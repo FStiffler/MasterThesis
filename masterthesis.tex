@@ -1,0 +1,152 @@
+\documentclass[12pt,a4paper]{article}\usepackage[]{graphicx}\usepackage[]{xcolor}
+% maxwidth is the original width if it is less than linewidth
+% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+
+%packages
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{setspace}
+\usepackage[natbibapa]{apacite}  % enable apa referecing 
+\usepackage[hyphens,spaces,obeyspaces]{url}  % make sure URL in reference is not too long
+\usepackage[nottoc, numbib]{tocbibind}  % package to number references chapter
+
+
+%document parameters
+\onehalfspacing  % 1.5 line spacing
+\bibliographystyle{apacite}
+
+% start document
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+
+\pagenumbering{roman}  %start with roman page numbers
+
+\input{titlepage}  % insert title page
+
+\input{abstract}  % insert abstract page
+\setcounter{page}{2}  % start counting pages on this page
+\newpage
+
+\tableofcontents  % insert table of contents
+\newpage
+
+\listoffigures
+\listoftables
+\newpage
+
+\section{Introduction}
+\pagenumbering{arabic}  % start counting again with arabic numbers
+
+\setlength{\parskip}{\baselineskip}  % set length of paragraphs
+
+\subsection{The problem in Swiss professional ice hockey and potential counter measures}
+
+Since the introduction of a playoff mode in the Swiss top-level ice hockey league, the National League (NL), in the year 1986, only six different teams have won the championship trophy. Before Zug won the championship in 2021 and 2022, there were even only three teams determining the champion for thirteen years straight and that in a league of twelve respectively thirteen teams since the season 2021/2022. The distribution of championship titles is a clear indication that the league suffers from a one-sided competition. Another problem arises in form of steadily and rapidly increasing player salaries observed over the years \citep[see][]{germann_spielerlohne_2020,roth_zsc-boss_2018}. There are different arguments as to why the salaries are increasing. According to the teams itself, the observed rise in salaries originates from a limited pool of players skilled enough to play at NL level which grants the players more bargaining power \citep{noauthor_zu_2018}. Others argue that the player pool is not the problem but rather the teams willingness and ability to spend a lot of money for competitiveness \citep[see][]{roth_wegen_2020}. Either way, there was and still is a fierce competition for players on the domestic player market since the number of allowed import players per team was limited to four up until the last season. The import player limit is going to be increased for the upcoming 2022/2023 season but at the same time an additional team joins the league which might counter any relaxing effect the import player increase is going to have on the player market situation. It is not a secret that the dominating teams in the playoff-era are financially well equipped and thus have a larger scope of action when it comes to contract negotiations and especially player salaries. This whole situation also puts teams with lower budgets at a disadvantage. They can simply not afford top players which is most likely the main cause for the described imbalance in championship titles. 
+
+\par
+\noindent
+Given these circumstances, a discussion about potential league reforms started and several measures to counter the introduced problems were proposed. Two of the proposed measures are of special interest as they might have great economic and competitive implications for teams in the NL. The first measure of interest is to introduce a form of a salary cap which comes with an expenditure ceiling for players and thus is geared towards the demand side of the problem. The second measure of interest is to raise the import player limit and thus tackles the problem from the supply side. In summer 2021, the NL teams released a statement in which they announced to put forward reforms after all \citep[see][]{stettler_neu_2021}. While an increase of the import player limit is going into effect next season, although in connection with a league expansion, the salary cap is still an open issue to discuss \citep[see][]{germann_eishockeysaison_2021}. Despite these efforts, the measures of increasing the import player limit and introducing a salary cap are still heavily discussed and under scrutiny as nobody really seems to know what they will bring to the table.
+
+
+\subsection{Research question and paper structure}
+
+The ongoing debate about league reforms among fans, journalists, team owners and players and the uncertainty about potential outcomes associated with the implementation of these reforms highlights the need for a scientific confrontation of the topic. Therefore, in this paper, I investigate potential economic and competitive ramifications of the mentioned measures of increasing the import player limit and introducing a salary cap. How does an increase of import players, the introduction of a salary cap or both together affect player salaries? Do the measures lead to a more balanced league in the long-term? To answer these questions, in a first step, I consult sources concerned with the topic and microeconomic concepts describing the problem at hand. In a second step, I apply the gained knowledge to create a theoretical framework which is translated into a model representing the league environment. The model is going to be based on statistical and mathematical assumptions backed up with empirical facts. In a last step, the model is used to simulate the effect of the proposed measures on the league environment to evaluate both, economic and competitive impacts. The goal is to identify potential advantages and disadvantages of these measures and to make a prediction on how they might play out in reality.
+
+
+\section{Literature Review}
+
+\subsection{Competitive balance and external factors}
+
+In the introduction it was pointed out that the NL suffers from one-sided competition. In this case, scholars would speak of poor competitive balance. Competitive balance, in the context of team sports, describes competition intensity between teams in a league and can be differentiated based on three different time dimensions, namely a short-term dimension which relates to uncertainty of game outcomes, a mid-term dimension which relates to the uncertainty about the outcome of a whole season and a long-term dimension which relates to the overall success of a team over several seasons \citep{walzel_teamsport_2019}. Based on this definition, the lack of variation in NL champions since the introduction of playoffs is an observation of long-term competitive balance or more like the absence thereof. Competitive balance is subject to external influence. \citet{sanderson_many_2002} discusses factors affecting competitive balance in the context of various sports and identifies technological changes, sport integrity, performance enhancing drugs and environment as main, non-economic drivers of competitive balance. Technological changes over the years lead to improved sporting equipment, which, at least in the short-term until all contestants have adapted to the new technology, can lead to reduced competitive balance. Sport integrity addresses the assumption that the competition is not rigged in any way shape or form to provide an unfair advantage towards one contestant. A lack of sport integrity includes fraud in a legal sense but also a mismanagement of incentives to win. The former could manifest itself in form of fixing games while the latter is the case, if a team, for example, purposely starts to lose games in order to obtain a favourable position in the upcoming entry draft where an entry draft is a system in which young talents are picked by teams whereas weaker teams have the advantage of picking first \citep[see][]{szymanski_economic_2003}. Performance enhancing drugs are reducing competitive balance for obvious reasons and are banned but repeated doping scandals underline their relevance for competition up until today. Finally, environmental factors summarise external influences which benefit or hurt athletes’ competitiveness from young age and are beyond their control such as parental support or proximity and quality to training facilities. In the same study, Sanderson also describes the influence of economics factors such as the market size i.e., the popularity of a sport in a certain area, stadium amenities and lucrative local television contracts. All three factors translate in more team revenues which has shown to be a crucial determinant for competitive balance. \citet{pawlowski_top_2010} provide evidence of decreasing competitive balance in major soccer leagues in Europe caused by an increase in payouts to UEFA Champions League participants. Participating teams gain a financial advantage compared to their non-participating opponents in the domestic league which allows them to acquire more skilled players on the market, which in turn increases the probability that participating teams will dominate the league yet again and appear in the Champions League in consecutive years as well. 
+\par
+\noindent
+To the best of my knowledge, it is unknown whether increasing salaries also lead to an impediment of competitive balance. In the context of the NL and given evidence presented in this section, it is, however, reasonable to assume that higher salary growth also disproportionally benefits teams with larger revenues. While salary growth limits the ability of low-budget teams to invest in highly skilled players, high-budget teams still can afford these players because they can, to some degree, also set the price. It appears that the NL is the highest paying, non-American league behind the Russian KHL \citep{darryl_wolski_2112hockey_2020_2020}. Although this source has to be taken with a grain of salt, it is very well possible that NL teams with large budgets can set the player salary limit for the best players in the league as long as these players can not reasonably threaten to leave and play for an NHL or KHL team where they would earn even more. This situation would ultimately result in competitive imbalance. Because salary growth might be a problem for competitive balance, the scope of salary growth is analysed in more detail.
+
+
+
+\subsection{Observation of salary growth in professional sport}
+
+From an economic perspective, salary growth over time is a natural occurrence which is why it is important to understand, if salary growth in professional sports is within the realms of ordinary growth behaviours or rather extraordinary. Looking at the historic context of player salaries allows this distinction. In 1960, the average family income in the United States was \$5'600 \citep{scammon_income_1962}. At the same time, the average salary of an MLB player was \$16'000 and thus almost three times a family's income \citep{haupert_economic_2007}. The same applies to NHL players which earned between \$10'000 and \$16'000 \citep{hockey_central_original_nodate}. By 2020, the average US worker earned \$71'456 \citep{statista_research_departement_annual_2021} while an NHL player earned \$2'690'000 and an MLB player even earned \$4'030'000 on average \citep{gough_average_2022}. This results in rations of approximately 38 to one and 57 to one respectively and visualizes the scope of salary growth in professional sports in the US compared to general growth. It is difficult to draw a similar comparison for professional ice hockey in Switzerland since the player salaries of NL players are not public. However, it is known that player salaries in 1960’s were limited to CHF900 and a lot of players had to work in a ordinary jobs to earn a living wage \citep{ koller_kanadier_2016}. Thus, hockey in Switzerland was far from professional back then. In the meantime, the Swiss ice hockey went through a professionalisation, and according to experts, depending on the role of players in their respective teams, national league players might earn up to CHF900'000 if they belong to the few superstars in the league and up to CHF350'000, if they are average players \citep{allemann_sind_2020}. Comparing these values to the annual median wages of Swiss workers of CHF82'900 \citep{bundesamt_fur_statistik_bruttoerwerbseinkommen_2021}, ratios of 11 to one and four to one are obtained. While the ratios are not comparable to the once in North America, it is obvious that extraordinary salary growth is observed in Swiss ice hockey as well.  
+
+\subsection{Reasons for salary growth}
+
+The introduction already laid out two common arguments which emerge when talking about the root cause of salary growth. According to the first argument, the root cause of salary growth has to be located in the willingness of teams to steadily increase spending for players. The second argument, on the other side, points towards a limited player pool faced by the teams. Both arguments describe crucial market dynamics. To check the validity of the described dynamics, the two arguments are put to test. 
+
+\subsubsection{Argument: Teams increase their willingness to spend}
+
+In their meta study, \citet{andon_accounting_2019} identify different factors fuelling salary growth in professional sports. They argue that since 1960 a lot of money has entered professional sports coming from corporate advertisers and the sale of broadcasting rights, tickets and merchandise. Especially the increased revenues from the growth in valuation of sport broadcasting rights is a major source for revenue and salary growth as the authors point out. They compare the prices which current and previous holders of broadcasting rights of nine, renown, professional sport leagues around the world were willing to pay for said rights. In their analysis they find a broadcast valuation growth for each considered league with an average, annual growth rate of 92\%. Similar patterns can also be observed in Swiss ice hockey. A commercialisation of the sport was initiated by teams in the French speaking part of Switzerland in the 1950’s and 1960’s \citep{ koller_kanadier_2016}. Additionally, the broadcasting value of the NL has seen a recent raise. In 2016, the National League (back then named ‘National Liga A’) announced a broadcasting deal with a large cable tv provider in Switzerland, almost tripling the leagues broadcasting revenue compared to the previous contract with a direct market competitor of the new contract holder \citep[see][]{germann_354_2016}. The sudden money influx from new broadcasting rights was also equivalent with more money for teams \citep[see][]{noauthor_noch_2017}. This led to concerns that the teams would spend the money on more expensive players, fuelling player salary growth even more and neglect long term development (e.g. by investing the money in junior hockey instead) for short term success \citep[see][]{germann_schweizer_2018, kuchta_schone_2017}. 
+
+\par
+\noindent
+In fact, evidence from professional soccer in Scotland shows that the professionalization and monetization of the sport gave rise to a re-investment cycle where sport teams would tend to re-invest additional, success related revenues in better players and coaches in order to maintain or enhance the sportive success and in turn, to achieve even higher revenues while only maintaining marginally small profits or even losses \citep{cooper_insolvency_2013}. Similar observations are made in professional ice hockey as well. A study conducted by \citet{zimbalist_competitive_2002} finds a positive correlation between NHL teams' win-shares and payroll from which he concludes that well performing teams make an effort to reinforce their roster by acquiring better players for further success. \citet{whitney_bidding_1993} describes this type of re-investment pattern as 'destructive competition' in which teams go all in on talented players and end up bankrupt when the marginal revenues attached to the success these talents bring to the team do not offset the investments. The findings of these studies imply team overspending to be a main cause for player salaries to grow. Expressed in economic terms, demand increases as a result of an increase in the reference salary, i.e. the maximal salary a team is willing to pay for a certain player. 
+
+
+\subsubsection{Argument: Teams face limited player supply}
+
+The notion of limited player supply alone is not enough to explain the occurrence of salary growth. After all, clubs can still choose to pay a fair salary reflecting player skill regardless of the market reality at hand. In line with this statement, \citet{szymanski_market_2000} indicates that in a competitive player market, a player's wage reflects the player's talent. Teams with more talent pay more for their players but are also more successful. To prove that point, he finds a significant correlation between success and talent, regressing the average league rank of English professional soccer teams on their wage expenditures which confirms that talent and wages are strongly linked. \citet{celik_salary_2017} who analyse salary differences in Major League Soccer come to a similar conclusion, finding that the number of goals and the number of assists are among the most influential determinants for player salaries. Goals and assists are also the most important factors in determining the salaries in the NHL \citep{coates_returns_2017}. Based on this evidence, one could conclude that player salaries simply reflect the actual skill of a player and is a compensation (or fair salary) for his output contribution. Players with lower output are paid less then players with higher output. Hence, every team would assess a player based on skill and should be willing to pay the same price for said player even when faced with a limited player pool. However, market related factors are not to be neglected when it comes to determining player salaries. \citet{bryson_all-star_2017} conduct a study with salary data from the NHL and find that the birth cohort in which a player is born is a deterministic factor for player salaries. Players born in large birth cohorts earn less over an average career lasting 4.5 years than players born in smaller birth cohorts although they outperform players from smaller cohorts in terms of points scored. Investigating possible causes for the salary difference between player cohorts, they identify the variables ‘number of games played by season’ and ‘league expansion’ as the most important factors. Players in larger cohorts tend to play more games per season on average which the authors attribute to higher player quality and durability as a result of more intensive competition while growing up. At the same time, league expansions mean more spots for players to fill. Both factors give players in smaller birth cohorts a relative bargaining advantage as there are just so many players available to fill the missing spots. So, while player skill seems to be the main determinant for salaries, the market situation also influences player compensation. The complaints of NL teams that a limited player pool is driving salary growth as a result of bargaining advantage by the players can thus not be dismissed.  
+
+
+\subsection{Definition of salary cap}
+
+A salary cap is defined as ‘limit on the amount of money a club can spend on player salaries’ \citep[pg. ~1]{dietl_effect_2009}. In compliance with this definition, there are various design options for a salary cap. A salary cap can either be implemented on team level where the expenditures of a team for player salaries is limited or on player level where a maximal allowable salary for a single player is defined or as a combination of both \citep{llindholm_problem_2011}. Furthermore, a salary cap is normally defined as a fixed monetary value to be complied with by all teams and are calculated based on the revenue earned by the league \citep{dietl_effect_2009}. The calculation key of this monetary value is defined by the leagues themselves. A further distinction of salary caps follows from the depth of economic intervention and the allowed scope of action for the teams. Based on these motives, it is differentiated between a hard cap, a soft caps and a luxury tax \citep[see][]{levine_hard_1995, llindholm_problem_2011}. A hard cap is a salary expenditure ceiling which mustn’t be overstepped on no account \citep{levine_hard_1995}. The NHL applies a hard cap which is defined in the collective bargaining agreement from 2012 between the league and the player association \citep{noauthor_collective_2012}. The agreement provides for a calculation of a salary cap based on league revenue in the previous season and also defines punishments in case of a cap violation such as fines, loss of points, loss of draft picks or even suspension of employees. 
+
+
+
+
+
+IN TEXT ZITATE GANZ AM SCHLUSS NOCHMALS ÜBERPRÜFEN!!!!!!
+
+
+\bibliography{references}
+
+\end{document}
+
+
