@@ -20,6 +20,34 @@ class PlayerPool(object):
         self.playerSkill = np.round(np.random.beta(a=alpha, b=beta, size=k_new), 2)  # draw skill from beta distribution
         self.playerSalary = np.round(w_max * self.playerSkill * (1 - ((k_new - k_old) / k_old)))  # calculate salary
 
+    def get_playerID(self):
+        '''
+        Get player ID's in a list
+        Returns: playerIDList (list)
+        '''
+        playerIDList = self.playerID.tolist()
+
+        return playerIDList
+
+    def get_playerSkill(self):
+        '''
+        Get player skills in a list
+        Returns: playerSkillList (list)
+        '''
+        playerSkillList = self.playerSkill.tolist()
+
+        return playerSkillList
+
+    def get_playerSalary(self):
+        '''
+        Get player salaries in a list
+        Returns: playerSalaryList (list)
+        '''
+        playerSalaryList = self.playerSalary.tolist()
+
+        return playerSalaryList
+
+
     def get_data(self):
         '''
         Get player pool as data set
