@@ -1,8 +1,10 @@
 # model parameters
-
-k_old = 308  # player pool size before measures
-k_new = 308  # player pool size after measures
+h = 22  # team size
+n = 14  # number of teams in the league
+w_max = 100000  # maximal salary for best available player
+R_tot_i = 10*w_max  # budget of team i
+k_old = n*h  # player pool size before measures
+k_new = n*h  # player pool size after measures
 alpha = 5  # parameter alpha of beta distribution
 beta = 5  # parameter beta of beta distribution
-w_max = 100000  # maximal salary for best available player
-h = 22  # team size
+
