@@ -60,3 +60,18 @@ class PlayerPool(object):
         player_data = player_data.astype({"ID": int})  # change ID to integer
 
         return player_data
+
+
+# define league as class
+class League(object):
+    def __init__(self):
+        '''
+        Initializes a league object
+        The object is fully initialised based on parameters
+        A league object has the following attributes:
+            self.i (list): determines the teams in the league
+            self.R_tot_i0 (list): determines the starting revenues of teams before first season
+
+        '''
+        self.i = ['team'+str(i+1) for i in range(n)]  # create n teams
+        self.R_tot_i0 = np.round(np.random.uniform(low=10*w_max, high=15*w_max, size=n))  # create team revenues
