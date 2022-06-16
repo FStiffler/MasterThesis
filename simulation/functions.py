@@ -5,8 +5,8 @@ import pulp as pl
 from pulp import PULP_CBC_CMD
 
 
-# define function to select players
-def select_players(playerPool):
+# define function to select players and maximizing skill
+def skill_maximization(playerPool, budgetConstraint):
     '''
     playerPool (PlayerPool): A player pool of object PlayerPool
     Returns:
@@ -30,7 +30,7 @@ def select_players(playerPool):
 
     # define the constraints
     prob += pl.lpSum(binaries[i] for i in range(len(players))) == h  # team size constraint
-    prob += pl.lpSum(binaries[i] * salaries[i] for i in range(len(players))) <= R_tot_i  # budget constraint
+    prob += pl.lpSum(binaries[i] * salaries[i] for i in range(len(players))) <= budgetConstraint  # budget constraint
 
     # solve problem to obtain the optimal solution (best team)
     prob.solve(solver=PULP_CBC_CMD(msg=False))
@@ -64,8 +64,9 @@ def select_players(playerPool):
 
     # assert that constraints hold since the solver does not throw an error when not converging to a solution
     assert len(selectedPlayers) == h
-    assert selectedPlayers.Salary.sum() <= R_tot_i
+    assert selectedPlayers.Salary.sum() <= budgetConstraint
 
 
     # return selected team
     return selectedPlayers
+

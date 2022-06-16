@@ -1,4 +1,5 @@
 from parameters import *
+from functions import skill_maximization
 import numpy as np
 import pandas as pd
 
@@ -71,7 +72,32 @@ class League(object):
         A league object has the following attributes:
             self.i (list): determines the teams in the league
             self.R_tot_i0 (list): determines the starting revenues of teams before first season
+            self.optimalPlayers {dict}: empty dictionary which is filled when players are selected in maximization process
 
         '''
         self.i = ['team'+str(i+1) for i in range(n)]  # create n teams
         self.R_tot_i0 = np.round(np.random.uniform(low=10*w_max, high=15*w_max, size=n))  # create team revenues
+        self.optimalPlayers = {}
+
+    def select_optimal_players(self, playerPool):
+        '''
+        Let each team solve the maximization problem of player selection
+        Input:
+        playerPool (PlayerPool): An object of class PlayerPool
+        Returns:
+
+        '''
+        # initialise new empty dictionary for player selection
+        optimalPlayers = {}
+
+        # for loop to select optimal players for each team and write them to a list
+        for i in range(len(self.i)):
+
+            # select optimal players based on skill maximization
+            selectedPlayers = skill_maximization(playerPool, self.R_tot_i0[i])
+
+            # create team entry with ID's of players
+            optimalPlayers[self.i[i]] = selectedPlayers.ID.tolist()
+
+            # overwrite old dictionary with new dictionary
+            self.optimalPlayers = optimalPlayers
