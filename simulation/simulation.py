@@ -12,3 +12,5 @@ N.select_optimal_players(P)
 # remove all selected players from the pool
 P.update_player_pool_after_maximization(N.optimalPlayersSet)
 
+# resolve conflict of player assignment
+N.resolve_player_conflicts(P)

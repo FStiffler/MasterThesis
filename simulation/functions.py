@@ -9,6 +9,7 @@ from pulp import PULP_CBC_CMD
 def skill_maximization(playerPool, budgetConstraint):
     '''
     playerPool (PlayerPool): A player pool of object PlayerPool
+    budgetConstraint (dbl): The budget constraint for a particular team used to optimize skill
     Returns:
     selectedPlayers (pandas dataframe): A pandas dataframe which includes data about selected players
     '''
@@ -69,4 +70,71 @@ def skill_maximization(playerPool, budgetConstraint):
 
     # return selected team
     return selectedPlayers
+
+# function to identify conflicts of player assignment
+def identify_conflicts(optimalPlayers, optimalPlayersSet):
+    '''
+    optimalPlayers (dict): A dictionary which shows the players selected by every team after the maximization process
+    derived from an object with class League after calling method select_optimal_players
+    optimalPlayersSet (set): A set which shows all players selected by any team during the maximization process
+    derived from an object with class League after calling method select_optimal_players
+    Returns:
+    conflicts (dict): A dictionary showing the conflicting player id as key and all interested teams as values in a list
+    noConflicts (dict): A dictionary showing the non-conflicting player id as key and the interested team as value in a list
+    '''
+
+    # create a data frame from dictionary
+    optimalPlayersDF = pd.DataFrame(optimalPlayers)
+
+    # pivot to long format
+    optimalPlayersDF = pd.melt(optimalPlayersDF,
+                               value_vars=optimalPlayersDF.columns,
+                               var_name='team',
+                               value_name='player')
+
+    # initialise empty dictionaries to be filled with observed conflicts and non conflicts
+    conflicts = {}
+    noConflicts = {}
+
+    # loop over all players to identify conflicts
+    for player in optimalPlayersSet:
+
+        # extract all teams interested in the same player
+        I = optimalPlayersDF.loc[optimalPlayersDF['player'] == player]
+
+        # if more than one team want to acquire a player
+        if len(I) > 1:
+
+            # fill player as key and list of teams in conflicts dictionary
+            conflicts[player] = I.team.tolist()
+
+        # if only one team wants to acquire a player
+        else:
+            noConflicts[player] = I.team.tolist()
+
+    # return dictionaries
+    return conflicts, noConflicts
+
+# function to assign a player to a team
+def assign_player(finalPlayerSelection, player, team):
+    '''
+    finalPlayerSelection (dict): A dictionary which shows the final player selection of teams so far
+    derived from an object with class League
+    player (int): The new player to be added to the already existing selection of players
+    team (str): The team to which the new player is to be assigned
+    Returns:
+    finalPlayerSelection (dict): Updates and returns final player selection
+    '''
+
+    # append the new player to a list of existing players for a team
+    finalPlayerSelection[team].append(player)
+
+    # return
+    return finalPlayerSelection
+
+
+
+
+
+
 

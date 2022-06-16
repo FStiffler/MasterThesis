@@ -1,5 +1,5 @@
 from parameters import *
-from functions import skill_maximization
+from functions import skill_maximization, identify_conflicts, assign_player
 import numpy as np
 import pandas as pd
 
@@ -50,7 +50,6 @@ class PlayerPool(object):
 
         return playerSalaryList
 
-
     def get_data(self):
         '''
         Get player pool as data set
@@ -68,7 +67,8 @@ class PlayerPool(object):
         '''
         Update the players in the player pool after teams have selected optimal players in maximization process
         Input:
-        optimalPlayersSet (set): the set of optimal players chosen by all teams
+        optimalPlayersSet (set): the set of optimal players chosen by all teams derived from an object with class League
+        after calling the class method select_optimal_players
         Update:
         self.p (array): remove all players from array which were selected in the maximization process
         self.S_p (array): remove all skills of selected players from the array
@@ -80,20 +80,18 @@ class PlayerPool(object):
         optimalPlayersList = list(optimalPlayersSet)
 
         # obtain index of optimal players by subtracting one from id
-        optimalPlayersList = [i-1 for i in optimalPlayersList]
+        optimalPlayersList = [i - 1 for i in optimalPlayersList]
 
         # remove players from player pool
         self.p = np.delete(self.p, optimalPlayersList)  # remove players from p
         self.S_p = np.delete(self.S_p, optimalPlayersList)  # remove players from S_p
         self.W_p = np.delete(self.W_p, optimalPlayersList)  # remove players from W_p
 
-
         # create a set of remaining players
         self.remainingPlayersSet = set(self.p)
 
         # assert that there is no intersection between the remaining and selected players
         assert len(self.remainingPlayersSet.intersection(optimalPlayersSet)) == 0
-
 
 
 # define league as class
@@ -105,14 +103,15 @@ class League(object):
         A league object has the following attributes:
             self.i (list): determines the teams in the league
             self.R_tot_i0 (list): determines the starting revenues of teams before first season
-            self.optimalPlayers {dict}: dictionary which is filled when players are selected in maximization process, empty when intialised
-            self.optimalPlayersSet {set}: set which is filled when players are selected in maximization processs, empty when initialised
-
+            self.optimalPlayers (dict): dictionary which is filled when players are selected in maximization process, empty when intialised
+            self.optimalPlayersSet (set): set which is filled when players are selected in maximization processs, empty when initialised
+            self.finalPlayerSelection (dict): dictionary which is filled with final player selection per team when player conflicts are resolved
         '''
-        self.i = ['team'+str(i+1) for i in range(n)]  # create n teams
-        self.R_tot_i0 = np.round(np.random.uniform(low=10*w_max, high=15*w_max, size=n))  # create team revenues
+        self.i = ['team' + str(i + 1) for i in range(n)]  # create n teams
+        self.R_tot_i0 = np.round(np.random.uniform(low=10 * w_max, high=15 * w_max, size=n))  # create team revenues
         self.optimalPlayers = {}
         self.optimalPlayersSet = set()
+        self.finalPlayerSelection = {}
 
     def select_optimal_players(self, playerPool):
         '''
@@ -129,7 +128,6 @@ class League(object):
 
         # for loop to select optimal players for each team and write them to a list
         for i in range(len(self.i)):
-
             # select optimal players based on skill maximization
             selectedPlayers = skill_maximization(playerPool, self.R_tot_i0[i])
 
@@ -142,5 +140,25 @@ class League(object):
         # overwrite old set with new set, each selected player appears exactly once
         self.optimalPlayersSet = set().union(*list(optimalPlayers.values()))
 
+    def resolve_player_conflicts(self, playerPool):
+        '''
+        Resolve conflicts in case players are selected by multiple teams by assigning all players to one team only
+        and by replacing the player with players from the player pool after
+        Input:
+        playerPool (PlayerPool): An object of class PlayerPool
+        Updates:
 
+        '''
+        # identify conflicts and non conflicts
+        conflicts, noConflicts = identify_conflicts(self.optimalPlayers, self.optimalPlayersSet)
 
+        # initialise final player selection by entering each team with an empty player list
+        finalPlayerSelection = {team: [] for team in self.i}
+
+        # for each player without conflict
+        for player in noConflicts:
+
+            # assign the player to the according team
+            finalPlayerSelection = assign_player(finalPlayerSelection, player, noConflicts[player][0])
+
+        self.finalPlayerSelection = finalPlayerSelection
