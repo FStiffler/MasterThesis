@@ -1,5 +1,4 @@
 from parameters import *
-from functions import *
 import numpy as np
 import pandas as pd
 
@@ -61,29 +60,3 @@ class PlayerPool(object):
         player_data = player_data.astype({"ID": int})  # change ID to integer
 
         return player_data
-
-
-# define teams as class
-class Team(object):
-    def __init__(self, name, revenue):
-        '''
-        Initializes a team object
-        A team object has the following attributes:
-            self.team (str): name of the team
-            self.revenue (dbl): budget constraint for team
-        '''
-        self.name = name
-        self.revenue = revenue
-
-    def select_players(self, playerPool):
-        '''
-        Select players with binary linear programming
-        Input:
-        playerPool (PlayerPool): A player pool of object PlayerPool
-        Stores:
-        self.players (pandas dataframe): Data of players to be stored
-        '''
-
-        # select players
-        self.players = select_players(playerPool, self.revenue)
-

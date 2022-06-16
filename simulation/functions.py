@@ -5,10 +5,9 @@ import pulp
 
 
 # define function to select players
-def select_players(playerPool, revenue):
+def select_players(playerPool):
     '''
     playerPool (PlayerPool): A player pool of object PlayerPool
-    revenue (dbl): The revenue serving as budget constraint
     Returns:
     selectedPlayers (pandas dataframe): A pandas dataframe which includes data about selected players
     '''
@@ -30,7 +29,7 @@ def select_players(playerPool, revenue):
 
     # define the constraints
     prob += pulp.lpSum(binaries[i] for i in range(len(players))) == h  # team size constraint
-    prob += pulp.lpSum(binaries[i] * salaries[i] for i in range(len(players))) <= revenue  # budget constraint
+    prob += pulp.lpSum(binaries[i] * salaries[i] for i in range(len(players))) <= R_tot_i  # budget constraint
 
     # solve problem to obtain the optimal solution (best team)
     prob.solve()
