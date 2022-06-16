@@ -33,7 +33,7 @@ def select_players(playerPool):
     prob += pl.lpSum(binaries[i] * salaries[i] for i in range(len(players))) <= R_tot_i  # budget constraint
 
     # solve problem to obtain the optimal solution (best team)
-    prob.solve()
+    prob.solve(solver=PULP_CBC_CMD(msg=False))
 
     # initialize empty lists for the variable names and solution values
     variables = []
@@ -62,6 +62,9 @@ def select_players(playerPool):
         )
     ]
 
+    # assert that constraints hold since the solver does not throw an error when not converging to a solution
+    assert len(selectedPlayers) == h
+    assert selectedPlayers.Salary.sum() <= R_tot_i
 
 
     # return selected team
