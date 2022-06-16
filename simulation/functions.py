@@ -1,7 +1,8 @@
 from parameters import *
 import numpy as np
 import pandas as pd
-import pulp
+import pulp as pl
+from pulp import PULP_CBC_CMD
 
 
 # define function to select players
@@ -14,22 +15,22 @@ def select_players(playerPool):
 
     # initialize variables
     playerData = playerPool.get_data()  # get player data in a data frame
-    players = playerPool.get_playerID()  # get players ID's in a list list
-    skills = playerPool.get_playerSkill()  # get player skill in a list
-    salaries = playerPool.get_playerSalary()  # get player salaries in a list
-    binaries = [pulp.LpVariable(  # initialise list of binary variables, one for each player
+    players = playerPool.get_player_id()  # get players ID's in a list list
+    skills = playerPool.get_player_skill()  # get player skill in a list
+    salaries = playerPool.get_player_salary()  # get player salaries in a list
+    binaries = [pl.LpVariable(  # initialise list of binary variables, one for each player
         "d_" + str(players[i]),  # name the variables: d_playerID
         cat="Binary") for i in range(len(players))]  # iterate through all players
 
     # initialize problem
-    prob = pulp.LpProblem(name="BestTeam", sense=-1)  # sense=-1 indicates maximization problem
+    prob = pl.LpProblem(name="BestTeam", sense=-1)  # sense=-1 indicates maximization problem
 
     # define objective function
-    prob += pulp.lpSum(binaries[i] * skills[i] for i in range(len(players)))  # maximize skill
+    prob += pl.lpSum(binaries[i] * skills[i] for i in range(len(players)))  # maximize skill
 
     # define the constraints
-    prob += pulp.lpSum(binaries[i] for i in range(len(players))) == h  # team size constraint
-    prob += pulp.lpSum(binaries[i] * salaries[i] for i in range(len(players))) <= R_tot_i  # budget constraint
+    prob += pl.lpSum(binaries[i] for i in range(len(players))) == h  # team size constraint
+    prob += pl.lpSum(binaries[i] * salaries[i] for i in range(len(players))) <= R_tot_i  # budget constraint
 
     # solve problem to obtain the optimal solution (best team)
     prob.solve()
@@ -60,6 +61,8 @@ def select_players(playerPool):
             )[:, 1].astype(int)  # select only ID numbers and define them as integer
         )
     ]
+
+
 
     # return selected team
     return selectedPlayers

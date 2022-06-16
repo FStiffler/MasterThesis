@@ -3,8 +3,8 @@ from functions import *
 
 
 # initialise the player pool
-playerPool = PlayerPool()
+P = PlayerPool()
 
 # select players
-selectedPlayers = select_players(playerPool)
+selectedPlayers = select_players(P)
 
