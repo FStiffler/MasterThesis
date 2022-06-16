@@ -1,4 +1,5 @@
 from parameters import *
+from functions import *
 import numpy as np
 import pandas as pd
 
@@ -73,3 +74,16 @@ class Team(object):
         '''
         self.name = name
         self.revenue = revenue
+
+    def select_players(self, playerPool):
+        '''
+        Select players with binary linear programming
+        Input:
+        playerPool (PlayerPool): A player pool of object PlayerPool
+        Stores:
+        self.players (pandas dataframe): Data of players to be stored
+        '''
+
+        # select players
+        self.players = select_players(playerPool, self.revenue)
+
