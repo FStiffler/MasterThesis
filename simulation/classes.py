@@ -349,6 +349,7 @@ class League(object):
                          self.finalPlayerSelection.items()}.values()))  # all teams have the defined number of players
         assert all([True if self.teamData.loc[x, 'budget'] - self.teamData.loc[x, 'payroll'] > 0 else False for x in
                     range(len(self.teamData))])  # payroll below budget
+        assert functions.no_duplicates(self.finalPlayerSelection)
 
         # return new player pool object
         return playerPool

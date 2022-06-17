@@ -286,3 +286,27 @@ def teams_choose_replacement(player, team, allPlayersData, availablePlayersData,
 
     # return id of chosen player
     return replacementPlayer
+
+def no_duplicates(finalPlayerSelection):
+    """
+    Description:
+    Function to check if any player appears twice in the final teams
+
+    Input:
+    finalPlayerSelection (dict): dictionary showing final selection of teams
+
+    Returns:
+    state (str): If there are no duplicates True is returned otherwise False is returned
+    """
+
+    # create nested list where the lists consists of one list of players per team
+    nestedList = list(finalPlayerSelection.values())
+
+    # flatten list so that each player is single list element
+    flatList = [player for team in nestedList for player in team]
+
+    # check for duplicates
+    state = (len(set(flatList)) == len(flatList))
+
+    # return player decision
+    return state
