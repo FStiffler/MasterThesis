@@ -6,15 +6,18 @@ import random as ra
 from pulp import PULP_CBC_CMD
 
 
-
-# define function to select players and maximizing skill
 def skill_maximization(playerPool, budgetConstraint):
-    '''
+    """
+    Description:
+    Function which allows team to select players while maximizing skill given a team size and budget constraint
+
+    Input:
     playerPool (PlayerPool): A player pool of object PlayerPool
     budgetConstraint (dbl): The budget constraint for a particular team used to optimize skill
+
     Returns:
     selectedPlayers (pandas dataframe): A pandas dataframe which includes data about selected players
-    '''
+    """
 
     # initialize variables
     playerData = playerPool.get_data()  # get player data in a data frame
@@ -69,21 +72,25 @@ def skill_maximization(playerPool, budgetConstraint):
     assert len(selectedPlayers) == h
     assert selectedPlayers.Salary.sum() <= budgetConstraint
 
-
     # return selected team
     return selectedPlayers
 
-# function to identify conflicts of player assignment
+
 def identify_conflicts(optimalPlayers, optimalPlayersSet):
-    '''
+    """
+    Description:
+    Function to identify players who multiple teams are interested in
+
+    Input:
     optimalPlayers (dict): A dictionary which shows the players selected by every team after the maximization process
     derived from an object with class League after calling method select_optimal_players
     optimalPlayersSet (set): A set which shows all players selected by any team during the maximization process
     derived from an object with class League after calling method select_optimal_players
+
     Returns:
     conflicts (dict): A dictionary showing the conflicting player id as key and all interested teams as values in a list
     noConflicts (dict): A dictionary showing the non-conflicting player id as key and the interested team as value in a list
-    '''
+    """
 
     # create a data frame from dictionary
     optimalPlayersDF = pd.DataFrame(optimalPlayers)
@@ -117,16 +124,21 @@ def identify_conflicts(optimalPlayers, optimalPlayersSet):
     # return dictionaries
     return conflicts, noConflicts
 
-# function to assign a player to a team
+
 def assign_player(finalPlayerSelection, player, team):
-    '''
+    """
+    Description:
+    Function to assign a player to a specific team
+
+    Input:
     finalPlayerSelection (dict): A dictionary which shows the final player selection of teams so far
     derived from an object with class League
     player (int): The new player to be added to the already existing selection of players
     team (str): The team to which the new player is to be assigned
+
     Returns:
     finalPlayerSelection (dict): Updates and returns final player selection
-    '''
+    """
 
     # append the new player to a list of existing players for a team
     finalPlayerSelection[team].append(player)
@@ -134,19 +146,25 @@ def assign_player(finalPlayerSelection, player, team):
     # return
     return finalPlayerSelection
 
-# function to update payroll of teams
+
 def update_team_payroll(finalPlayerSelection, teamData, playerInfo):
-    '''
+    """
+    Description:
+    Function to update the team payrolls of all teams
+
+    Input:
     finalPlayerSelection (dict): A dictionary which shows the final player selection of teams so far
     derived from an object with class League
     teamData (dataframe): A dataframe which shows data about the team and is initialised when a object of class League is created
     playerInfo (dataframe): A dataframe with information about all players initially created when playerpool was initialised
+
     Returns:
     teamData (dict): Updates and returns information about the teams
-    '''
+    """
 
     # obtain salary for every selected player
-    salaryDict = {k: playerInfo.loc[playerInfo['ID'].isin(v), 'Salary'].values.tolist() for (k, v) in finalPlayerSelection.items()}
+    salaryDict = {k: playerInfo.loc[playerInfo['ID'].isin(v), 'Salary'].values.tolist() for (k, v) in
+                  finalPlayerSelection.items()}
 
     # calculate sum of salaries
     salarySumDict = {k: sum(v) for (k, v) in salaryDict.items()}
@@ -157,13 +175,18 @@ def update_team_payroll(finalPlayerSelection, teamData, playerInfo):
     # return
     return teamData
 
-# function representing the decision rule if a player has to choose between teams
+
 def player_chooses_team(potentialTeams):
-    '''
+    """
+    Description:
+    Function representing the decision rule if a player has to choose between teams
+
+    Input:
     potentialTeams (list): list of teams interested in player
+
     Returns:
     decision (str): The team team the player has chosen
-    '''
+    """
 
     # let player decide for one team
     decision = ra.choice(potentialTeams)
@@ -172,17 +195,21 @@ def player_chooses_team(potentialTeams):
     return decision
 
 
-# function representing the replacement decision by teams which were not picked by the desired player
 def teams_choose_replacement(player, team, playerInfo, remainingPlayersData, teamData):
-    '''
+    """
+    Description:
+    Function representing the replacement decision by teams which were not picked a player they considered optimal
+
+    Input:
     player (int): The player which did not join the team
     team (str): The team which has to decide which player to choose now
     playerInfo (dataframe): Contains data about every player
     remainingPlayersData (dataframe): Contains all data about the remaining players in the player pool
-    teamData (team)
+    teamData (team): A dataframe which contains team information
+
     Returns:
     replacementPlayer (int): Id of replacement player
-    '''
+    """
 
     # filter player skill from player of interest
     playerSkill = playerInfo.loc[playerInfo['ID'] == player, 'Skill'].values[0]
@@ -206,7 +233,7 @@ def teams_choose_replacement(player, team, playerInfo, remainingPlayersData, tea
     while index < len(remainingPlayersData):
 
         # identify a replacement player in increasing order of skill gab
-        replacementPlayerInfo = remainingPlayersData.iloc[index, ]
+        replacementPlayerInfo = remainingPlayersData.iloc[index,]
 
         # identify salary of replacement player
         replacementPlayerSalary = replacementPlayerInfo['Salary']
@@ -228,21 +255,3 @@ def teams_choose_replacement(player, team, playerInfo, remainingPlayersData, tea
 
     # return id of chosen player
     return replacementPlayer
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
