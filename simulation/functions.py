@@ -2,7 +2,9 @@ from parameters import *
 import numpy as np
 import pandas as pd
 import pulp as pl
+import random as ra
 from pulp import PULP_CBC_CMD
+
 
 
 # define function to select players and maximizing skill
@@ -131,6 +133,112 @@ def assign_player(finalPlayerSelection, player, team):
 
     # return
     return finalPlayerSelection
+
+# function to update payroll of teams
+def update_team_payroll(finalPlayerSelection, teamData, playerInfo):
+    '''
+    finalPlayerSelection (dict): A dictionary which shows the final player selection of teams so far
+    derived from an object with class League
+    teamData (dataframe): A dataframe which shows data about the team and is initialised when a object of class League is created
+    playerInfo (dataframe): A dataframe with information about all players initially created when playerpool was initialised
+    Returns:
+    teamData (dict): Updates and returns information about the teams
+    '''
+
+    # obtain salary for every selected player
+    salaryDict = {k: playerInfo.loc[playerInfo['ID'].isin(v), 'Salary'].values.tolist() for (k, v) in finalPlayerSelection.items()}
+
+    # calculate sum of salaries
+    salarySumDict = {k: sum(v) for (k, v) in salaryDict.items()}
+
+    # create list of salary sums and append to payroll information about teamData
+    teamData['payroll'] = list(salarySumDict.values())
+
+    # return
+    return teamData
+
+# function representing the decision rule if a player has to choose between teams
+def player_chooses_team(potentialTeams):
+    '''
+    potentialTeams (list): list of teams interested in player
+    Returns:
+    decision (str): The team team the player has chosen
+    '''
+
+    # let player decide for one team
+    decision = ra.choice(potentialTeams)
+
+    # return player decision
+    return decision
+
+
+# function representing the replacement decision by teams which were not picked by the desired player
+def teams_choose_replacement(player, team, playerInfo, remainingPlayersData, teamData):
+    '''
+    player (int): The player which did not join the team
+    team (str): The team which has to decide which player to choose now
+    playerInfo (dataframe): Contains data about every player
+    remainingPlayersData (dataframe): Contains all data about the remaining players in the player pool
+    teamData (team)
+    Returns:
+    replacementPlayer (int): Id of replacement player
+    '''
+
+    # filter player skill from player of interest
+    playerSkill = playerInfo.loc[playerInfo['ID'] == player, 'Skill'].values[0]
+
+    # add new column with absolut skill gab to info about remaining players
+    remainingPlayersData['Skill Gab'] = abs(playerSkill - remainingPlayersData.Skill)
+
+    # order remainingPlayerData according to skill gab
+    remainingPlayersData.sort_values('Skill Gab', inplace=True)
+
+    # identify current team payroll
+    teamPayroll = teamData.loc[teamData['team'] == team, 'payroll'].values[0]
+
+    # identify team budget
+    teamBudget = teamData.loc[teamData['team'] == team, 'budget'].values[0]
+
+    # initialise index for loop
+    index = 0
+
+    # while index is smaller then length of dataframe containing replacement players
+    while index < len(remainingPlayersData):
+
+        # identify a replacement player in increasing order of skill gab
+        replacementPlayerInfo = remainingPlayersData.iloc[index, ]
+
+        # identify salary of replacement player
+        replacementPlayerSalary = replacementPlayerInfo['Salary']
+
+        # if addition of player salary to team payroll would lead to a violation of team budget
+        if teamPayroll + replacementPlayerSalary > teamBudget:
+
+            # increase index by one to try next player in order
+            index += 1
+
+        # if there is no violation
+        else:
+
+            # identify replacement player by ID
+            replacementPlayer = int(replacementPlayerInfo['ID'])
+
+            # break loop
+            break
+
+    # return id of chosen player
+    return replacementPlayer
+
+
+
+
+
+
+
+
+
+
+
 
 
 
