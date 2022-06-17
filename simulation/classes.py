@@ -353,3 +353,26 @@ class League(object):
 
         # return new player pool object
         return playerPool
+
+    def check_intersection_optimal_final(self):
+        """
+        Description:
+        Check how many players initially wanted by the team end up on the team
+
+        Output:
+        Printing intersection for each team
+        """
+        # for each team
+        for team in self.finalPlayerSelection:
+
+            # extract final selection as set
+            finalSelectionSet = set(self.finalPlayerSelection[team])
+
+            # extract optimal selection as set
+            optimalSelectionSet = set(self.optimalPlayers[team])
+
+            # create intersection
+            intersection = finalSelectionSet.intersection(optimalSelectionSet)
+
+            # print
+            print('Team: {}, Total: {}, Set: {}'.format(team, len(intersection), intersection))
