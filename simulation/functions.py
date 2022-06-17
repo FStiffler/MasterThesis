@@ -245,6 +245,11 @@ def teams_choose_replacement(player, team, playerInfo, remainingPlayersData, tea
             # increase index by one to try next player in order
             index += 1
 
+            # raise exception if there is no other player left and the budget constraint is violated
+            if index == len(remainingPlayersData):
+
+                raise Exception('No replacement player left but breach of budget constraint')
+
         # if there is no violation
         else:
 
