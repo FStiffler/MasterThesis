@@ -13,19 +13,19 @@ class PlayerPool(object):
         Initializes the player pool object. The object is fully initialised based on parameters
 
         A player pool object has the following attributes:
-            self.k (int): determines pool size (number of available players)
-            self.p (numpy array): determines the ID's of players
-            self.S_p (numpy array): determines the skill level of players
-            self.W_p (numpy array): determines the salary of players
+            self.size (int): determines pool size (number of available players)
+            self.players (numpy array): determines the ID's of players
+            self.playerSkills (numpy array): determines the skill level of players
+            self.playerSalaries (numpy array): determines the salary of players
             self.remainingPlayerSet (set): empty set which is updated when players from the pool are selected
         """
-        self.k = k_new
-        self.p = np.arange(start=1, stop=k_new + 1)  # create id's from 1 to k_new
-        self.S_p = np.round(np.random.beta(a=alpha, b=beta, size=k_new), 2)  # draw skill from beta distribution
-        self.W_p = np.round(w_max * self.S_p * (1 - ((k_new - k_old) / k_old)))  # calculate salary
+        self.size = newPlayerPoolSize
+        self.players = np.arange(start=1, stop=newPlayerPoolSize + 1)  # create id's from 1 to newPlayerPoolSize
+        self.playerSkills = np.round(np.random.beta(a=alpha, b=beta, size=newPlayerPoolSize), 2)  # draw skill from beta distribution
+        self.playerSalaries = np.round(maximalSalary * self.playerSkills * (1 - ((newPlayerPoolSize - oldPlayerPoolSize) / oldPlayerPoolSize)))  # calculate salary
         self.remainingPlayersSet = set()
 
-    def get_player_id(self):
+    def get_players(self):
         """
         Description:
         Get player ID's in a list
@@ -33,11 +33,11 @@ class PlayerPool(object):
         Returns:
         playerIDList (list)
         """
-        playerIDList = self.p.tolist()
+        playerIDList = self.players.tolist()
 
         return playerIDList
 
-    def get_player_skill(self):
+    def get_player_skills(self):
         """
         Description:
         Get player skills in a list
@@ -45,11 +45,11 @@ class PlayerPool(object):
         Returns:
         playerSkillList (list)
         """
-        playerSkillList = self.S_p.tolist()
+        playerSkillList = self.playerSkills.tolist()
 
         return playerSkillList
 
-    def get_player_salary(self):
+    def get_player_salaries(self):
         """
         Description:
         Get player salaries in a list
@@ -57,7 +57,7 @@ class PlayerPool(object):
         Returns:
         playerSalaryList (list)
         """
-        playerSalaryList = self.W_p.tolist()
+        playerSalaryList = self.playerSalaries.tolist()
 
         return playerSalaryList
 
@@ -70,7 +70,7 @@ class PlayerPool(object):
         player_data (pandas dataframe)
         """
         player_data = pd.DataFrame(
-            data=np.column_stack((self.p, self.S_p, self.W_p)),  # arrays as columns
+            data=np.column_stack((self.players, self.playerSkills, self.playerSalaries)),  # arrays as columns
             columns=["ID", "Skill", "Salary"]
         )
         player_data = player_data.astype({"ID": int})  # change ID to integer
@@ -87,9 +87,9 @@ class PlayerPool(object):
         after calling the class method select_optimal_players
 
         Update:
-        self.p (array): remove all players from array which were selected in the maximization process
-        self.S_p (array): remove all skills of selected players from the array
-        self.W_p (array): remove all salaries of selected players from the array
+        self.players (array): remove all players from array which were selected in the maximization process
+        self.playerSkills (array): remove all skills of selected players from the array
+        self.playerSalaries (array): remove all salaries of selected players from the array
         self.remainingPlayersSet (set): create a set of all remaining players after maximization process
         """
 
@@ -97,15 +97,15 @@ class PlayerPool(object):
         optimalPlayersList = list(optimalPlayersSet)
 
         # obtain index of optimal players by subtracting one from id
-        optimalPlayersList = [i - 1 for i in optimalPlayersList]
+        optimalPlayersIndex = [player - 1 for player in optimalPlayersList]
 
         # remove players from player pool
-        self.p = np.delete(self.p, optimalPlayersList)  # remove players from p
-        self.S_p = np.delete(self.S_p, optimalPlayersList)  # remove players from S_p
-        self.W_p = np.delete(self.W_p, optimalPlayersList)  # remove players from W_p
+        self.players = np.delete(self.players, optimalPlayersIndex)  # remove players from p
+        self.playerSkills = np.delete(self.playerSkills, optimalPlayersIndex)  # remove players from S_p
+        self.playerSalaries = np.delete(self.playerSalaries, optimalPlayersIndex)  # remove players from W_p
 
         # create a set of remaining players
-        self.remainingPlayersSet = set(self.p)
+        self.remainingPlayersSet = set(self.players)
 
         # assert that there is no intersection between the remaining and selected players
         assert len(self.remainingPlayersSet.intersection(optimalPlayersSet)) == 0
@@ -119,22 +119,22 @@ class PlayerPool(object):
         player (int): the player to be removed from the available players
 
         Update:
-        self.p (array): remove selected player from the array
-        self.S_p (array): remove skill of selected player from the array
-        self.W_p (array): remove salary of selected player from the array
+        self.players (array): remove selected player from the array
+        self.playerSkills (array): remove skill of selected player from the array
+        self.playerSalaries (array): remove salary of selected player from the array
         self.remainingPlayersSet (set): create a set of all remaining players after a player is selected
         """
 
         # identify index of player to be removed in arrays
-        playerIndex = np.where(self.p == player)[0][0]
+        playerIndex = np.where(self.players == player)[0][0]
 
         # remove players from player pool
-        self.p = np.delete(self.p, playerIndex)  # remove player from p
-        self.S_p = np.delete(self.S_p, playerIndex)  # remove player from S_p
-        self.W_p = np.delete(self.W_p, playerIndex)  # remove player from W_p
+        self.players = np.delete(self.players, playerIndex)  # remove player from p
+        self.playerSkills = np.delete(self.playerSkills, playerIndex)  # remove player from S_p
+        self.playerSalaries = np.delete(self.playerSalaries, playerIndex)  # remove player from W_p
 
         # create a set of remaining players
-        self.remainingPlayersSet = set(self.p)
+        self.remainingPlayersSet = set(self.players)
 
 
 # define league as class
@@ -145,17 +145,17 @@ class League(object):
         Initializes a league object. The object is fully initialised based on parameters
 
         A league object has the following attributes:
-            self.i (list): determines the teams in the league
-            self.R_tot_i0 (list): determines the starting revenues of teams before first season
+            self.teams (list): determines the teams in the league
+            self.teamBudgets (list): determines the starting revenues of teams before first season
             self.teamData (dataframe): dataframe with information about the team
-            self.optimalPlayers (dict): dictionary which is filled when players are selected in maximization process, empty when intialised
-            self.optimalPlayersSet (set): set which is filled when players are selected in maximization processs, empty when initialised
-            self.optimalPlayersData (dataframe): dataframe which is filled when players are selected in maximization process, empty when initialised
+            self.optimalPlayers (dict): dictionary which is filled when players are selected in maximization process
+            self.optimalPlayersSet (set): set which is filled when players are selected in maximization processs
+            self.optimalPlayersData (dataframe): dataframe which is filled when players are selected in maximization process
             self.finalPlayerSelection (dict): dictionary which is filled with final player selection per team when player conflicts are resolved
         """
-        self.i = ['team' + str(i + 1) for i in range(n)]  # create n teams
-        self.R_tot_i0 = np.round(np.random.uniform(low=10 * w_max, high=15 * w_max, size=n))  # create team revenues
-        self.teamData = pd.DataFrame({'team': self.i, 'budget': self.R_tot_i0, 'payroll': [0] * n})
+        self.teams = ['team' + str(i + 1) for i in range(leagueSize)]  # create n teams
+        self.teamBudgets = np.round(np.random.uniform(low=10 * maximalSalary, high=15 * maximalSalary, size=leagueSize))  # create team revenues
+        self.teamData = pd.DataFrame({'team': self.teams, 'budget': self.teamBudgets, 'payroll': [0] * leagueSize})
         self.optimalPlayers = {}
         self.optimalPlayersSet = set()
         self.optimalPlayersData = pd.DataFrame()
@@ -175,16 +175,15 @@ class League(object):
         """
         # initialise new empty dictionary for player selection
         optimalPlayers = {}
-        optimalPlayersSet = set()
-        optimalPlayersData = pd.DataFrame()
 
         # for loop to select optimal players for each team and write them to a list
-        for i in range(len(self.i)):
+        for team in range(len(self.teams)):
+
             # select optimal players based on skill maximization
-            selectedPlayers = functions.skill_maximization(playerPool, self.R_tot_i0[i])
+            selectedPlayers = functions.skill_maximization(playerPool, self.teamBudgets[team])
 
             # create team entry with ID's of players
-            optimalPlayers[self.i[i]] = selectedPlayers.ID.tolist()
+            optimalPlayers[self.teams[team]] = selectedPlayers.ID.tolist()
 
         # overwrite old dictionary with new dictionary
         self.optimalPlayers = optimalPlayers
@@ -222,57 +221,57 @@ class League(object):
         conflicts, noConflicts = functions.identify_conflicts(self.optimalPlayers, self.optimalPlayersSet)
 
         # initialise final player selection by entering each team with an empty player list
-        self.finalPlayerSelection = {team: [] for team in self.i}
+        self.finalPlayerSelection = {team: [] for team in self.teams}
 
         # for each player without conflict
-        for p in noConflicts:
-            # define the team, the player is going to join
-            i = noConflicts[p][0]
+        for player in noConflicts:
+
+            # define the team which has selected the player
+            team = noConflicts[player][0]
 
             # assign the player to the according team
-            self.finalPlayerSelection = functions.assign_player(self.finalPlayerSelection, p, i)
+            self.finalPlayerSelection = functions.assign_player(self.finalPlayerSelection, player, team)
 
         # update payroll data for all teams
         self.teamData = functions.update_team_payroll(self.finalPlayerSelection, self.teamData, playerInfo)
 
         # for each player with conflict
-        for p in conflicts:
+        for player in conflicts:
 
             # define the potential teams a player can join
-            I = conflicts[p]
+            interestedTeams = conflicts[player]
 
             # let the player decide which team to join
-            i = functions.player_chooses_team(I)
+            selectedTeam = functions.player_chooses_team(interestedTeams)
 
             # assign the player to the team he decided to join
-            self.finalPlayerSelection = functions.assign_player(self.finalPlayerSelection, p, i)
+            self.finalPlayerSelection = functions.assign_player(self.finalPlayerSelection, player, selectedTeam)
 
-            # remove picked team from list of potential teams
-            I.remove(i)
+            # remove picked team from list of interested teams
+            interestedTeams.remove(selectedTeam)
 
             # shuffle the remaining teams so that teams can pick a replacement in a random order
-            ra.shuffle(I)
+            ra.shuffle(interestedTeams)
 
             # For every remaining team
-            for j in I:
-                # search an choose a player
-                q = functions.teams_choose_replacement(p, j, self.optimalPlayersData, playerPool.get_data(),
-                                                       self.teamData)
+            for remainingTeam in interestedTeams:
 
-                # add replacement player to the final list of selected players
-                self.finalPlayerSelection = functions.assign_player(self.finalPlayerSelection, q, j)
+                # a replacement player for initial player is defined
+                replacementPlayer = functions.teams_choose_replacement(player, remainingTeam, self.optimalPlayersData, playerPool.get_data(), self.teamData)
+
+                # add replacement player to the remaining team which has selected the player
+                self.finalPlayerSelection = functions.assign_player(self.finalPlayerSelection, replacementPlayer, remainingTeam)
 
                 # remove replacement player from available players in player pool
-                playerPool.remove_player_from_available(q)
+                playerPool.remove_player_from_available(replacementPlayer)
 
             # update payroll data after each conflict so that it is up to date when resolving next conflict
             self.teamData = functions.update_team_payroll(self.finalPlayerSelection, self.teamData, playerInfo)
 
+
         # assert that constraints also hold in final player selection
-        assert all(list({k: len(v) == h for (k, v) in
-                         self.finalPlayerSelection.items()}.values()))  # all teams have the defined number of players
-        assert all([True if self.teamData.loc[x, 'budget'] - self.teamData.loc[x, 'payroll'] > 0 else False for x in
-                    range(len(self.teamData))])  # payroll below budget
+        assert all(list({team: len(players) == teamSize for (team, players) in self.finalPlayerSelection.items()}.values()))  # all teams have the defined number of players
+        assert all([True if self.teamData.loc[x, 'budget'] - self.teamData.loc[x, 'payroll'] > 0 else False for x in range(len(self.teamData))])  # payroll below budget
 
         # return new player pool object
         return playerPool

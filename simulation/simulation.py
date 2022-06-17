@@ -1,17 +1,17 @@
 from classes import *
 
 # initialise the player pool
-P = PlayerPool()
-playerInfo = P.get_data()  # store information about all players
+playerPool = PlayerPool()
+playerInfo = playerPool.get_data()  # store information about all players
 
 # initialise the league
-N = League()
+league = League()
 
 # solve skill maximization problem for each team
-N.select_optimal_players(P)
+league.select_optimal_players(playerPool)
 
 # remove all selected players from the pool
-P.update_player_pool_after_maximization(N.optimalPlayersSet)
+playerPool.update_player_pool_after_maximization(league.optimalPlayersSet)
 
 # resolve conflict of player assignment
-N.resolve_player_conflicts(P, playerInfo)
+league.resolve_player_conflicts(playerPool, playerInfo)

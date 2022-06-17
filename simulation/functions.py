@@ -6,14 +6,14 @@ import random as ra
 from pulp import PULP_CBC_CMD
 
 
-def skill_maximization(playerPool, budgetConstraint):
+def skill_maximization(playerPool, teamBudget):
     """
     Description:
     Function which allows team to select players while maximizing skill given a team size and budget constraint
 
     Input:
     playerPool (PlayerPool): A player pool of object PlayerPool
-    budgetConstraint (dbl): The budget constraint for a particular team used to optimize skill
+    teamBudget (dbl): The budget constraint for a particular team used to optimize skill
 
     Returns:
     selectedPlayers (pandas dataframe): A pandas dataframe which includes data about selected players
@@ -21,9 +21,9 @@ def skill_maximization(playerPool, budgetConstraint):
 
     # initialize variables
     playerData = playerPool.get_data()  # get player data in a data frame
-    players = playerPool.get_player_id()  # get players ID's in a list list
-    skills = playerPool.get_player_skill()  # get player skill in a list
-    salaries = playerPool.get_player_salary()  # get player salaries in a list
+    players = playerPool.get_players()  # get players ID's in a list list
+    skills = playerPool.get_player_skills()  # get player skill in a list
+    salaries = playerPool.get_player_salaries()  # get player salaries in a list
     binaries = [pl.LpVariable(  # initialise list of binary variables, one for each player
         "d_" + str(players[i]),  # name the variables: d_playerID
         cat="Binary") for i in range(len(players))]  # iterate through all players
@@ -35,8 +35,8 @@ def skill_maximization(playerPool, budgetConstraint):
     prob += pl.lpSum(binaries[i] * skills[i] for i in range(len(players)))  # maximize skill
 
     # define the constraints
-    prob += pl.lpSum(binaries[i] for i in range(len(players))) == h  # team size constraint
-    prob += pl.lpSum(binaries[i] * salaries[i] for i in range(len(players))) <= budgetConstraint  # budget constraint
+    prob += pl.lpSum(binaries[i] for i in range(len(players))) == teamSize  # team size constraint
+    prob += pl.lpSum(binaries[i] * salaries[i] for i in range(len(players))) <= teamBudget  # budget constraint
 
     # solve problem to obtain the optimal solution (best team)
     prob.solve(solver=PULP_CBC_CMD(msg=False))
@@ -69,8 +69,8 @@ def skill_maximization(playerPool, budgetConstraint):
     ]
 
     # assert that constraints hold since the solver does not throw an error when not converging to a solution
-    assert len(selectedPlayers) == h
-    assert selectedPlayers.Salary.sum() <= budgetConstraint
+    assert len(selectedPlayers) == teamSize
+    assert selectedPlayers.Salary.sum() <= teamBudget
 
     # return selected team
     return selectedPlayers
@@ -109,17 +109,19 @@ def identify_conflicts(optimalPlayers, optimalPlayersSet):
     for player in optimalPlayersSet:
 
         # extract all teams interested in the same player
-        I = optimalPlayersDF.loc[optimalPlayersDF['player'] == player]
+        interestedTeams = optimalPlayersDF.loc[optimalPlayersDF['player'] == player]
 
         # if more than one team want to acquire a player
-        if len(I) > 1:
+        if len(interestedTeams) > 1:
 
-            # fill player as key and list of teams in conflicts dictionary
-            conflicts[player] = I.team.tolist()
+            # add player id as key and list of interested teams as value to the conflicts dictionary
+            conflicts[player] = interestedTeams.team.tolist()
 
         # if only one team wants to acquire a player
         else:
-            noConflicts[player] = I.team.tolist()
+
+            # add player id as key and list containing interested team as value to the non conflicts dictionary
+            noConflicts[player] = interestedTeams.team.tolist()
 
     # return dictionaries
     return conflicts, noConflicts
@@ -156,18 +158,17 @@ def update_team_payroll(finalPlayerSelection, teamData, playerInfo):
     finalPlayerSelection (dict): A dictionary which shows the final player selection of teams so far
     derived from an object with class League
     teamData (dataframe): A dataframe which shows data about the team and is initialised when a object of class League is created
-    playerInfo (dataframe): A dataframe with information about all players initially created when playerpool was initialised
+    playerInfo (dataframe): A dataframe with information about all players initially created when player pool was initialised
 
     Returns:
     teamData (dict): Updates and returns information about the teams
     """
 
     # obtain salary for every selected player
-    salaryDict = {k: playerInfo.loc[playerInfo['ID'].isin(v), 'Salary'].values.tolist() for (k, v) in
-                  finalPlayerSelection.items()}
+    salaryDict = {team: playerInfo.loc[playerInfo['ID'].isin(players), 'Salary'].values.tolist() for (team, players) in finalPlayerSelection.items()}
 
     # calculate sum of salaries
-    salarySumDict = {k: sum(v) for (k, v) in salaryDict.items()}
+    salarySumDict = {team: sum(salaries) for (team, salaries) in salaryDict.items()}
 
     # create list of salary sums and append to payroll information about teamData
     teamData['payroll'] = list(salarySumDict.values())
@@ -176,20 +177,20 @@ def update_team_payroll(finalPlayerSelection, teamData, playerInfo):
     return teamData
 
 
-def player_chooses_team(potentialTeams):
+def player_chooses_team(interestedTeams):
     """
     Description:
     Function representing the decision rule if a player has to choose between teams
 
     Input:
-    potentialTeams (list): list of teams interested in player
+    interestedTeams (list): list of teams interested in player
 
     Returns:
     decision (str): The team team the player has chosen
     """
 
     # let player decide for one team
-    decision = ra.choice(potentialTeams)
+    decision = ra.choice(interestedTeams)
 
     # return player decision
     return decision
@@ -201,7 +202,7 @@ def teams_choose_replacement(player, team, playerInfo, remainingPlayersData, tea
     Function representing the replacement decision by teams which were not picked a player they considered optimal
 
     Input:
-    player (int): The player which did not join the team
+    player (int): The player which did not join the team and thus needs to be replaced
     team (str): The team which has to decide which player to choose now
     playerInfo (dataframe): Contains data about every player
     remainingPlayersData (dataframe): Contains all data about the remaining players in the player pool
@@ -211,10 +212,10 @@ def teams_choose_replacement(player, team, playerInfo, remainingPlayersData, tea
     replacementPlayer (int): Id of replacement player
     """
 
-    # filter player skill from player of interest
+    # filter player skill from player to be replaced
     playerSkill = playerInfo.loc[playerInfo['ID'] == player, 'Skill'].values[0]
 
-    # add new column with absolut skill gab to info about remaining players
+    # add new column with absolut skill gab to data about remaining players
     remainingPlayersData['Skill Gab'] = abs(playerSkill - remainingPlayersData.Skill)
 
     # order remainingPlayerData according to skill gab
@@ -233,7 +234,7 @@ def teams_choose_replacement(player, team, playerInfo, remainingPlayersData, tea
     while index < len(remainingPlayersData):
 
         # identify a replacement player in increasing order of skill gab
-        replacementPlayerInfo = remainingPlayersData.iloc[index,]
+        replacementPlayerInfo = remainingPlayersData.iloc[index, ]
 
         # identify salary of replacement player
         replacementPlayerSalary = replacementPlayerInfo['Salary']
