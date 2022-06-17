@@ -2,7 +2,6 @@ from classes import *
 
 # initialise the player pool
 playerPool = PlayerPool()
-playerInfo = playerPool.get_data()  # store information about all players
 
 # initialise the league
 league = League()
@@ -14,4 +13,4 @@ league.select_optimal_players(playerPool)
 playerPool.update_player_pool_after_maximization(league.optimalPlayersSet)
 
 # resolve conflict of player assignment
-league.resolve_player_conflicts(playerPool, playerInfo)
+league.resolve_player_conflicts(playerPool)

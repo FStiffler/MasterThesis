@@ -20,12 +20,12 @@ def skill_maximization(playerPool, teamBudget):
     """
 
     # initialize variables
-    playerData = playerPool.get_data()  # get player data in a data frame
-    players = playerPool.get_players()  # get players ID's in a list list
-    skills = playerPool.get_player_skills()  # get player skill in a list
-    salaries = playerPool.get_player_salaries()  # get player salaries in a list
+    playerData = playerPool.get_all_player_data()  # get data from all players as data frame
+    players = playerPool.get_all_players()  # get all players as list
+    skills = playerPool.get_all_player_skills()  # get skill levels of all players as list
+    salaries = playerPool.get_all_player_salaries()  # get salaries of all players as list
     binaries = [pl.LpVariable(  # initialise list of binary variables, one for each player
-        "d_" + str(players[i]),  # name the variables: d_playerID
+        "d_" + str(players[i]),  # name the variables: d_player
         cat="Binary") for i in range(len(players))]  # iterate through all players
 
     # initialize problem
@@ -64,7 +64,7 @@ def skill_maximization(playerPool, teamBudget):
         playerData['ID'].isin(  # filter ID's in array
             np.array(
                 solutionDF.Variable.str.split('_').tolist()  # extract player ID from variable name
-            )[:, 1].astype(int)  # select only ID numbers and define them as integer
+            )[:, 1].astype(int)  # select column with ID and define them as integer
         )
     ]
 
@@ -84,7 +84,7 @@ def identify_conflicts(optimalPlayers, optimalPlayersSet):
     Input:
     optimalPlayers (dict): A dictionary which shows the players selected by every team after the maximization process
     derived from an object with class League after calling method select_optimal_players
-    optimalPlayersSet (set): A set which shows all players selected by any team during the maximization process
+    optimalPlayersSet (set): A set which shows all unique players selected by any team during the maximization process
     derived from an object with class League after calling method select_optimal_players
 
     Returns:
@@ -111,7 +111,7 @@ def identify_conflicts(optimalPlayers, optimalPlayersSet):
         # extract all teams interested in the same player
         interestedTeams = optimalPlayersDF.loc[optimalPlayersDF['player'] == player]
 
-        # if more than one team want to acquire a player
+        # if more than one team are interested in one player
         if len(interestedTeams) > 1:
 
             # add player id as key and list of interested teams as value to the conflicts dictionary
@@ -125,6 +125,31 @@ def identify_conflicts(optimalPlayers, optimalPlayersSet):
 
     # return dictionaries
     return conflicts, noConflicts
+
+
+def shuffle_conflicts(conflicts):
+    """
+    Description:
+    Function to shuffle order of conflicts to be solved
+
+    Input:
+    finalPlayerSelection (dict): A dictionary which contains all players and according interested teams
+
+    Returns:
+    shuffledConflicts (dict): The same dictionary as input but now with shuffled conflicts
+    """
+
+    # create list of conflict items where each item consists of a tuple with the conflicting player and a list of teams
+    conflictItems = list(conflicts.items())
+
+    # shuffle the tuples
+    ra.shuffle(conflictItems)
+
+    # create a shuffled dictionary
+    shuffledConflicts = dict(conflictItems)
+
+    # return
+    return shuffledConflicts
 
 
 def assign_player(finalPlayerSelection, player, team):
@@ -149,7 +174,7 @@ def assign_player(finalPlayerSelection, player, team):
     return finalPlayerSelection
 
 
-def update_team_payroll(finalPlayerSelection, teamData, playerInfo):
+def update_team_payroll(finalPlayerSelection, teamData, allPlayersData):
     """
     Description:
     Function to update the team payrolls of all teams
@@ -157,15 +182,16 @@ def update_team_payroll(finalPlayerSelection, teamData, playerInfo):
     Input:
     finalPlayerSelection (dict): A dictionary which shows the final player selection of teams so far
     derived from an object with class League
-    teamData (dataframe): A dataframe which shows data about the team and is initialised when a object of class League is created
-    playerInfo (dataframe): A dataframe with information about all players initially created when player pool was initialised
+    teamData (dataframe): A dataframe which contains information about the team and is initialised when a object of class League is created
+    allPlayersData (dataframe): A dataframe with information about all players in the player pool created when player pool was initialised
 
     Returns:
     teamData (dict): Updates and returns information about the teams
     """
 
     # obtain salary for every selected player
-    salaryDict = {team: playerInfo.loc[playerInfo['ID'].isin(players), 'Salary'].values.tolist() for (team, players) in finalPlayerSelection.items()}
+    salaryDict = {team: allPlayersData.loc[allPlayersData['ID'].isin(players), 'Salary'].values.tolist() for
+                  (team, players) in finalPlayerSelection.items()}
 
     # calculate sum of salaries
     salarySumDict = {team: sum(salaries) for (team, salaries) in salaryDict.items()}
@@ -196,7 +222,7 @@ def player_chooses_team(interestedTeams):
     return decision
 
 
-def teams_choose_replacement(player, team, playerInfo, remainingPlayersData, teamData):
+def teams_choose_replacement(player, team, allPlayersData, availablePlayersData, teamData):
     """
     Description:
     Function representing the replacement decision by teams which were not picked a player they considered optimal
@@ -204,7 +230,7 @@ def teams_choose_replacement(player, team, playerInfo, remainingPlayersData, tea
     Input:
     player (int): The player which did not join the team and thus needs to be replaced
     team (str): The team which has to decide which player to choose now
-    playerInfo (dataframe): Contains data about every player
+    allPlayersData (dataframe): Contains information about all players in the player pool
     remainingPlayersData (dataframe): Contains all data about the remaining players in the player pool
     teamData (team): A dataframe which contains team information
 
@@ -213,13 +239,13 @@ def teams_choose_replacement(player, team, playerInfo, remainingPlayersData, tea
     """
 
     # filter player skill from player to be replaced
-    playerSkill = playerInfo.loc[playerInfo['ID'] == player, 'Skill'].values[0]
+    playerSkill = allPlayersData.loc[allPlayersData['ID'] == player, 'Skill'].values[0]
 
-    # add new column with absolut skill gab to data about remaining players
-    remainingPlayersData['Skill Gab'] = abs(playerSkill - remainingPlayersData.Skill)
+    # add new column with absolut skill gab to data about still available players
+    availablePlayersData['Skill Gab'] = abs(playerSkill - availablePlayersData.Skill)
 
-    # order remainingPlayerData according to skill gab
-    remainingPlayersData.sort_values('Skill Gab', inplace=True)
+    # order available player data according to skill gab
+    availablePlayersData.sort_values('Skill Gab', inplace=True)
 
     # identify current team payroll
     teamPayroll = teamData.loc[teamData['team'] == team, 'payroll'].values[0]
@@ -231,10 +257,10 @@ def teams_choose_replacement(player, team, playerInfo, remainingPlayersData, tea
     index = 0
 
     # while index is smaller then length of dataframe containing replacement players
-    while index < len(remainingPlayersData):
+    while index < len(availablePlayersData):
 
         # identify a replacement player in increasing order of skill gab
-        replacementPlayerInfo = remainingPlayersData.iloc[index, ]
+        replacementPlayerInfo = availablePlayersData.iloc[index, ]
 
         # identify salary of replacement player
         replacementPlayerSalary = replacementPlayerInfo['Salary']
@@ -246,8 +272,7 @@ def teams_choose_replacement(player, team, playerInfo, remainingPlayersData, tea
             index += 1
 
             # raise exception if there is no other player left and the budget constraint is violated
-            if index == len(remainingPlayersData):
-
+            if index == len(availablePlayersData):
                 raise Exception('No replacement player left but breach of budget constraint')
 
         # if there is no violation
