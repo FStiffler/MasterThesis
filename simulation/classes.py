@@ -71,6 +71,9 @@ class PlayerPool(object):
         """
         allPlayerSalariesList = self.allPlayerSalaries.tolist()
 
+        # convert to integer
+        allPlayerSalariesList = [int(salary) for salary in allPlayerSalariesList]
+
         return allPlayerSalariesList
 
     def get_all_player_data(self):
@@ -85,7 +88,7 @@ class PlayerPool(object):
             data=np.column_stack((self.allPlayers, self.allPlayerSkills, self.allPlayerSalaries)),  # arrays as columns
             columns=["ID", "Skill", "Salary"]
         )
-        allPlayersData = allPlayersData.astype({"ID": int})  # change ID to integer
+        allPlayersData = allPlayersData.astype({"ID": int, 'Salary': int})  # change ID to integer
 
         return allPlayersData
 
@@ -123,6 +126,9 @@ class PlayerPool(object):
         """
         availablePlayerSalariesList = self.availablePlayerSalaries.tolist()
 
+        # convert to integer
+        availablePlayerSalariesList = [int(salary) for salary in availablePlayerSalariesList]
+
         return availablePlayerSalariesList
 
     def get_available_player_data(self):
@@ -138,7 +144,7 @@ class PlayerPool(object):
             # arrays as columns
             columns=["ID", "Skill", "Salary"]
         )
-        availablePlayersData = availablePlayersData.astype({"ID": int})  # change ID to integer
+        availablePlayersData = availablePlayersData.astype({"ID": int, 'Salary': int})  # change ID to integer
 
         return availablePlayersData
 
@@ -175,7 +181,7 @@ class PlayerPool(object):
         self.availablePlayersSet = set(self.availablePlayers)
 
         # update data on available players
-        self.availablePlayersData = self.availablePlayersData.loc[~self.availablePlayersData['ID'].isin(optimalPlayersList)]
+        self.availablePlayersData = self.get_available_player_data()
 
         # assert that there is no intersection between the still available and the selected players
         assert len(self.availablePlayersSet.intersection(optimalPlayersSet)) == 0
@@ -208,7 +214,7 @@ class PlayerPool(object):
         self.availablePlayersSet = set(self.availablePlayers)
 
         # update data on available players
-        self.availablePlayersData = self.availablePlayersData.loc[~self.availablePlayersData['ID'] == player]
+        self.availablePlayersData = self.get_available_player_data()
 
 
 # define league as class
@@ -223,13 +229,13 @@ class League(object):
             self.teamBudgets (list): determines the starting revenues of teams before first season
             self.teamData (dataframe): dataframe with information about the team
             self.optimalPlayers (dict): dictionary which is filled when players are selected in maximization process
-            self.optimalPlayersSet (set): set which is filled when players are selected in maximization processs
+            self.optimalPlayersSet (set): set which is filled when players are selected in maximization process
             self.optimalPlayersData (dataframe): dataframe which is filled when players are selected in maximization process
             self.finalPlayerSelection (dict): dictionary which is filled with final player selection per team when player conflicts are resolved
         """
         self.teams = ['team' + str(i + 1) for i in range(leagueSize)]  # create n teams
         self.teamBudgets = np.round(
-            np.random.uniform(low=10 * maximalSalary, high=15 * maximalSalary, size=leagueSize))  # create team revenues
+            np.random.uniform(low=10 * maximalSalary, high=15 * maximalSalary, size=leagueSize)).astype(int)  # create team revenues
         self.teamData = pd.DataFrame({'team': self.teams, 'budget': self.teamBudgets, 'payroll': [0] * leagueSize})
         self.optimalPlayers = {}
         self.optimalPlayersSet = set()
@@ -309,7 +315,8 @@ class League(object):
             self.finalPlayerSelection = functions.assign_player(self.finalPlayerSelection, player, team)
 
         # update payroll data for all teams
-        self.teamData = functions.update_team_payroll(self.finalPlayerSelection, self.teamData, playerPool.get_all_player_data())
+        self.teamData = functions.update_team_payroll(self.finalPlayerSelection, self.teamData,
+                                                      playerPool.get_all_player_data())
 
         # for each player with conflict
         for player in shuffledConflicts:
@@ -331,18 +338,22 @@ class League(object):
 
             # For every remaining team
             for remainingTeam in interestedTeams:
-
                 # a replacement player for initial player is defined
-                replacementPlayer = functions.teams_choose_replacement(player, remainingTeam, playerPool.get_all_player_data(), playerPool.get_available_player_data(), self.teamData)
+                replacementPlayer = functions.teams_choose_replacement(player, remainingTeam,
+                                                                       playerPool.get_all_player_data(),
+                                                                       playerPool.get_available_player_data(),
+                                                                       self.teamData)
 
                 # add replacement player to the remaining team which has selected the player
-                self.finalPlayerSelection = functions.assign_player(self.finalPlayerSelection, replacementPlayer, remainingTeam)
+                self.finalPlayerSelection = functions.assign_player(self.finalPlayerSelection, replacementPlayer,
+                                                                    remainingTeam)
 
                 # remove replacement player from available players in player pool
                 playerPool.remove_player_from_available(replacementPlayer)
 
             # update payroll data after each conflict so that it is up to date when resolving next conflict
-            self.teamData = functions.update_team_payroll(self.finalPlayerSelection, self.teamData, playerPool.allPlayersData)
+            self.teamData = functions.update_team_payroll(self.finalPlayerSelection, self.teamData,
+                                                          playerPool.allPlayersData)
 
         # assert that constraints also hold in final player selection
         assert all(list({team: len(players) == teamSize for (team, players) in
@@ -364,7 +375,6 @@ class League(object):
         """
         # for each team
         for team in self.finalPlayerSelection:
-
             # extract final selection as set
             finalSelectionSet = set(self.finalPlayerSelection[team])
 

@@ -13,7 +13,7 @@ def skill_maximization(playerPool, teamBudget):
 
     Input:
     playerPool (PlayerPool): A player pool of object PlayerPool
-    teamBudget (dbl): The budget constraint for a particular team used to optimize skill
+    teamBudget (int): The budget constraint for a particular team used to optimize skill
 
     Returns:
     selectedPlayers (pandas dataframe): A pandas dataframe which includes data about selected players
@@ -232,7 +232,7 @@ def teams_choose_replacement(player, team, allPlayersData, availablePlayersData,
     team (str): The team which has to decide which player to choose now
     allPlayersData (dataframe): Contains information about all players in the player pool
     remainingPlayersData (dataframe): Contains all data about the remaining players in the player pool
-    teamData (team): A dataframe which contains team information
+    teamData (dataframe): A dataframe which contains team information
 
     Returns:
     replacementPlayer (int): Id of replacement player
@@ -273,7 +273,11 @@ def teams_choose_replacement(player, team, allPlayersData, availablePlayersData,
 
             # raise exception if there is no other player left and the budget constraint is violated
             if index == len(availablePlayersData):
-                raise Exception('No replacement player left but breach of budget constraint')
+                raise Exception("""
+                Problem finding replacement player -
+                All the available players serving as potential replacements have salaries violating budget 
+                constraint when added to the team
+                """)
 
         # if there is no violation
         else:
@@ -286,6 +290,7 @@ def teams_choose_replacement(player, team, allPlayersData, availablePlayersData,
 
     # return id of chosen player
     return replacementPlayer
+
 
 def no_duplicates(finalPlayerSelection):
     """
