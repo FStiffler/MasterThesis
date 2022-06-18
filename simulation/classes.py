@@ -330,14 +330,24 @@ class League(object):
             # assign the player to the team he decided to join
             self.finalPlayerSelection = functions.assign_player(self.finalPlayerSelection, player, chosenTeam)
 
-            # remove chosen team from list of interested teams
+            # remove chosen team from list of interested teams and from dictionary with shuffled conflicts
             interestedTeams.remove(chosenTeam)
 
             # shuffle the remaining teams so that teams can pick a replacement in a random order
             ra.shuffle(interestedTeams)
 
-            # For every remaining team
-            for remainingTeam in interestedTeams:
+        # update team data after all players have chosen their team
+        self.teamData = functions.update_team_info(self.finalPlayerSelection, self.teamData,
+                                                       playerPool.allPlayersData)
+
+        # for every player which now needs to be replaced by the remaining teams in each conflict
+        for player in shuffledConflicts:
+
+            # extract the remaining teams in same conflict order as players have chosen teams
+            remainingTeams = shuffledConflicts[player]
+
+            # for each remaining team among the remaining teams in one conflict
+            for remainingTeam in remainingTeams:
                 # a replacement player for initial player is defined
                 replacementPlayer = functions.teams_choose_replacement(player, remainingTeam,
                                                                        playerPool.get_all_player_data(),
@@ -351,9 +361,11 @@ class League(object):
                 # remove replacement player from available players in player pool
                 playerPool.remove_player_from_available(replacementPlayer)
 
+
             # update team data after each conflict so that it is up to date when resolving next conflict
             self.teamData = functions.update_team_info(self.finalPlayerSelection, self.teamData,
-                                                          playerPool.allPlayersData)
+                                                    playerPool.allPlayersData)
+
 
         # assert that constraints also hold in final player selection
         assert all(list({team: len(players) == teamSize for (team, players) in
