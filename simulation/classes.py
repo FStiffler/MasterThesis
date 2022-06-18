@@ -235,8 +235,8 @@ class League(object):
         """
         self.teams = ['team' + str(i + 1) for i in range(leagueSize)]  # create n teams
         self.teamBudgets = np.round(
-            np.random.uniform(low=10 * maximalSalary, high=15 * maximalSalary, size=leagueSize)).astype(int)  # create team revenues
-        self.teamData = pd.DataFrame({'team': self.teams, 'budget': self.teamBudgets, 'payroll': [0] * leagueSize})
+            np.random.uniform(low=7 * maximalSalary, high=15 * maximalSalary, size=leagueSize)).astype(int)  # create team revenues
+        self.teamData = pd.DataFrame({'team': self.teams, 'budget': self.teamBudgets, 'payroll': [0] * leagueSize, 'totalSkill': [0] * leagueSize})
         self.optimalPlayers = {}
         self.optimalPlayersSet = set()
         self.optimalPlayersData = pd.DataFrame()
@@ -314,8 +314,8 @@ class League(object):
             # assign the player to the according team
             self.finalPlayerSelection = functions.assign_player(self.finalPlayerSelection, player, team)
 
-        # update payroll data for all teams
-        self.teamData = functions.update_team_payroll(self.finalPlayerSelection, self.teamData,
+        # update data for all teams
+        self.teamData = functions.update_team_info(self.finalPlayerSelection, self.teamData,
                                                       playerPool.get_all_player_data())
 
         # for each player with conflict
@@ -351,8 +351,8 @@ class League(object):
                 # remove replacement player from available players in player pool
                 playerPool.remove_player_from_available(replacementPlayer)
 
-            # update payroll data after each conflict so that it is up to date when resolving next conflict
-            self.teamData = functions.update_team_payroll(self.finalPlayerSelection, self.teamData,
+            # update team data after each conflict so that it is up to date when resolving next conflict
+            self.teamData = functions.update_team_info(self.finalPlayerSelection, self.teamData,
                                                           playerPool.allPlayersData)
 
         # assert that constraints also hold in final player selection

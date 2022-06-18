@@ -174,10 +174,10 @@ def assign_player(finalPlayerSelection, player, team):
     return finalPlayerSelection
 
 
-def update_team_payroll(finalPlayerSelection, teamData, allPlayersData):
+def update_team_info(finalPlayerSelection, teamData, allPlayersData):
     """
     Description:
-    Function to update the team payrolls of all teams
+    Function to update the team info of all teams
 
     Input:
     finalPlayerSelection (dict): A dictionary which shows the final player selection of teams so far
@@ -186,18 +186,28 @@ def update_team_payroll(finalPlayerSelection, teamData, allPlayersData):
     allPlayersData (dataframe): A dataframe with information about all players in the player pool created when player pool was initialised
 
     Returns:
-    teamData (dict): Updates and returns information about the teams
+    teamData (dataframe): Updates and returns information about the teams
     """
 
-    # obtain salary for every selected player
-    salaryDict = {team: allPlayersData.loc[allPlayersData['ID'].isin(players), 'Salary'].values.tolist() for
-                  (team, players) in finalPlayerSelection.items()}
+    # define variables to obtain and summarize
+    variableName = ['Salary', 'Skill']
 
-    # calculate sum of salaries
-    salarySumDict = {team: sum(salaries) for (team, salaries) in salaryDict.items()}
+    for variable in variableName:
+        # obtain defined variable values for every selected player
+        salaryDict = {team: allPlayersData.loc[allPlayersData['ID'].isin(players), variable].values.tolist() for
+                      (team, players) in finalPlayerSelection.items()}
 
-    # create list of salary sums and append to payroll information about teamData
-    teamData['payroll'] = list(salarySumDict.values())
+        # calculate sum of variable value
+        salarySumDict = {team: sum(value) for (team, value) in salaryDict.items()}
+
+        # if variable is 'Salary'
+        if variable == 'Salary':
+            # append a list of all team salaries to the column 'payroll'
+            teamData['payroll'] = list(salarySumDict.values())
+
+        if variable == 'Skill':
+            # append a list of all team salaries to the column 'totalSkill'
+            teamData['totalSkill'] = list(salarySumDict.values())
 
     # return
     return teamData
