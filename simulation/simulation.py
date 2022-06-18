@@ -14,3 +14,6 @@ playerPool.update_player_pool_after_maximization(league.optimalPlayersSet)
 
 # resolve conflict of player assignment
 league.resolve_player_conflicts(playerPool)
+
+# simulate season
+league.simulate_season()

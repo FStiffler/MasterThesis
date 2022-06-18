@@ -232,15 +232,17 @@ class League(object):
             self.optimalPlayersSet (set): set which is filled when players are selected in maximization process
             self.optimalPlayersData (dataframe): dataframe which is filled when players are selected in maximization process
             self.finalPlayerSelection (dict): dictionary which is filled with final player selection per team when player conflicts are resolved
+            self.teamSkills (dict): dictionary which is filled with teams and their according skills
         """
         self.teams = ['team' + str(i + 1) for i in range(leagueSize)]  # create n teams
         self.teamBudgets = np.round(
-            np.random.uniform(low=7 * maximalSalary, high=15 * maximalSalary, size=leagueSize)).astype(int)  # create team revenues
+            np.random.uniform(low=10 * maximalSalary, high=15 * maximalSalary, size=leagueSize)).astype(int)  # create team revenues
         self.teamData = pd.DataFrame({'team': self.teams, 'budget': self.teamBudgets, 'payroll': [0] * leagueSize, 'totalSkill': [0] * leagueSize})
         self.optimalPlayers = {}
         self.optimalPlayersSet = set()
         self.optimalPlayersData = pd.DataFrame()
         self.finalPlayerSelection = {}
+        self.teamSkills = {}
 
     def select_optimal_players(self, playerPool):
         """
@@ -367,6 +369,9 @@ class League(object):
                                                     playerPool.allPlayersData)
 
 
+        # create team skill dictionary for next simulation step
+        self.create_skill_dictionary()
+
         # assert that constraints also hold in final player selection
         assert all(list({team: len(players) == teamSize for (team, players) in
                          self.finalPlayerSelection.items()}.values()))  # all teams have the defined number of players
@@ -398,3 +403,31 @@ class League(object):
 
             # print
             print('Team: {}, Total: {}, Set: {}'.format(team, len(intersection), intersection))
+
+    def create_skill_dictionary(self):
+        """
+        Description:
+        create a dictionary with the team as key and skill of team as value
+
+        Update:
+        teamSkills (dict): Updates dictionary containing teams and skill of teams
+        """
+
+        # create team skills dictionary
+        self.teamSkills = {self.teamData.loc[team, 'team']: self.teamData.loc[team, 'totalSkill'].round(2) for team in range(len(self.teams))}
+
+    def simulate_season(self):
+        """
+        Description:
+        Simulate a whole season where each team plays against every other team six times during a regular season.
+        After that, pre-playoffs and playoffs follow. One champion is determined.
+
+        Output:
+
+        """
+        # simulate regular season to obtain ranking
+        regularSeasonRanking = functions.simulate_regular_season(self.teams, self.teamSkills)
+
+        print(regularSeasonRanking)
+
+

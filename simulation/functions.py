@@ -1,9 +1,10 @@
 from parameters import *
+from pulp import PULP_CBC_CMD
 import numpy as np
 import pandas as pd
 import pulp as pl
 import random as ra
-from pulp import PULP_CBC_CMD
+import itertools as it
 
 
 def skill_maximization(playerPool, teamBudget):
@@ -270,7 +271,7 @@ def teams_choose_replacement(player, team, allPlayersData, availablePlayersData,
     while index < len(availablePlayersData):
 
         # identify a replacement player in increasing order of skill gab
-        replacementPlayerInfo = availablePlayersData.iloc[index, ]
+        replacementPlayerInfo = availablePlayersData.iloc[index,]
 
         # identify salary of replacement player
         replacementPlayerSalary = replacementPlayerInfo['Salary']
@@ -325,3 +326,97 @@ def no_duplicates(finalPlayerSelection):
 
     # return player decision
     return state
+
+
+def simulate_game(skillFirstTeam, skillSecondTeam):
+    """
+    Description:
+    Function to simulate one game
+
+    Input:
+    skillFirstTeam (float): Total skill of first team in pairing
+    skillSecondTeam (float): Total skill of second team in pairing
+
+    Returns:
+    firstTeamWins (boolean): True when first team in pairings has won, False when first team in pairing has lost
+    """
+
+    # calculate winning-percentage of first team in pairing
+    winPercentageFirstTeam = skillFirstTeam/(skillFirstTeam+skillSecondTeam)
+
+    # determine whether or not first team wins
+    firstTeamVictory = ra.choices([True, False], [winPercentageFirstTeam, 1-winPercentageFirstTeam])[0]
+
+    return firstTeamVictory
+
+
+def simulate_regular_season(teams, skillDictionary):
+    """
+    Description:
+    Function to simulate an entire regular season based on team skills
+
+    Input:
+    teams (list): list of all teams present in the league
+    skillDictionary (dict): dictionary containing each team as key and the according skill as value
+
+    Returns:
+    ranking (dataframe): Return ranking of regular season
+    """
+
+    # initialise empty ranking
+    ranking = pd.DataFrame({'rank': ['-']*len(teams),
+                            'team': teams,
+                            'skill': skillDictionary.values(),  # add column skill to dataframe
+                            'wins': [0]*len(teams),
+                            'games': [0]*len(teams),
+                            'winningPercentage': ['-']*len(teams)})
+
+    # create each possible team pairing for regular season
+    pairings = list(it.combinations(teams, 2))
+
+    # for each pairing
+    for pairing in pairings:
+
+        # extract skills of both teams
+        nameFirstTeam = pairing[0]
+        nameSecondTeam = pairing[1]
+        skillFirstTeam = skillDictionary[nameFirstTeam]  # extract of first team in pairing by team name
+        skillSecondTeam = skillDictionary[nameSecondTeam]   # extract of second team in pairing by team name
+
+        # initialise game count
+        game = 1
+
+        # as long as not 4 games have been played
+        while game < 5:
+
+            # if first team in pairing wins
+            if simulate_game(skillFirstTeam, skillSecondTeam):
+
+                # add a win to the teams record
+                ranking.loc[ranking['team'] == nameFirstTeam, 'wins'] += 1
+
+            # if the second team in the pairing wins
+            else:
+
+                # add a loss to the teams record
+                ranking.loc[ranking['team'] == nameSecondTeam, 'wins'] += 1
+
+            # add a game to both teams
+            ranking.loc[ranking['team'].isin(pairing), 'games'] += 1
+
+            # end of game 1
+            game += 1
+
+    # calculate winning percentage
+    ranking['winningPercentage'] = ranking['wins']/ranking['games']
+
+    # sort ranking
+    ranking.sort_values('winningPercentage', ascending=False, inplace=True)
+
+    # return ranking
+    return ranking
+
+
+
+
+
