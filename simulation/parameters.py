@@ -6,3 +6,5 @@ oldPlayerPoolSize = 500  # player pool size before measures, references 'k_old' 
 newPlayerPoolSize = 500  # player pool size after measures, references 'k_new' in thesis
 alpha = 3  # parameter alpha of beta distribution
 beta = 3  # parameter beta of beta distribution
+prePlayoff = 1  # parameter indicating prePlayoffs which means best of five series
+playoffs = 2  # parameter indicating Playoffs which means best of seven series

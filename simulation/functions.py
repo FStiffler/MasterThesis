@@ -381,9 +381,6 @@ def placement_games(skillDictionary, equalTeams):
     # while no decision in placement games
     while not placementDecision:
 
-        # get skills of teams which have equally often won
-        equalSkills = [skillDictionary[team] for team in equalTeams]
-
         # initialise empty ranking
         placementRanking = pd.DataFrame({'rank': [0] * len(equalTeams),
                                          'team': equalTeams,
@@ -425,9 +422,6 @@ def placement_games(skillDictionary, equalTeams):
 
         # if ranking is resolved
         if len(set(finalPlacementRanking['rank'].tolist())) == len(equalTeams):
-            # indicate that placement decision is final
-            placementDecision = True
-
             # return final ranking
             return finalPlacementRanking
 
@@ -443,7 +437,7 @@ def solve_ranking_conflicts(ranking, record, skillDictionary):
     skillDictionary (dict): Dictionary with all teams and their according skills
 
     Returns:
-    resolvedRanking (dataframe): Dataframe with unambigous ranking
+    resolvedRanking (dataframe): Dataframe with unambiguous ranking
     """
 
     # initialise row
@@ -463,7 +457,6 @@ def solve_ranking_conflicts(ranking, record, skillDictionary):
 
             # go to next iteration
             row += 1
-
 
         # if there are other teams with the same number of wins
         else:
@@ -596,3 +589,235 @@ def simulate_regular_season(teams, skillDictionary):
 
     # return ranking
     return resolvedRanking
+
+
+def simulate_playoff_round(skillDictionary, teamPairings, playoffsType):
+    """
+    Description:
+    Function to simulate one round of a certain playoff type (pre playoffs, playoffs)
+
+    Input:
+    skillDictionary (dict): Dictionary containing each team as key and the according skill as value
+    teamPairings (list): List of tuples with team pairings for the round
+    playoffsType (int): Integer indicating which type of playoffs is to be played, 1 = pre playoffs -> best of five,
+    2 = playoffs ->best of seven
+
+    Returns:
+    winningTeams (list): List of teams which have won their respective pairing
+    """
+    # if pre playoffs are to be played
+    if playoffsType == 1:
+        # create overall pre playoff record
+        playoffRecord = pd.DataFrame({'firstTeam': [], 'secondTeam': [], 'winner': []})
+
+        # for each pairing
+        for pairing in teamPairings:
+
+            # extract skills of both teams
+            nameFirstTeam = pairing[0]
+            nameSecondTeam = pairing[1]
+            skillFirstTeam = skillDictionary[nameFirstTeam]
+            skillSecondTeam = skillDictionary[nameSecondTeam]
+            winsFirstTeam = 0
+            winsSecondTeam = 0
+
+            # initialise game count
+            game = 1
+
+            # as long as not 4 games have been played
+            while game < 4:
+                # simulate game between team pairing
+                winner = simulate_game(nameFirstTeam, skillFirstTeam, nameSecondTeam, skillSecondTeam)
+
+                # if first team has won
+                if winner == nameFirstTeam:
+
+                    # add a win to first team
+                    winsFirstTeam += 1
+
+                    # if the team has 2 wins
+                    if winsFirstTeam == 2:
+                        # create new playoffs record to report series win
+                        newRecord = pd.DataFrame(
+                            {'firstTeam': [nameFirstTeam], 'secondTeam': [nameSecondTeam], 'winner': [nameFirstTeam]})
+
+                        # concat new record with record of previous games
+                        playoffRecord = pd.concat([playoffRecord, newRecord], ignore_index=True)
+
+                        # stop pre playoff series
+                        break
+
+                # if second team has won
+                else:
+
+                    # add a win to first team
+                    winsSecondTeam += 1
+
+                    # if the team has 2 wins
+                    if winsSecondTeam == 2:
+                        # create new pre playoffs record to report series win
+                        newRecord = pd.DataFrame(
+                            {'firstTeam': [nameFirstTeam], 'secondTeam': [nameSecondTeam], 'winner': [nameSecondTeam]})
+
+                        # concat new record with record of previous games
+                        playoffRecord = pd.concat([playoffRecord, newRecord], ignore_index=True)
+
+                        # stop pre playoff series
+                        break
+
+                # end of game 1
+                game += 1
+
+        # create list of winning teams
+        winningTeams = playoffRecord['winner'].tolist()
+
+        # return winning teams
+        return winningTeams
+
+   # if regular playoffs are to be played
+    elif playoffsType == 2:
+
+        # create overall playoff round record
+        playoffRoundRecord = pd.DataFrame({'firstTeam': [], 'secondTeam': [], 'winner': []})
+
+        # for each pairing
+        for pairing in teamPairings:
+
+            # extract skills of both teams
+            nameFirstTeam = pairing[0]
+            nameSecondTeam = pairing[1]
+            skillFirstTeam = skillDictionary[nameFirstTeam]
+            skillSecondTeam = skillDictionary[nameSecondTeam]
+            winsFirstTeam = 0
+            winsSecondTeam = 0
+
+            # initialise game count
+            game = 1
+
+            # as long as not 7 games have been played
+            while game < 8:
+                # simulate game between team pairing
+                winner = simulate_game(nameFirstTeam, skillFirstTeam, nameSecondTeam, skillSecondTeam)
+
+                # if first team has won
+                if winner == nameFirstTeam:
+
+                    # add a win to first team
+                    winsFirstTeam += 1
+
+                    # if the team has 4 wins
+                    if winsFirstTeam == 4:
+                        # create new playoffs record to report series win
+                        newRecord = pd.DataFrame(
+                            {'firstTeam': [nameFirstTeam], 'secondTeam': [nameSecondTeam], 'winner': [nameFirstTeam]})
+
+                        # concat new record with record of previous games
+                        playoffRoundRecord = pd.concat([playoffRoundRecord, newRecord], ignore_index=True)
+
+                        # stop playoff series
+                        break
+
+                # if second team has won
+                else:
+
+                    # add a win to first team
+                    winsSecondTeam += 1
+
+                    # if the team has 4 wins
+                    if winsSecondTeam == 4:
+                        # create new playoffs record to report series win
+                        newRecord = pd.DataFrame(
+                            {'firstTeam': [nameFirstTeam], 'secondTeam': [nameSecondTeam], 'winner': [nameSecondTeam]})
+
+                        # concat new record with record of previous games
+                        playoffRoundRecord = pd.concat([playoffRoundRecord, newRecord], ignore_index=True)
+
+                        # stop playoff series
+                        break
+
+                # end of game 1
+                game += 1
+
+        # create list of winning teams
+        winningTeams = playoffRoundRecord['winner'].tolist()
+
+        # return list of winning teams
+        return winningTeams
+
+
+def simulate_playoffs(skillDictionary, regularSeasonRanking):
+    """
+    Description:
+    Function to simulate pre-playoffs and playoffs
+
+    Input:
+    skillDictionary (dict): Dictionary containing each team as key and the according skill as value
+    regularSeasonRanking (dataframe): Dataframe containing ranking after regular season simulation
+
+    Returns:
+    champion [str]: Name of champions when playoffs mode was selected
+    """
+    # pre-playoffs ###
+
+    # extract teams to play pre-playoffs in ranking order
+    prePlayoffTeams = regularSeasonRanking.loc[regularSeasonRanking['rank'].isin([7, 8, 9, 10]), 'team'].tolist()
+
+    # create list of teams in first and second half of ranking so that the teams meet in pre playoffs elementwise
+    firstHalf = [prePlayoffTeams[i] for i in range(0, int(len(prePlayoffTeams) / 2))]  # first half of ranking
+    secondHalf = [prePlayoffTeams[j] for j in range(-1, -int(len(prePlayoffTeams) / 2) - 1, -1)]  # second half of ranking
+
+    # create pairings
+    prePlayoffPairings = list(zip(firstHalf, secondHalf))
+
+    # simulate pre playoffs
+    prePlayoffWinners = simulate_playoff_round(skillDictionary, prePlayoffPairings, 1)
+
+    # playoffs round 1 ###
+
+    # extract top 6 teams after regular season and winning teams of pre playoffs in ranking order
+    roundOneTeams = regularSeasonRanking.loc[
+        (regularSeasonRanking['rank'].isin([1, 2, 3, 4, 5, 6])) | (regularSeasonRanking['team'].isin(prePlayoffWinners)),
+        'team'
+    ].tolist()
+
+    # create list of teams in first and second half of ranking so that the teams meet in pre playoffs
+    firstHalf = [roundOneTeams[i] for i in range(0, int(len(roundOneTeams) / 2))]  # first half of ranking
+    secondHalf = [roundOneTeams[j] for j in
+                  range(-1, -int(len(roundOneTeams) / 2) - 1, -1)]  # second half of ranking
+
+    # create pairings
+    roundOnePairings = list(zip(firstHalf, secondHalf))
+
+    # simulate playoffs round 2
+    roundOneWinners = simulate_playoff_round(skillDictionary, roundOnePairings, 2)
+
+    # playoffs round 2 ###
+
+    # extract round one winners for round two in ranking order
+    roundTwoTeams = regularSeasonRanking.loc[regularSeasonRanking['team'].isin(roundOneWinners), 'team'].tolist()
+
+    # create list of teams in first and second half of ranking so that the teams meet in playoffs
+    firstHalf = [roundTwoTeams[i] for i in range(0, int(len(roundTwoTeams) / 2))]  # first half of ranking
+    secondHalf = [roundTwoTeams[j] for j in
+                  range(-1, -int(len(roundTwoTeams) / 2) - 1, -1)]  # second half of ranking
+
+    # create pairings
+    roundTwoPairings = list(zip(firstHalf, secondHalf))
+
+    # simulate playoffs round 1
+    roundTwoWinners = simulate_playoff_round(skillDictionary, roundTwoPairings, 2)
+
+    # playoffs round 3 ###
+
+    # extract round two winners for round three in ranking order
+    roundThreeTeams = regularSeasonRanking.loc[regularSeasonRanking['team'].isin(roundTwoWinners), 'team'].tolist()
+
+    # create pairing
+    roundThreePairing = [(roundThreeTeams[0], roundThreeTeams[1])]
+
+    # simulate playoffs round 3
+    champion = simulate_playoff_round(skillDictionary, roundThreePairing, 2)
+
+    # return champion
+    return champion[0]
+

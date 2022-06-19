@@ -428,6 +428,11 @@ class League(object):
         # simulate regular season to obtain ranking
         regularSeasonRanking = functions.simulate_regular_season(self.teams, self.teamSkills)
 
-        print(regularSeasonRanking)
+        # simulate playoffs
+        champion = functions.simulate_playoffs(self.teamSkills, regularSeasonRanking)
+
+        print(champion)
+
+
 
 
