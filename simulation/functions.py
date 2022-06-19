@@ -256,7 +256,7 @@ def teams_choose_replacement(player, team, allPlayersData, availablePlayersData,
     availablePlayersData['Skill Gab'] = abs(playerSkill - availablePlayersData.Skill)
 
     # order available player data according to skill gab
-    availablePlayersData.sort_values('Skill Gab', inplace=True)
+    availablePlayersData.sort_values('Skill Gab', inplace=True, ignore_index=True)
 
     # identify current team payroll
     teamPayroll = teamData.loc[teamData['team'] == team, 'payroll'].values[0]
@@ -328,26 +328,201 @@ def no_duplicates(finalPlayerSelection):
     return state
 
 
-def simulate_game(skillFirstTeam, skillSecondTeam):
+def simulate_game(nameFirstTeam, skillFirstTeam, nameSecondTeam, skillSecondTeam):
     """
     Description:
     Function to simulate one game
 
     Input:
+    nameFirstTeam (str): Name of first team in pairing
     skillFirstTeam (float): Total skill of first team in pairing
+    nameSecondTeam (str): Name of second team in pairing
     skillSecondTeam (float): Total skill of second team in pairing
 
     Returns:
-    firstTeamWins (boolean): True when first team in pairings has won, False when first team in pairing has lost
+    winner (str): Name of winner
     """
 
     # calculate winning-percentage of first team in pairing
-    winPercentageFirstTeam = skillFirstTeam/(skillFirstTeam+skillSecondTeam)
+    winPercentageFirstTeam = skillFirstTeam / (skillFirstTeam + skillSecondTeam)
 
     # determine whether or not first team wins
-    firstTeamVictory = ra.choices([True, False], [winPercentageFirstTeam, 1-winPercentageFirstTeam])[0]
+    firstTeamVictory = ra.choices([True, False], [winPercentageFirstTeam, 1 - winPercentageFirstTeam])[0]
 
-    return firstTeamVictory
+    # if first team in pairing has won
+    if firstTeamVictory:
+
+        # return name of first team
+        return nameFirstTeam
+
+    # if second team in pairing has won
+    else:
+
+        # return name of second team
+        return nameSecondTeam
+
+
+def placement_games(skillDictionary, equalTeams):
+    """
+    Description:
+    Function to simulate placement games where teams replay each other for ranking
+
+    Input:
+    skillDictionary (dict): Dictionary with all teams and according skill
+    equalTeams (list): List of all teams which have same  number of wins
+
+    Returns:
+
+    """
+
+    # initialise placement decision status
+    placementDecision = False
+
+    # as long as not 4 games have been played
+    while not placementDecision:
+
+        # get skills of teams which have equally often won
+        equalSkills = [skillDictionary[team] for team in equalTeams]
+
+        # initialise empty ranking
+        placementRanking = pd.DataFrame({'rank': [0] * len(equalTeams),
+                                         'team': equalTeams,
+                                         'wins': [0] * len(equalTeams)
+                                         })
+
+        # initialise record of all game outcomes
+        placementGamesRecord = pd.DataFrame({'firstTeam': [], 'secondTeam': [], 'winner': []})
+
+        # create each possible team pairing for regular season
+        placementPairings = list(it.combinations(equalTeams, 2))
+
+        # for each pairing
+        for pairing in placementPairings:
+            # extract skills of both teams
+            nameFirstTeam = pairing[0]
+            nameSecondTeam = pairing[1]
+            skillFirstTeam = skillDictionary[nameFirstTeam]  # extract of first team in pairing by team name
+            skillSecondTeam = skillDictionary[nameSecondTeam]  # extract of second team in pairing by team name
+
+            # simulate game between team pairing
+            winner = simulate_game(nameFirstTeam, skillFirstTeam, nameSecondTeam, skillSecondTeam)
+
+            # add a win to the winning team's record
+            placementRanking.loc[placementRanking['team'] == winner, 'wins'] += 1
+
+            # sort ranking
+            placementRanking.sort_values('wins', ignore_index=True, inplace=True, ascending=False)
+
+            # newPlacementRecord
+            newRecord = pd.DataFrame(
+                {'firstTeam': [nameFirstTeam], 'secondTeam': [nameSecondTeam], 'winner': [winner]})
+
+            # concat new record with record of previous games
+            placementGamesRecord = pd.concat([placementGamesRecord, newRecord], ignore_index=True)
+
+        # recursively call solve_ranking_conflicts
+        finalPlacementRanking = solve_ranking_conflicts(placementRanking, placementGamesRecord, skillDictionary)
+
+        # if ranking is resolved
+        if len(set(finalPlacementRanking['rank'].tolist())) == len(equalTeams):
+            # indicate that placement decision is final
+            placementDecision = True
+
+            # return final ranking
+            return finalPlacementRanking
+
+
+def solve_ranking_conflicts(ranking, record, skillDictionary):
+    """
+    Description:
+    Function to solve ranking conflicts when two teams have same number of wins (and thus winning percentage)
+
+    Input:
+    ranking (dataframe): Dataframe containing ranking with calculated winning percentages
+    record (dataframe): Dataframe containing the record of all games played
+    skillDictionary (dict): Dictionary with all teams and their according skills
+
+    Returns:
+    resolvedRanking (dataframe): Dataframe with unambigous ranking
+    """
+
+    # initialise row
+    row = 0
+
+    # go through ranking row by row from top down
+    while row < len(ranking):
+
+        # extract number of wins
+        winNumber = ranking.loc[row, 'wins']
+
+        # if no other team had the same number of wins
+        if sum(ranking['wins'] == winNumber) == 1:
+
+            # assign rank to the team
+            ranking.iloc[row, 0] = row + 1
+
+            # go to next iteration
+            row += 1
+
+
+        # if there are other teams with the same number of wins
+        else:
+
+            # identify all teams with same number of wins
+            equalTeams = ranking.loc[ranking['wins'] == winNumber, 'team'].tolist()
+
+            # extract all direct games between these teams
+            directRecord = record.loc[(record['firstTeam'].isin(equalTeams)) & (record['secondTeam'].isin(equalTeams))]
+
+            # calculate the direct wins by each team
+            directWins = [len(directRecord.loc[directRecord['winner'] == team]) for team in equalTeams]
+
+            # if all teams have the exact same number of direct against each other
+            if len(set(directWins)) == 1:
+
+                # play placement games
+                placementRanking = placement_games(skillDictionary, equalTeams)
+
+                # for each entry in resolved direct ranking
+                for index in range(len(placementRanking)):
+                    # identify team
+                    team = placementRanking.loc[index, "team"]
+
+                    # assign this team the correct ranking
+                    ranking.loc[ranking['team'] == team, 'rank'] = row + 1
+
+                    # increase row by 1
+                    row += 1
+
+            # if not all teams have an equal number of wins against each other
+            else:
+                # initialise empty ranking to fill with direct record among equal teams
+                directRanking = pd.DataFrame({'rank': [0] * len(equalTeams),
+                                              'team': equalTeams,
+                                              'wins': directWins})
+
+                # sort direct ranking dataframe based on wins
+                directRanking.sort_values('wins', ignore_index=True, inplace=True, ascending=False)
+
+                # recursively call this function with direct rankin, direct record and skillDictionary
+                resolvedDirectRanking = solve_ranking_conflicts(directRanking, directRecord, skillDictionary)
+
+                # for each entry in resolved direct ranking
+                for index in range(len(resolvedDirectRanking)):
+                    # identify team
+                    team = resolvedDirectRanking.loc[index, "team"]
+
+                    # assign this team the correct ranking
+                    ranking.loc[ranking['team'] == team, 'rank'] = row + 1
+
+                    # increase row by 1
+                    row += 1
+
+    # Sort teams based on resolved ranking
+    ranking.sort_values('rank', inplace=True, ignore_index=True)
+
+    # return resolved ranking final
+    return ranking
 
 
 def simulate_regular_season(teams, skillDictionary):
@@ -364,12 +539,15 @@ def simulate_regular_season(teams, skillDictionary):
     """
 
     # initialise empty ranking
-    ranking = pd.DataFrame({'rank': ['-']*len(teams),
+    ranking = pd.DataFrame({'rank': [0] * len(teams),
                             'team': teams,
                             'skill': skillDictionary.values(),  # add column skill to dataframe
-                            'wins': [0]*len(teams),
-                            'games': [0]*len(teams),
-                            'winningPercentage': ['-']*len(teams)})
+                            'wins': [0] * len(teams),
+                            'games': [0] * len(teams),
+                            'winningPercentage': ['-'] * len(teams)})
+
+    # initialise record of all game outcomes
+    record = pd.DataFrame({'firstTeam': [], 'secondTeam': [], 'winner': []})
 
     # create each possible team pairing for regular season
     pairings = list(it.combinations(teams, 2))
@@ -381,42 +559,40 @@ def simulate_regular_season(teams, skillDictionary):
         nameFirstTeam = pairing[0]
         nameSecondTeam = pairing[1]
         skillFirstTeam = skillDictionary[nameFirstTeam]  # extract of first team in pairing by team name
-        skillSecondTeam = skillDictionary[nameSecondTeam]   # extract of second team in pairing by team name
+        skillSecondTeam = skillDictionary[nameSecondTeam]  # extract of second team in pairing by team name
 
         # initialise game count
         game = 1
 
         # as long as not 4 games have been played
         while game < 5:
+            # simulate game between team pairing
+            winner = simulate_game(nameFirstTeam, skillFirstTeam, nameSecondTeam, skillSecondTeam)
 
-            # if first team in pairing wins
-            if simulate_game(skillFirstTeam, skillSecondTeam):
+            # add a win to the winning team's record
+            ranking.loc[ranking['team'] == winner, 'wins'] += 1
 
-                # add a win to the teams record
-                ranking.loc[ranking['team'] == nameFirstTeam, 'wins'] += 1
+            # create a new record for this game
+            newRecord = pd.DataFrame(
+                {'firstTeam': [nameFirstTeam], 'secondTeam': [nameSecondTeam], 'winner': [winner]})
 
-            # if the second team in the pairing wins
-            else:
+            # concat new record with record of previous games
+            record = pd.concat([record, newRecord], ignore_index=True)
 
-                # add a loss to the teams record
-                ranking.loc[ranking['team'] == nameSecondTeam, 'wins'] += 1
-
-            # add a game to both teams
+            # increase the number of games for both teams by 1
             ranking.loc[ranking['team'].isin(pairing), 'games'] += 1
 
             # end of game 1
             game += 1
 
     # calculate winning percentage
-    ranking['winningPercentage'] = ranking['wins']/ranking['games']
+    ranking['winningPercentage'] = ranking['wins'] / ranking['games']
 
     # sort ranking
-    ranking.sort_values('winningPercentage', ascending=False, inplace=True)
+    ranking.sort_values('winningPercentage', ascending=False, inplace=True, ignore_index=True)
+
+    # resolve ranking conflicts
+    resolvedRanking = solve_ranking_conflicts(ranking, record, skillDictionary)
 
     # return ranking
-    return ranking
-
-
-
-
-
+    return resolvedRanking
