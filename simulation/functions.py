@@ -378,7 +378,7 @@ def placement_games(skillDictionary, equalTeams):
     # initialise placement decision status
     placementDecision = False
 
-    # as long as not 4 games have been played
+    # while no decision in placement games
     while not placementDecision:
 
         # get skills of teams which have equally often won
