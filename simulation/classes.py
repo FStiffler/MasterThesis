@@ -236,7 +236,7 @@ class League(object):
         """
         self.teams = ['team' + str(i + 1) for i in range(leagueSize)]  # create n teams
         self.teamBudgets = np.round(
-            np.random.uniform(low=10 * maximalSalary, high=15 * maximalSalary, size=leagueSize)).astype(int)  # create team revenues
+            np.random.uniform(low=15 * maximalSalary, high=20 * maximalSalary, size=leagueSize)).astype(int)  # create team revenues
         self.teamData = pd.DataFrame({'team': self.teams, 'budget': self.teamBudgets, 'payroll': [0] * leagueSize, 'totalSkill': [0] * leagueSize})
         self.optimalPlayers = {}
         self.optimalPlayersSet = set()
