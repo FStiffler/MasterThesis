@@ -239,6 +239,7 @@ class League(object):
         self.teamBudgets = teamBudgets
         self.teamRevenues = [0]*leagueSize
         self.marketSize = marketSize
+        self.playoffFactor = playoffFactor
         self.teamData = pd.DataFrame({'team': self.teams, 'budget': self.teamBudgets, 'payroll': [0] * leagueSize, 'totalSkill': [0] * leagueSize})
         self.optimalPlayers = {}
         self.optimalPlayersSet = set()

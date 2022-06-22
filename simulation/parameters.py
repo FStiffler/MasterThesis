@@ -13,7 +13,8 @@ prePlayoff = 1  # parameter indicating prePlayoffs which means best of five seri
 playoffs = 2  # parameter indicating Playoffs which means best of seven series
 
 # team parameters
-teams = imports.gameAttendanceData['team'].tolist()
+teams = imports.gameAttendanceData['team'].tolist()  # name of teams imported, references i
 teamBudgets = np.round(
             np.random.uniform(low=15 * maximalSalary, high=20 * maximalSalary, size=leagueSize)).astype(int)  # create team budgets
-marketSize = imports.gameAttendanceData['median'].tolist()
+marketSize = imports.gameAttendanceData['rsMedian'].tolist()  # per team median of average game attendances in past years, references m_i
+playoffFactor = imports.gameAttendanceData['grMedian'].tolist()  # per team median of average attendance growth going into playoffs, references r_ig
