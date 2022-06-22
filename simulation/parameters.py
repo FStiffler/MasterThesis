@@ -24,5 +24,5 @@ teams = imports.gameAttendanceData['team'].tolist()  # import names of teams, re
 teamBudgets = np.round(
             np.random.uniform(low=15 * maximalSalary, high=20 * maximalSalary, size=leagueSize)).astype(int)  # create team budgets, references 'R_tot_it-1'
 marketSize = imports.gameAttendanceData['rsMedian'].tolist()  # per team median of average game attendances in past years, references market size 'm_i' in thesis
-playoffFactor = imports.gameAttendanceData['grMedian'].tolist()  # per team median of average attendance growth going into playoffs, references season phase factor 'r_ig' in thesis
+seasonPhaseFactor = list(zip([1]*leagueSize, imports.gameAttendanceData['grMedian'].tolist()))  # tuple of season phase factors per team where the first factor is the regular season factor and the second the playoffs factor, references season phase factor 'r_ig' in thesis
 compBalanceEffect = [marketSize[team]/optimalWinPer for team in range(len(teams))]  # per team effect of competitive balance on revenue, references 'b_i' in thesis
