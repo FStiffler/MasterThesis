@@ -7,6 +7,23 @@ import random as ra
 import itertools as it
 
 
+def get_all_player_data():
+    """
+    Description:
+    Get all player information as data frame
+
+    Returns:
+    allPlayersData (dataframe): Dataframe with information about all players
+    """
+    allPlayersData = pd.DataFrame(
+        data=np.column_stack((allPlayers, allPlayerSkills, allPlayerSalaries)),  # arrays as columns
+        columns=["player", "skill", "salary"]
+    )
+    allPlayersData = allPlayersData.astype({"player": int, 'salary': int})  # change player to integer
+
+    return allPlayersData
+
+
 def skill_maximization(playerPool, teamBudget):
     """
     Description:
@@ -21,7 +38,7 @@ def skill_maximization(playerPool, teamBudget):
     """
 
     # initialize variables
-    playerData = playerPool.get_all_player_data()  # get data from all players as data frame
+    playerData = playerPool.allPlayersData  # get data from all players as data frame
     players = playerPool.get_all_players()  # get all players as list
     skills = playerPool.get_all_player_skills()  # get skill levels of all players as list
     salaries = playerPool.get_all_player_salaries()  # get salaries of all players as list
@@ -62,16 +79,16 @@ def skill_maximization(playerPool, teamBudget):
     solutionDF['Optimal Value'] = solutionDF['Optimal Value'].astype(int)  # define column as binary
     solutionDF = solutionDF[solutionDF['Optimal Value'] == 1]  # filter selected players
     selectedPlayers = playerData.loc[  # create data frame with information about selected players
-        playerData['ID'].isin(  # filter ID's in array
+        playerData['player'].isin(  # filter players in array
             np.array(
-                solutionDF.Variable.str.split('_').tolist()  # extract player ID from variable name
-            )[:, 1].astype(int)  # select column with ID and define them as integer
+                solutionDF.Variable.str.split('_').tolist()  # extract player player from variable name
+            )[:, 1].astype(int)  # select column with player and define them as integer
         )
     ]
 
     # assert that constraints hold since the solver does not throw an error when not converging to a solution
     assert len(selectedPlayers) == teamSize
-    assert selectedPlayers.Salary.sum() <= teamBudget
+    assert selectedPlayers.salary.sum() <= teamBudget
 
     # return selected team
     return selectedPlayers
@@ -86,8 +103,8 @@ def identify_conflicts(leagueObject):
     leagueObject (League): The initialised league object of class League
 
     Returns:
-    conflicts (dict): A dictionary showing the conflicting player id as key and all interested teams as values in a list
-    noConflicts (dict): A dictionary showing the non-conflicting player id as key and the interested team as value in a list
+    conflicts (dict): A dictionary showing the conflicting player as key and all interested teams as values in a list
+    noConflicts (dict): A dictionary showing the non-conflicting player as key and the interested team as value in a list
     """
     # get required team information
     optimalPlayers = leagueObject.optimalPlayers
@@ -115,13 +132,13 @@ def identify_conflicts(leagueObject):
         # if more than one team are interested in one player
         if len(interestedTeams) > 1:
 
-            # add player id as key and list of interested teams as value to the conflicts dictionary
+            # add player as key and list of interested teams as value to the conflicts dictionary
             conflicts[player] = interestedTeams.team.tolist()
 
         # if only one team wants to acquire a player
         else:
 
-            # add player id as key and list containing interested team as value to the non conflicts dictionary
+            # add player as key and list containing interested team as value to the non conflicts dictionary
             noConflicts[player] = interestedTeams.team.tolist()
 
     # return dictionaries
@@ -194,22 +211,22 @@ def update_team_info(leagueObject, allPlayersData):
     teamData = leagueObject.teamData
 
     # define variables to obtain and summarize
-    variableName = ['Salary', 'Skill']
+    variableName = ['salary', 'skill']
 
     for variable in variableName:
         # obtain defined variable values for every selected player
-        variableDict = {team: allPlayersData.loc[allPlayersData['ID'].isin(players), variable].values.tolist() for
-                      (team, players) in finalPlayerSelection.items()}
+        variableDict = {team: allPlayersData.loc[allPlayersData['player'].isin(players), variable].values.tolist() for
+                        (team, players) in finalPlayerSelection.items()}
 
         # calculate sum of variable value
         variableSumDict = {team: sum(value) for (team, value) in variableDict.items()}
 
-        # if variable is 'Salary'
-        if variable == 'Salary':
+        # if variable is 'salary'
+        if variable == 'salary':
             # append a list of all team salaries to the column 'payroll'
             teamData['payroll'] = list(variableSumDict.values())
 
-        if variable == 'Skill':
+        if variable == 'skill':
             # append a list of all team salaries to the column 'totalSkill'
             teamData['totalSkill'] = list(variableSumDict.values())
 
@@ -236,7 +253,7 @@ def player_chooses_team(interestedTeams):
     return decision
 
 
-def teams_choose_replacement(player, team, allPlayersData, availablePlayersData, leagueObject):
+def teams_choose_replacement(player, team, playerPool, leagueObject):
     """
     Description:
     Function representing the replacement decision by teams which were not picked a player they considered optimal
@@ -244,24 +261,27 @@ def teams_choose_replacement(player, team, allPlayersData, availablePlayersData,
     Input:
     player (int): The player which did not join the team and thus needs to be replaced
     team (str): The team which has to decide which player to choose now
-    allPlayersData (dataframe): Contains information about all players in the player pool
-    remainingPlayersData (dataframe): Contains all data about the remaining players in the player pool
+    playerPool (PlayerPool): The initialised player pool object
     leagueObject (League): The initialised league object of class League
 
     Returns:
-    replacementPlayer (int): Id of replacement player
+    replacementPlayer (int): Number of replacement player
     """
     # get required team information
     teamData = leagueObject.teamData
 
+    # get required player information
+    allPlayersData = playerPool.allPlayersData
+    availablePlayersData = playerPool.availablePlayersData.copy()
+
     # filter player skill from player to be replaced
-    playerSkill = allPlayersData.loc[allPlayersData['ID'] == player, 'Skill'].values[0]
+    playerSkill = allPlayersData.loc[allPlayersData['player'] == player, 'skill'].values[0]
 
     # add new column with absolut skill gab to data about still available players
-    availablePlayersData['Skill Gab'] = abs(playerSkill - availablePlayersData.Skill)
+    availablePlayersData['skillGab'] = abs(playerSkill - availablePlayersData['skill'])
 
     # order available player data according to skill gab
-    availablePlayersData.sort_values('Skill Gab', inplace=True, ignore_index=True)
+    availablePlayersData.sort_values('skillGab', inplace=True, ignore_index=True)
 
     # identify current team payroll
     teamPayroll = teamData.loc[teamData['team'] == team, 'payroll'].values[0]
@@ -279,7 +299,7 @@ def teams_choose_replacement(player, team, allPlayersData, availablePlayersData,
         replacementPlayerInfo = availablePlayersData.iloc[index,]
 
         # identify salary of replacement player
-        replacementPlayerSalary = replacementPlayerInfo['Salary']
+        replacementPlayerSalary = replacementPlayerInfo['salary']
 
         # if addition of player salary to team payroll would lead to a violation of team budget
         if teamPayroll + replacementPlayerSalary > teamBudget:
@@ -298,8 +318,8 @@ def teams_choose_replacement(player, team, allPlayersData, availablePlayersData,
         # if there is no violation
         else:
 
-            # identify replacement player by ID
-            replacementPlayer = int(replacementPlayerInfo['ID'])
+            # identify replacement player by player number
+            replacementPlayer = int(replacementPlayerInfo['player'])
 
             # break loop
             break
@@ -681,7 +701,7 @@ def simulate_playoff_round(skillDictionary, teamPairings, playoffsType):
         # return winning teams
         return winningTeams
 
-   # if regular playoffs are to be played
+    # if regular playoffs are to be played
     elif playoffsType == 2:
 
         # create overall playoff round record
@@ -768,7 +788,6 @@ def simulate_playoffs(leagueObject):
     regularSeasonRanking = leagueObject.regularSeasonRanking
     skillDictionary = leagueObject.get_skill_dictionary()
 
-
     # pre-playoffs ###
 
     # extract teams to play pre-playoffs in ranking order
@@ -776,7 +795,8 @@ def simulate_playoffs(leagueObject):
 
     # create list of teams in first and second half of ranking so that the teams meet in pre playoffs elementwise
     firstHalf = [prePlayoffTeams[i] for i in range(0, int(len(prePlayoffTeams) / 2))]  # first half of ranking
-    secondHalf = [prePlayoffTeams[j] for j in range(-1, -int(len(prePlayoffTeams) / 2) - 1, -1)]  # second half of ranking
+    secondHalf = [prePlayoffTeams[j] for j in
+                  range(-1, -int(len(prePlayoffTeams) / 2) - 1, -1)]  # second half of ranking
 
     # create pairings
     prePlayoffPairings = list(zip(firstHalf, secondHalf))
@@ -788,7 +808,8 @@ def simulate_playoffs(leagueObject):
 
     # extract top 6 teams after regular season and winning teams of pre playoffs in ranking order
     roundOneTeams = regularSeasonRanking.loc[
-        (regularSeasonRanking['rank'].isin([1, 2, 3, 4, 5, 6])) | (regularSeasonRanking['team'].isin(prePlayoffWinners)),
+        (regularSeasonRanking['rank'].isin([1, 2, 3, 4, 5, 6])) | (
+            regularSeasonRanking['team'].isin(prePlayoffWinners)),
         'team'
     ].tolist()
 
@@ -832,4 +853,3 @@ def simulate_playoffs(leagueObject):
 
     # return champion
     return champion[0]
-

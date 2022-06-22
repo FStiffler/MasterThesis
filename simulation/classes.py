@@ -14,28 +14,12 @@ class PlayerPool(object):
 
         A player pool object has the following attributes:
             self.size (int): Determines pool size (number of available players)
-            self.allPlayers (array): All players in player pool
-            self.allPlayerSkills (array): All skill levels of players in player pool
-            self.allPlayerSalaries (array): All salaries in the player pool
-            self.allPlayersData (dataframe): A dataframe with information about all players, initialised by the method self.get_player_data
-            self.availablePlayers (array): Available players yet picked by a team, is initialised with all players
-            self.availablePlayerSkills (array): Available skill levels players not yet picked by a team, is initialised with all skill levels
-            self.availablePlayerSalaries (array): Available salaries of players not yet picked by a team, is initialised with all salaries
-            self.availablePlayerSet (set): Set of available players, is initialised with all players
-            self.availablePlayersData (dataframe): A dataframe with information about available players not yet picked by a team initialised by the method self.get_player_data
+            self.allPlayersData (dataframe): A dataframe with information about all players
+            self.availablePlayersData (dataframe): A dataframe with information about available players not yet picked by a team, initialised with all players
         """
         self.size = newPlayerPoolSize
-        self.allPlayers = np.arange(start=1, stop=newPlayerPoolSize + 1)  # create id's from 1 to newPlayerPoolSize
-        self.allPlayerSkills = np.round(np.random.beta(a=alpha, b=beta, size=newPlayerPoolSize),
-                                        2)  # draw skill from beta distribution
-        self.allPlayerSalaries = np.round(maximalSalary * self.allPlayerSkills * (
-                1 - ((newPlayerPoolSize - oldPlayerPoolSize) / oldPlayerPoolSize)))  # calculate salary
-        self.allPlayersData = self.get_all_player_data()
-        self.availablePlayers = self.allPlayers
-        self.availablePlayerSkills = self.allPlayerSkills
-        self.availablePlayerSalaries = self.allPlayerSalaries
-        self.availablePlayersSet = set(self.allPlayers)
-        self.availablePlayersData = self.get_available_player_data()
+        self.allPlayersData = functions.get_all_player_data()
+        self.availablePlayersData = functions.get_all_player_data()
 
     def get_all_players(self):
         """
@@ -45,7 +29,7 @@ class PlayerPool(object):
         Returns:
         allPlayersList (list): List of all players
         """
-        allPlayersList = self.allPlayers.tolist()
+        allPlayersList = self.allPlayersData['player'].tolist()
 
         return allPlayersList
 
@@ -57,7 +41,7 @@ class PlayerPool(object):
         Returns:
         allPlayerSkillsList (list) : List of skill levels of all players
         """
-        allPlayerSkillsList = self.allPlayerSkills.tolist()
+        allPlayerSkillsList = self.allPlayersData['skill'].tolist()
 
         return allPlayerSkillsList
 
@@ -69,84 +53,21 @@ class PlayerPool(object):
         Returns:
         allPlayerSalariesList (list): List of salaries of all players
         """
-        allPlayerSalariesList = self.allPlayerSalaries.tolist()
-
-        # convert to integer
-        allPlayerSalariesList = [int(salary) for salary in allPlayerSalariesList]
+        allPlayerSalariesList = self.allPlayersData['salary'].tolist()
 
         return allPlayerSalariesList
 
-    def get_all_player_data(self):
+    def get_available_players_set(self):
         """
         Description:
-        Get all player information as data frame
+        Get set of all available players
 
         Returns:
-        allPlayersData (dataframe): Dataframe with information about all players
+        availablePlayersSet (list): Set of all available players
         """
-        allPlayersData = pd.DataFrame(
-            data=np.column_stack((self.allPlayers, self.allPlayerSkills, self.allPlayerSalaries)),  # arrays as columns
-            columns=["ID", "Skill", "Salary"]
-        )
-        allPlayersData = allPlayersData.astype({"ID": int, 'Salary': int})  # change ID to integer
+        availablePlayersSet = set(self.availablePlayersData['player'].tolist())
 
-        return allPlayersData
-
-    def get_available_players(self):
-        """
-        Description:
-        Get available players as list
-
-        Returns:
-        availablePlayersList (list): List of available players
-        """
-        availablePlayersList = self.availablePlayers.tolist()
-
-        return availablePlayersList
-
-    def get_available_player_skills(self):
-        """
-        Description:
-        Get skill levels of available players as list
-
-        Returns:
-        availablePlayerSkillsList (list) : List of skill levels of available players
-        """
-        availablePlayerSkillsList = self.availablePlayerSkills.tolist()
-
-        return availablePlayerSkillsList
-
-    def get_available_player_salaries(self):
-        """
-        Description:
-        Get available player salaries as a list
-
-        Returns:
-        availablePlayerSalariesList (list): List of salaries of available players
-        """
-        availablePlayerSalariesList = self.availablePlayerSalaries.tolist()
-
-        # convert to integer
-        availablePlayerSalariesList = [int(salary) for salary in availablePlayerSalariesList]
-
-        return availablePlayerSalariesList
-
-    def get_available_player_data(self):
-        """
-        Description:
-        Get available player information as data frame
-
-        Returns:
-        availablePlayersData (dataframe): Dataframe with information about available players
-        """
-        availablePlayersData = pd.DataFrame(
-            data=np.column_stack((self.availablePlayers, self.availablePlayerSkills, self.availablePlayerSalaries)),
-            # arrays as columns
-            columns=["ID", "Skill", "Salary"]
-        )
-        availablePlayersData = availablePlayersData.astype({"ID": int, 'Salary': int})  # change ID to integer
-
-        return availablePlayersData
+        return availablePlayersSet
 
     def update_player_pool_after_maximization(self, optimalPlayersSet):
         """
@@ -158,33 +79,21 @@ class PlayerPool(object):
         after calling the class method select_optimal_players
 
         Update:
-        self.availablePlayers (array): Remove all players from available which were selected in the maximization process
-        self.availablePlayerSkills (array): Remove all skill levels of players selected in the maximization process from available
-        self.availablePlayerSalaries (array): Remove all salaries of players selected in the maximization process from available
-        self.availablePlayersSet (set): Update set of available players
+        self.availablePlayersData (dataframe): Dataframe of available players after optimal players were removed
         """
 
         # convert set to a list
         optimalPlayersList = list(optimalPlayersSet)
 
-        # obtain index list of optimal players by subtracting one from player id
-        optimalPlayersIndex = [player - 1 for player in optimalPlayersList]
+        # remove optimal players from available player data
+        self.availablePlayersData = self.availablePlayersData.loc[
+            ~self.availablePlayersData['player'].isin(optimalPlayersList)]
 
-        # remove optimal players from available players since they are no longer available
-        self.availablePlayers = np.delete(self.availablePlayers, optimalPlayersIndex)  # remove optimal players
-        self.availablePlayerSkills = np.delete(self.availablePlayerSkills,
-                                               optimalPlayersIndex)  # remove skill levels of optimal players
-        self.availablePlayerSalaries = np.delete(self.availablePlayerSalaries,
-                                                 optimalPlayersIndex)  # remove salaries of optimal players
-
-        # create a set of still available players
-        self.availablePlayersSet = set(self.availablePlayers)
-
-        # update data on available players
-        self.availablePlayersData = self.get_available_player_data()
+        # create set of available players
+        availablePlayersSet = self.get_available_players_set()
 
         # assert that there is no intersection between the still available and the selected players
-        assert len(self.availablePlayersSet.intersection(optimalPlayersSet)) == 0
+        assert len(availablePlayersSet.intersection(optimalPlayersSet)) == 0
 
     def remove_player_from_available(self, player):
         """
@@ -195,26 +104,11 @@ class PlayerPool(object):
         player (int): The selected player to be removed from the available players
 
         Update:
-        self.availablePlayers (array): Remove player from array of available players
-        self.availablePlayerSkills (array): Remove skill level of selected player from the array
-        self.availablePlayerSalaries (array): Remove salary of selected player from the array
-        self.availablePlayersSet (set): Update set of available players
-        self.availablePlayersData (dataframe): Update information of available players in dataframe
+        self.availablePlayersData (dataframe): Dataframe of available players after replacement player was removed
         """
 
-        # identify index of player to be removed in arrays
-        playerIndex = np.where(self.availablePlayers == player)[0][0]
-
-        # remove player and all attributes from available players and their attributes
-        self.availablePlayers = np.delete(self.availablePlayers, playerIndex)
-        self.availablePlayerSkills = np.delete(self.availablePlayerSkills, playerIndex)
-        self.availablePlayerSalaries = np.delete(self.availablePlayerSalaries, playerIndex)
-
-        # update set of remaining players
-        self.availablePlayersSet = set(self.availablePlayers)
-
-        # update data on available players
-        self.availablePlayersData = self.get_available_player_data()
+        # remove optimal players from available player data
+        self.availablePlayersData = self.availablePlayersData.loc[self.availablePlayersData['player'] != player]
 
 
 # define league as class
@@ -347,7 +241,7 @@ class League(object):
             selectedPlayers = functions.skill_maximization(playerPool, teamBudgets[team])
 
             # add team as key and the list of selected players as value do the dictionary
-            optimalPlayers[teams[team]] = selectedPlayers.ID.tolist()
+            optimalPlayers[teams[team]] = selectedPlayers.player.tolist()
 
         # overwrite old dictionary with new dictionary
         self.optimalPlayers = optimalPlayers
@@ -359,10 +253,10 @@ class League(object):
         self.optimalPlayersSet = optimalPlayersSet
 
         # import data of all players
-        allPlayersData = playerPool.get_all_player_data()
+        allPlayersData = playerPool.allPlayersData
 
         # extract data from selected players and assign it
-        self.optimalPlayersData = allPlayersData.loc[allPlayersData['ID'].isin(self.optimalPlayersSet)]
+        self.optimalPlayersData = allPlayersData.loc[allPlayersData['player'].isin(self.optimalPlayersSet)]
 
     def resolve_player_conflicts(self, playerPool):
         """
@@ -401,7 +295,7 @@ class League(object):
             self.finalPlayerSelection = functions.assign_player(self, player, team)
 
         # update data for all teams
-        self.teamData = functions.update_team_info(self, playerPool.get_all_player_data())
+        self.teamData = functions.update_team_info(self, playerPool.allPlayersData)
 
         # for each player with conflict
         for player in shuffledConflicts:
@@ -432,21 +326,16 @@ class League(object):
             # for each remaining team among the remaining teams in one conflict
             for remainingTeam in remainingTeams:
                 # a replacement player for initial player is defined
-                replacementPlayer = functions.teams_choose_replacement(player, remainingTeam,
-                                                                       playerPool.get_all_player_data(),
-                                                                       playerPool.get_available_player_data(),
-                                                                       self)
+                replacementPlayer = functions.teams_choose_replacement(player, remainingTeam, playerPool, self)
 
                 # add replacement player to the remaining team which has selected the player
-                self.finalPlayerSelection = functions.assign_player(self, replacementPlayer,
-                                                                    remainingTeam)
+                self.finalPlayerSelection = functions.assign_player(self, replacementPlayer, remainingTeam)
 
                 # remove replacement player from available players in player pool
                 playerPool.remove_player_from_available(replacementPlayer)
 
             # update team data after each conflict so that it is up to date when resolving next conflict
             self.teamData = functions.update_team_info(self, playerPool.allPlayersData)
-
 
         # assert that constraints also hold in final player selection
         assert all(list({team: len(players) == teamSize for (team, players) in

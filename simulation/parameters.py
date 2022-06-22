@@ -12,7 +12,12 @@ beta = 3  # parameter beta of beta distribution
 prePlayoff = 1  # parameter indicating prePlayoffs which means best of five series
 playoffs = 2  # parameter indicating Playoffs which means best of seven series
 monetaryFactor = 2  # monetary factor to be multiplied with every game revenue, references M in thesis
-optimalWinPer = 0.6 # optimal winning percentage, references omega_star
+optimalWinPer = 0.6  # optimal winning percentage, references omega_star
+
+# player parameters
+allPlayers = np.arange(start=1, stop=newPlayerPoolSize + 1)  # create id's from 1 to newPlayerPoolSize, all players in player pool, references p in thesis
+allPlayerSkills = np.round(np.random.beta(a=alpha, b=beta, size=newPlayerPoolSize), 2)  # draw skill from beta distribution, all skill levels of players in player pool, references S_p in thesis
+allPlayerSalaries = np.round(maximalSalary * allPlayerSkills * (1 - ((newPlayerPoolSize - oldPlayerPoolSize) / oldPlayerPoolSize)))  # calculate player salaries, all salaries in the player pool, references W_p in thesis
 
 # team parameters
 teams = imports.gameAttendanceData['team'].tolist()  # name of teams imported, references i
