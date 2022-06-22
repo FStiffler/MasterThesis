@@ -11,10 +11,13 @@ alpha = 3  # parameter alpha of beta distribution
 beta = 3  # parameter beta of beta distribution
 prePlayoff = 1  # parameter indicating prePlayoffs which means best of five series
 playoffs = 2  # parameter indicating Playoffs which means best of seven series
+monetaryFactor = 2  # monetary factor to be multiplied with every game revenue, references M in thesis
+optimalWinPer = 0.6 # optimal winning percentage, references omega_star
 
 # team parameters
 teams = imports.gameAttendanceData['team'].tolist()  # name of teams imported, references i
 teamBudgets = np.round(
             np.random.uniform(low=15 * maximalSalary, high=20 * maximalSalary, size=leagueSize)).astype(int)  # create team budgets
-marketSize = imports.gameAttendanceData['rsMedian'].tolist()  # per team median of average game attendances in past years, references m_i
-playoffFactor = imports.gameAttendanceData['grMedian'].tolist()  # per team median of average attendance growth going into playoffs, references r_ig
+marketSize = imports.gameAttendanceData['rsMedian'].tolist()  # per team median of average game attendances in past years, references m_i in thesis
+playoffFactor = imports.gameAttendanceData['grMedian'].tolist()  # per team median of average attendance growth going into playoffs, references r_ig in thesis
+compBalanceEffect = [marketSize[team]/optimalWinPer for team in range(len(teams))]
