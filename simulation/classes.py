@@ -131,7 +131,7 @@ class League(object):
                                       'totalSkill': [0] * parameters.leagueSize,
                                       'revenue': [0] * parameters.leagueSize,
                                       'marketPotential': parameters.marketSize,
-                                      'playoffFactor': parameters.seasonPhaseFactor,
+                                      'playoffFactor': parameters.playoffFactor,
                                       'compBalanceEffect': parameters.compBalanceEffect})
         self.optimalPlayers = {}
         self.optimalPlayersSet = set()
