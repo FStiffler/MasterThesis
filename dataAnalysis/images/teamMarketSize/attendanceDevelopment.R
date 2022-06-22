@@ -1,7 +1,5 @@
 # Load packages
-library(tidyverse)
-library(wesanderson)
-library(showtext)
+source("../dependencies.R")
 
 # Load data
 attendance<-read_csv("averageAttendaceHistory.csv")

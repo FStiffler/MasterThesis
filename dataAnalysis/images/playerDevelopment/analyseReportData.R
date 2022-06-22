@@ -1,7 +1,5 @@
 # Load packages
-library(tidyverse)
-library(RColorBrewer)
-library(showtext)
+source("../dependencies.R")
 
 # Load data
 reportData<-read.csv("IIHFSurveysCombined.csv")
