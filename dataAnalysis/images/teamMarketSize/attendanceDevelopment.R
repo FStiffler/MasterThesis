@@ -15,8 +15,8 @@ showtext_auto()
 
 # National League Attendance Development
 attDev<-attendance%>%
-  select(-median)%>%
-  pivot_longer(cols = contains("/"), values_to = 'attendanceAverage', names_to = 'season')%>%
+  select(-contains("po"), -contains("gr"), -rsMedian)%>%
+  pivot_longer(cols = contains("rs"), values_to = 'attendanceAverage', names_to = 'season', names_prefix = 'rs')%>%
   filter(!is.na(attendanceAverage))%>%
   group_by(season)%>%
   mutate(share=attendanceAverage/sum(attendanceAverage, na.rm = T))%>%
