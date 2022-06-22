@@ -1,10 +1,10 @@
-from classes import *
+import classes
 
 # initialise the player pool
-playerPool = PlayerPool()
+playerPool = classes.PlayerPool()
 
 # initialise the league
-league = League()
+league = classes.League()
 
 # solve skill maximization problem for each team
 league.select_optimal_players(playerPool)

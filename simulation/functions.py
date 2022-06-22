@@ -1,4 +1,4 @@
-from parameters import *
+import parameters
 from pulp import PULP_CBC_CMD
 import numpy as np
 import pandas as pd
@@ -16,7 +16,7 @@ def get_all_player_data():
     allPlayersData (dataframe): Dataframe with information about all players
     """
     allPlayersData = pd.DataFrame(
-        data=np.column_stack((allPlayers, allPlayerSkills, allPlayerSalaries)),  # arrays as columns
+        data=np.column_stack((parameters.allPlayers, parameters.allPlayerSkills, parameters.allPlayerSalaries)),  # arrays as columns
         columns=["player", "skill", "salary"]
     )
     allPlayersData = allPlayersData.astype({"player": int, 'salary': int})  # change player to integer
@@ -53,7 +53,7 @@ def skill_maximization(playerPool, teamBudget):
     prob += pl.lpSum(binaries[i] * skills[i] for i in range(len(players)))  # maximize skill
 
     # define the constraints
-    prob += pl.lpSum(binaries[i] for i in range(len(players))) == teamSize  # team size constraint
+    prob += pl.lpSum(binaries[i] for i in range(len(players))) == parameters.teamSize  # team size constraint
     prob += pl.lpSum(binaries[i] * salaries[i] for i in range(len(players))) <= teamBudget  # budget constraint
 
     # solve problem to obtain the optimal solution (best team)
@@ -87,7 +87,7 @@ def skill_maximization(playerPool, teamBudget):
     ]
 
     # assert that constraints hold since the solver does not throw an error when not converging to a solution
-    assert len(selectedPlayers) == teamSize
+    assert len(selectedPlayers) == parameters.teamSize
     assert selectedPlayers.salary.sum() <= teamBudget
 
     # return selected team
@@ -296,7 +296,7 @@ def teams_choose_replacement(player, team, playerPool, leagueObject):
     while index < len(availablePlayersData):
 
         # identify a replacement player in increasing order of skill gab
-        replacementPlayerInfo = availablePlayersData.iloc[index,]
+        replacementPlayerInfo = availablePlayersData.iloc[index, ]
 
         # identify salary of replacement player
         replacementPlayerSalary = replacementPlayerInfo['salary']
@@ -559,18 +559,18 @@ def simulate_regular_season(leagueObject):
     skillDictionary = leagueObject.get_skill_dictionary()
 
     # initialise empty ranking
-    ranking = pd.DataFrame({'rank': [0] * len(teams),
+    ranking = pd.DataFrame({'rank': [0] * len(parameters.teams),
                             'team': list(skillDictionary.keys()),
                             'skill': list(skillDictionary.values()),  # add column skill to dataframe
-                            'wins': [0] * len(teams),
-                            'games': [0] * len(teams),
-                            'winningPercentage': ['-'] * len(teams)})
+                            'wins': [0] * len(parameters.teams),
+                            'games': [0] * len(parameters.teams),
+                            'winningPercentage': ['-'] * len(parameters.teams)})
 
     # initialise record of all game outcomes
     record = pd.DataFrame({'firstTeam': [], 'secondTeam': [], 'winner': []})
 
     # create each possible team pairing for regular season
-    pairings = list(it.combinations(teams, 2))
+    pairings = list(it.combinations(parameters.teams, 2))
 
     # for each pairing
     for pairing in pairings:

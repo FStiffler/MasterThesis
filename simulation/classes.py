@@ -1,6 +1,5 @@
-from parameters import *
+import parameters
 import functions
-import numpy as np
 import pandas as pd
 import random as ra
 
@@ -17,7 +16,7 @@ class PlayerPool(object):
             self.allPlayersData (dataframe): A dataframe with information about all players
             self.availablePlayersData (dataframe): A dataframe with information about available players not yet picked by a team, initialised with all players
         """
-        self.size = newPlayerPoolSize
+        self.size = parameters.newPlayerPoolSize
         self.allPlayersData = functions.get_all_player_data()
         self.availablePlayersData = functions.get_all_player_data()
 
@@ -126,14 +125,14 @@ class League(object):
             self.finalPlayerSelection (dict): Dictionary with each team as key and a list of the final players selected by the team in replacement process, is initialised empty
             self.regularSeasonRanking (dataframe): Dataframe which contains regular season ranking, is initialised empty
         """
-        self.teamData = pd.DataFrame({'team': teams,
-                                      'budget': teamBudgets,
-                                      'payroll': [0] * leagueSize,
-                                      'totalSkill': [0] * leagueSize,
-                                      'revenue': [0] * leagueSize,
-                                      'marketPotential': marketSize,
-                                      'playoffFactor': playoffFactor,
-                                      'compBalanceEffect': compBalanceEffect})
+        self.teamData = pd.DataFrame({'team': parameters.teams,
+                                      'budget': parameters.teamBudgets,
+                                      'payroll': [0] * parameters.leagueSize,
+                                      'totalSkill': [0] * parameters.leagueSize,
+                                      'revenue': [0] * parameters.leagueSize,
+                                      'marketPotential': parameters.marketSize,
+                                      'playoffFactor': parameters.playoffFactor,
+                                      'compBalanceEffect': parameters.compBalanceEffect})
         self.optimalPlayers = {}
         self.optimalPlayersSet = set()
         self.optimalPlayersData = pd.DataFrame()
@@ -338,7 +337,7 @@ class League(object):
             self.teamData = functions.update_team_info(self, playerPool.allPlayersData)
 
         # assert that constraints also hold in final player selection
-        assert all(list({team: len(players) == teamSize for (team, players) in
+        assert all(list({team: len(players) == parameters.teamSize for (team, players) in
                          self.finalPlayerSelection.items()}.values()))  # all teams have the defined number of players
         assert all([True if self.teamData.loc[x, 'budget'] - self.teamData.loc[x, 'payroll'] > 0 else False for x in
                     range(len(self.teamData))])  # payroll below budget
