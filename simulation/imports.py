@@ -1,4 +1,4 @@
 import pandas as pd
 
 # imports
-gameAttendanceData = pd.read_csv('../dataAnalysis/images/teamMarketSize/averageAttendaceHistory.csv')
+gameAttendanceData = pd.read_csv('../dataAnalysis/images/teamMarketSize/averageAttendanceHistory.csv')

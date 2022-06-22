@@ -2,7 +2,7 @@
 source("../dependencies.R")
 
 # Load data
-attendance<-read_csv("averageAttendaceHistory.csv")
+attendance<-read_csv("averageAttendanceHistory.csv")
 
 # Load color palettes
 colors<-wes_palette("Darjeeling1", 14, type = "continuous")
