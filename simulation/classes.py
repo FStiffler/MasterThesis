@@ -226,7 +226,8 @@ class League(object):
 
         A league object has the following attributes:
             self.teams (list): determines the teams in the league
-            self.teamBudgets (list): determines the starting revenues of teams before first season
+            self.teamBudgets (array): determines the starting budgets i.e last season's revenue of teams
+            team.teamRevenues(list): Initialised the team revenues. The revenues are zero at the beginning of the season
             self.teamData (dataframe): dataframe with information about the team
             self.optimalPlayers (dict): dictionary which is filled when players are selected in maximization process
             self.optimalPlayersSet (set): set which is filled when players are selected in maximization process
@@ -234,9 +235,10 @@ class League(object):
             self.finalPlayerSelection (dict): dictionary which is filled with final player selection per team when player conflicts are resolved
             self.teamSkills (dict): dictionary which is filled with teams and their according skills
         """
-        self.teams = ['team' + str(i + 1) for i in range(leagueSize)]  # create n teams
-        self.teamBudgets = np.round(
-            np.random.uniform(low=15 * maximalSalary, high=20 * maximalSalary, size=leagueSize)).astype(int)  # create team revenues
+        self.teams = teams
+        self.teamBudgets = teamBudgets
+        self.teamRevenues = [0]*leagueSize
+        self.marketSize = marketSize
         self.teamData = pd.DataFrame({'team': self.teams, 'budget': self.teamBudgets, 'payroll': [0] * leagueSize, 'totalSkill': [0] * leagueSize})
         self.optimalPlayers = {}
         self.optimalPlayersSet = set()
