@@ -34,7 +34,7 @@ def skill_maximization(playerPool, teamBudget):
     teamBudget (int): The budget constraint for a particular team used to optimize skill
 
     Returns:
-    selectedPlayers (pandas dataframe): A pandas dataframe which includes data about selected players
+    selectedPlayers (pandas dataframe): A pandas dataframe which includes data about selected players by team
     """
 
     # initialize variables
@@ -151,10 +151,10 @@ def shuffle_conflicts(conflicts):
     Function to shuffle order of conflicts to be solved
 
     Input:
-    finalPlayerSelection (dict): A dictionary which contains all players and according interested teams
+    conflicts (dict): A dictionary which contains all players as key and a list of interested teams as values
 
     Returns:
-    shuffledConflicts (dict): The same dictionary as input but now with shuffled conflicts
+    shuffledConflicts (dict): The same dictionary as input but now with shuffled conflicts (changed order)
     """
 
     # create list of conflict items where each item consists of a tuple with the conflicting player and a list of teams
@@ -178,7 +178,7 @@ def assign_player(leagueObject, player, team):
     Input:
     leagueObject (League): The initialised league object of class League
     derived from an object with class League
-    player (int): The new player to be added to the already existing selection of players
+    player (int): The new player to be added to the already existing selection of players of the team
     team (str): The team to which the new player is to be assigned
 
     Returns:
@@ -204,7 +204,7 @@ def update_team_info(leagueObject, allPlayersData):
     allPlayersData (dataframe): A dataframe with information about all players in the player pool created when player pool was initialised
 
     Returns:
-    teamData (dataframe): Updates and returns information about the teams
+    teamData (dataframe): Updates and returns information about the teams in a dataframe
     """
     # get required team information
     finalPlayerSelection = leagueObject.finalPlayerSelection
@@ -256,16 +256,16 @@ def player_chooses_team(interestedTeams):
 def teams_choose_replacement(player, team, playerPool, leagueObject):
     """
     Description:
-    Function representing the replacement decision by teams which were not picked a player they considered optimal
+    Function representing the replacement decision by teams which were not picked by a player they considered optimal
 
     Input:
-    player (int): The player which did not join the team and thus needs to be replaced
-    team (str): The team which has to decide which player to choose now
+    player (int): The player who did not join the team and thus needs to be replaced
+    team (str): The team which has to decide which player to choose now for replacement
     playerPool (PlayerPool): The initialised player pool object
     leagueObject (League): The initialised league object of class League
 
     Returns:
-    replacementPlayer (int): Number of replacement player
+    replacementPlayer (int): The replacement player (number)
     """
     # get required team information
     teamData = leagueObject.teamData
@@ -334,7 +334,7 @@ def no_duplicates(finalPlayerSelection):
     Function to check if any player appears twice in the final teams
 
     Input:
-    finalPlayerSelection (dict): dictionary showing final selection of teams
+    finalPlayerSelection (dict): dictionary showing final player selection of teams
 
     Returns:
     state (str): If there are no duplicates True is returned otherwise False is returned
@@ -390,14 +390,15 @@ def simulate_game(nameFirstTeam, skillFirstTeam, nameSecondTeam, skillSecondTeam
 def placement_games(skillDictionary, equalTeams):
     """
     Description:
-    Function to simulate placement games where teams replay each other for ranking
+    Function to simulate placement games where teams replay each other for ranking when they are equally ranked and have
+    a balanced score in direct  confrontation
 
     Input:
     skillDictionary (dict): Dictionary with all teams and according skill
     equalTeams (list): List of all teams which have same  number of wins
 
     Returns:
-
+    finalPlacementRanking (dataframe): Dataframe with a ranking of the placement games
     """
 
     # initialise placement decision status
@@ -462,7 +463,7 @@ def solve_ranking_conflicts(ranking, record, skillDictionary):
     skillDictionary (dict): Dictionary with all teams and their according skills
 
     Returns:
-    resolvedRanking (dataframe): Dataframe with unambiguous ranking
+    resolvedRanking (dataframe): Dataframe with unambiguous ranking for all teams
     """
 
     # initialise row
@@ -781,7 +782,7 @@ def simulate_playoffs(leagueObject):
     leagueObject (League): The initialised league object of class League
 
     Returns:
-    champion [str]: Name of champions when playoffs mode was selected
+    champion [str]: Name of final champion
     """
 
     # get required team information

@@ -13,7 +13,7 @@ class PlayerPool(object):
 
         A player pool object has the following attributes:
             self.size (int): Determines pool size (number of available players)
-            self.allPlayersData (dataframe): A dataframe with information about all players
+            self.allPlayersData (dataframe): A dataframe with information about all initialised players, infos are to be found in parameter file
             self.availablePlayersData (dataframe): A dataframe with information about available players not yet picked by a team, initialised with all players
         """
         self.size = parameters.newPlayerPoolSize
@@ -78,7 +78,7 @@ class PlayerPool(object):
         after calling the class method select_optimal_players
 
         Update:
-        self.availablePlayersData (dataframe): Dataframe of available players after optimal players were removed
+        self.availablePlayersData (dataframe): Dataframe of available players after optimal players are removed from from the dataframe
         """
 
         # convert set to a list
@@ -118,10 +118,10 @@ class League(object):
         Initializes a league object. The object is fully initialised based on parameters
 
         A league object has the following attributes:
-            self.teamData (dataframe): Dataframe with information about the team
+            self.teamData (dataframe): Dataframe with information about the team, information about the parameters are to be found in the parameters file
             self.optimalPlayers (dict): Dictionary with each team as key and a list of optimal players selected by the team in maximization process, is initialised empty
             self.optimalPlayersSet (set): Set containing every selected player in the maximization process once, is initialised empty
-            self.optimalPlayersData (dataframe): Dataframe containing information about the selected players, is initialised empty
+            self.optimalPlayersData (dataframe): Dataframe containing information about the selected players in maximization process, is initialised empty
             self.finalPlayerSelection (dict): Dictionary with each team as key and a list of the final players selected by the team in replacement process, is initialised empty
             self.regularSeasonRanking (dataframe): Dataframe which contains regular season ranking, is initialised empty
         """
@@ -166,10 +166,10 @@ class League(object):
     def get_team_skills(self):
         """
         Description:
-        Get skill levels of all teams
+        Get aggregated skill levels of all teams
 
         Returns:
-        teamSkillsList (list): List with skill level of every team
+        teamSkillsList (list): List with aggregated skill level of every team
         """
         teamSkillsList = self.teamData['totalSkill'].tolist()
 
@@ -178,7 +178,7 @@ class League(object):
     def get_skill_dictionary(self):
         """
         Description:
-        Get a dictionary of teams and their according skills
+        Get a dictionary of teams and their according skill levels
 
         Returns:
         skillDictionary (list): Dictionary with team as key and team skill as value
@@ -220,11 +220,12 @@ class League(object):
         Let each team solve the maximization problem of player selection
 
         Input:
-        playerPool (PlayerPool): A player pool of object PlayerPool
+        playerPool (PlayerPool): The initialised player pool of object PlayerPool
 
         Updates:
         self.optimalPlayers (dict): updates the dictionary with the selected optimal players by each team
         self.optimalPlayersSet (set): updates the set with all unique players selected over all teams
+        self.optimalPlayersData (set): updates the dataframe with the information about the optimal players
         """
 
         # initialise new empty dictionary for player selection
@@ -346,11 +347,11 @@ class League(object):
     def simulate_season(self):
         """
         Description:
-        Simulate a whole season where each team plays against every other team six times during a regular season.
+        Simulate a whole season where each team plays against every other team four times during a regular season.
         After that, pre-playoffs and playoffs follow. One champion is determined.
 
         Output:
-
+        The name of the champion is printed out
         """
         # simulate regular season to obtain ranking
         self.regularSeasonRanking = functions.simulate_regular_season(self)
