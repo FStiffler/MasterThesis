@@ -77,21 +77,21 @@ def skill_maximization(playerPool, teamBudget):
     return selectedPlayers
 
 
-def identify_conflicts(optimalPlayers, optimalPlayersSet):
+def identify_conflicts(leagueObject):
     """
     Description:
     Function to identify players who multiple teams are interested in
 
     Input:
-    optimalPlayers (dict): A dictionary which shows the players selected by every team after the maximization process
-    derived from an object with class League after calling method select_optimal_players
-    optimalPlayersSet (set): A set which shows all unique players selected by any team during the maximization process
-    derived from an object with class League after calling method select_optimal_players
+    leagueObject (League): The initialised league object of class League
 
     Returns:
     conflicts (dict): A dictionary showing the conflicting player id as key and all interested teams as values in a list
     noConflicts (dict): A dictionary showing the non-conflicting player id as key and the interested team as value in a list
     """
+    # get required team information
+    optimalPlayers = leagueObject.optimalPlayers
+    optimalPlayersSet = leagueObject.optimalPlayersSet
 
     # create a data frame from dictionary
     optimalPlayersDF = pd.DataFrame(optimalPlayers)
@@ -153,13 +153,13 @@ def shuffle_conflicts(conflicts):
     return shuffledConflicts
 
 
-def assign_player(finalPlayerSelection, player, team):
+def assign_player(leagueObject, player, team):
     """
     Description:
     Function to assign a player to a specific team
 
     Input:
-    finalPlayerSelection (dict): A dictionary which shows the final player selection of teams so far
+    leagueObject (League): The initialised league object of class League
     derived from an object with class League
     player (int): The new player to be added to the already existing selection of players
     team (str): The team to which the new player is to be assigned
@@ -167,6 +167,8 @@ def assign_player(finalPlayerSelection, player, team):
     Returns:
     finalPlayerSelection (dict): Updates and returns final player selection
     """
+    # get required team information
+    finalPlayerSelection = leagueObject.finalPlayerSelection
 
     # append the new player to a list of existing players for a team
     finalPlayerSelection[team].append(player)
@@ -175,40 +177,41 @@ def assign_player(finalPlayerSelection, player, team):
     return finalPlayerSelection
 
 
-def update_team_info(finalPlayerSelection, teamData, allPlayersData):
+def update_team_info(leagueObject, allPlayersData):
     """
     Description:
     Function to update the team info of all teams
 
     Input:
-    finalPlayerSelection (dict): A dictionary which shows the final player selection of teams so far
-    derived from an object with class League
-    teamData (dataframe): A dataframe which contains information about the team and is initialised when a object of class League is created
+    leagueObject (League): The initialised league object of class League
     allPlayersData (dataframe): A dataframe with information about all players in the player pool created when player pool was initialised
 
     Returns:
     teamData (dataframe): Updates and returns information about the teams
     """
+    # get required team information
+    finalPlayerSelection = leagueObject.finalPlayerSelection
+    teamData = leagueObject.teamData
 
     # define variables to obtain and summarize
     variableName = ['Salary', 'Skill']
 
     for variable in variableName:
         # obtain defined variable values for every selected player
-        salaryDict = {team: allPlayersData.loc[allPlayersData['ID'].isin(players), variable].values.tolist() for
+        variableDict = {team: allPlayersData.loc[allPlayersData['ID'].isin(players), variable].values.tolist() for
                       (team, players) in finalPlayerSelection.items()}
 
         # calculate sum of variable value
-        salarySumDict = {team: sum(value) for (team, value) in salaryDict.items()}
+        variableSumDict = {team: sum(value) for (team, value) in variableDict.items()}
 
         # if variable is 'Salary'
         if variable == 'Salary':
             # append a list of all team salaries to the column 'payroll'
-            teamData['payroll'] = list(salarySumDict.values())
+            teamData['payroll'] = list(variableSumDict.values())
 
         if variable == 'Skill':
             # append a list of all team salaries to the column 'totalSkill'
-            teamData['totalSkill'] = list(salarySumDict.values())
+            teamData['totalSkill'] = list(variableSumDict.values())
 
     # return
     return teamData
@@ -233,7 +236,7 @@ def player_chooses_team(interestedTeams):
     return decision
 
 
-def teams_choose_replacement(player, team, allPlayersData, availablePlayersData, teamData):
+def teams_choose_replacement(player, team, allPlayersData, availablePlayersData, leagueObject):
     """
     Description:
     Function representing the replacement decision by teams which were not picked a player they considered optimal
@@ -243,11 +246,13 @@ def teams_choose_replacement(player, team, allPlayersData, availablePlayersData,
     team (str): The team which has to decide which player to choose now
     allPlayersData (dataframe): Contains information about all players in the player pool
     remainingPlayersData (dataframe): Contains all data about the remaining players in the player pool
-    teamData (dataframe): A dataframe which contains team information
+    leagueObject (League): The initialised league object of class League
 
     Returns:
     replacementPlayer (int): Id of replacement player
     """
+    # get required team information
+    teamData = leagueObject.teamData
 
     # filter player skill from player to be replaced
     playerSkill = allPlayersData.loc[allPlayersData['ID'] == player, 'Skill'].values[0]
@@ -518,23 +523,25 @@ def solve_ranking_conflicts(ranking, record, skillDictionary):
     return ranking
 
 
-def simulate_regular_season(teams, skillDictionary):
+def simulate_regular_season(leagueObject):
     """
     Description:
     Function to simulate an entire regular season based on team skills
 
     Input:
-    teams (list): list of all teams present in the league
-    skillDictionary (dict): dictionary containing each team as key and the according skill as value
+    leagueObject (League): The initialised league object of class League
 
     Returns:
     ranking (dataframe): Return ranking of regular season
     """
 
+    # create skill dictionary
+    skillDictionary = leagueObject.get_skill_dictionary()
+
     # initialise empty ranking
     ranking = pd.DataFrame({'rank': [0] * len(teams),
-                            'team': teams,
-                            'skill': skillDictionary.values(),  # add column skill to dataframe
+                            'team': list(skillDictionary.keys()),
+                            'skill': list(skillDictionary.values()),  # add column skill to dataframe
                             'wins': [0] * len(teams),
                             'games': [0] * len(teams),
                             'winningPercentage': ['-'] * len(teams)})
@@ -745,18 +752,23 @@ def simulate_playoff_round(skillDictionary, teamPairings, playoffsType):
         return winningTeams
 
 
-def simulate_playoffs(skillDictionary, regularSeasonRanking):
+def simulate_playoffs(leagueObject):
     """
     Description:
     Function to simulate pre-playoffs and playoffs
 
     Input:
-    skillDictionary (dict): Dictionary containing each team as key and the according skill as value
-    regularSeasonRanking (dataframe): Dataframe containing ranking after regular season simulation
+    leagueObject (League): The initialised league object of class League
 
     Returns:
     champion [str]: Name of champions when playoffs mode was selected
     """
+
+    # get required team information
+    regularSeasonRanking = leagueObject.regularSeasonRanking
+    skillDictionary = leagueObject.get_skill_dictionary()
+
+
     # pre-playoffs ###
 
     # extract teams to play pre-playoffs in ranking order

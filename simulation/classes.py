@@ -29,7 +29,7 @@ class PlayerPool(object):
         self.allPlayerSkills = np.round(np.random.beta(a=alpha, b=beta, size=newPlayerPoolSize),
                                         2)  # draw skill from beta distribution
         self.allPlayerSalaries = np.round(maximalSalary * self.allPlayerSkills * (
-                    1 - ((newPlayerPoolSize - oldPlayerPoolSize) / oldPlayerPoolSize)))  # calculate salary
+                1 - ((newPlayerPoolSize - oldPlayerPoolSize) / oldPlayerPoolSize)))  # calculate salary
         self.allPlayersData = self.get_all_player_data()
         self.availablePlayers = self.allPlayers
         self.availablePlayerSkills = self.allPlayerSkills
@@ -225,28 +225,101 @@ class League(object):
         Initializes a league object. The object is fully initialised based on parameters
 
         A league object has the following attributes:
-            self.teams (list): determines the teams in the league
-            self.teamBudgets (array): determines the starting budgets i.e last season's revenue of teams
-            team.teamRevenues(list): Initialised the team revenues. The revenues are zero at the beginning of the season
-            self.teamData (dataframe): dataframe with information about the team
-            self.optimalPlayers (dict): dictionary which is filled when players are selected in maximization process
-            self.optimalPlayersSet (set): set which is filled when players are selected in maximization process
-            self.optimalPlayersData (dataframe): dataframe which is filled when players are selected in maximization process
-            self.finalPlayerSelection (dict): dictionary which is filled with final player selection per team when player conflicts are resolved
-            self.teamSkills (dict): dictionary which is filled with teams and their according skills
+            self.teamData (dataframe): Dataframe with information about the team
+            self.optimalPlayers (dict): Dictionary with each team as key and a list of optimal players selected by the team in maximization process, is initialised empty
+            self.optimalPlayersSet (set): Set containing every selected player in the maximization process once, is initialised empty
+            self.optimalPlayersData (dataframe): Dataframe containing information about the selected players, is initialised empty
+            self.finalPlayerSelection (dict): Dictionary with each team as key and a list of the final players selected by the team in replacement process, is initialised empty
+            self.regularSeasonRanking (dataframe): Dataframe which contains regular season ranking, is initialised empty
         """
-        self.teams = teams
-        self.teamBudgets = teamBudgets
-        self.teamRevenues = [0]*leagueSize
-        self.marketSize = marketSize
-        self.playoffFactor = playoffFactor
-        self.compBalanceEffect = compBalanceEffect
-        self.teamData = pd.DataFrame({'team': self.teams, 'budget': self.teamBudgets, 'payroll': [0] * leagueSize, 'totalSkill': [0] * leagueSize})
+        self.teamData = pd.DataFrame({'team': teams,
+                                      'budget': teamBudgets,
+                                      'payroll': [0] * leagueSize,
+                                      'totalSkill': [0] * leagueSize,
+                                      'revenue': [0] * leagueSize,
+                                      'marketPotential': marketSize,
+                                      'playoffFactor': playoffFactor,
+                                      'compBalanceEffect': compBalanceEffect})
         self.optimalPlayers = {}
         self.optimalPlayersSet = set()
         self.optimalPlayersData = pd.DataFrame()
         self.finalPlayerSelection = {}
-        self.teamSkills = {}
+        self.regularSeasonRanking = pd.DataFrame()
+
+    def get_teams(self):
+        """
+        Description:
+        Get all teams as list
+
+        Returns:
+        teamsList (list): List of all teams
+        """
+        teamsList = self.teamData['team'].tolist()
+
+        return teamsList
+
+    def get_team_budgets(self):
+        """
+        Description:
+        Get all team budgets
+
+        Returns:
+        teamBudgetsList (list): List of all team budgets
+        """
+        teamBudgetsList = self.teamData['budget'].tolist()
+
+        return teamBudgetsList
+
+    def get_team_skills(self):
+        """
+        Description:
+        Get skill levels of all teams
+
+        Returns:
+        teamSkillsList (list): List with skill level of every team
+        """
+        teamSkillsList = self.teamData['totalSkill'].tolist()
+
+        return teamSkillsList
+
+    def get_skill_dictionary(self):
+        """
+        Description:
+        Get a dictionary of teams and their according skills
+
+        Returns:
+        skillDictionary (list): Dictionary with team as key and team skill as value
+        """
+        # get required team information
+        teams = self.get_teams()
+        skills = self.get_team_skills()
+
+        # create skill dictionary
+        skillDictionary = {teams[team]: round(skills[team], 2) for team in range(len(teams))}
+
+        return skillDictionary
+
+    def check_intersection_optimal_final(self):
+        """
+        Description:
+        Check how many players initially wanted by the team end up on the team
+
+        Output:
+        Printing intersection for each team
+        """
+        # for each team
+        for team in self.finalPlayerSelection:
+            # extract final selection as set
+            finalSelectionSet = set(self.finalPlayerSelection[team])
+
+            # extract optimal selection as set
+            optimalSelectionSet = set(self.optimalPlayers[team])
+
+            # create intersection
+            intersection = finalSelectionSet.intersection(optimalSelectionSet)
+
+            # print
+            print('Team: {}, Total: {}, Set: {}'.format(team, len(intersection), intersection))
 
     def select_optimal_players(self, playerPool):
         """
@@ -264,13 +337,17 @@ class League(object):
         # initialise new empty dictionary for player selection
         optimalPlayers = {}
 
+        # get required team information
+        teams = self.get_teams()
+        teamBudgets = self.get_team_budgets()
+
         # for each team in the league
-        for team in range(len(self.teams)):
+        for team in range(len(teams)):
             # select optimal players based on skill maximization
-            selectedPlayers = functions.skill_maximization(playerPool, self.teamBudgets[team])
+            selectedPlayers = functions.skill_maximization(playerPool, teamBudgets[team])
 
             # add team as key and the list of selected players as value do the dictionary
-            optimalPlayers[self.teams[team]] = selectedPlayers.ID.tolist()
+            optimalPlayers[teams[team]] = selectedPlayers.ID.tolist()
 
         # overwrite old dictionary with new dictionary
         self.optimalPlayers = optimalPlayers
@@ -303,14 +380,17 @@ class League(object):
         self.finalPlayerSelection (dict): The dictionary with the final player selection is completed
         self.teamData (dataframe): The dataframe with information about the teams is completed
         """
+        # get required team information
+        teams = self.get_teams()
+
         # identify conflicts and non conflicts
-        conflicts, noConflicts = functions.identify_conflicts(self.optimalPlayers, self.optimalPlayersSet)
+        conflicts, noConflicts = functions.identify_conflicts(self)
 
         # shuffle conflicts
         shuffledConflicts = functions.shuffle_conflicts(conflicts)
 
         # initialise dictionary for final player selection by adding a key for each team and empty lists as values
-        self.finalPlayerSelection = {team: [] for team in self.teams}
+        self.finalPlayerSelection = {team: [] for team in teams}
 
         # for each player without conflict
         for player in noConflicts:
@@ -318,15 +398,13 @@ class League(object):
             team = noConflicts[player][0]
 
             # assign the player to the according team
-            self.finalPlayerSelection = functions.assign_player(self.finalPlayerSelection, player, team)
+            self.finalPlayerSelection = functions.assign_player(self, player, team)
 
         # update data for all teams
-        self.teamData = functions.update_team_info(self.finalPlayerSelection, self.teamData,
-                                                      playerPool.get_all_player_data())
+        self.teamData = functions.update_team_info(self, playerPool.get_all_player_data())
 
         # for each player with conflict
         for player in shuffledConflicts:
-
             # define the potential teams a player can choose
             interestedTeams = shuffledConflicts[player]
 
@@ -334,7 +412,7 @@ class League(object):
             chosenTeam = functions.player_chooses_team(interestedTeams)
 
             # assign the player to the team he decided to join
-            self.finalPlayerSelection = functions.assign_player(self.finalPlayerSelection, player, chosenTeam)
+            self.finalPlayerSelection = functions.assign_player(self, player, chosenTeam)
 
             # remove chosen team from list of interested teams and from dictionary with shuffled conflicts
             interestedTeams.remove(chosenTeam)
@@ -343,8 +421,7 @@ class League(object):
             ra.shuffle(interestedTeams)
 
         # update team data after all players have chosen their team
-        self.teamData = functions.update_team_info(self.finalPlayerSelection, self.teamData,
-                                                       playerPool.allPlayersData)
+        self.teamData = functions.update_team_info(self, playerPool.allPlayersData)
 
         # for every player which now needs to be replaced by the remaining teams in each conflict
         for player in shuffledConflicts:
@@ -358,23 +435,18 @@ class League(object):
                 replacementPlayer = functions.teams_choose_replacement(player, remainingTeam,
                                                                        playerPool.get_all_player_data(),
                                                                        playerPool.get_available_player_data(),
-                                                                       self.teamData)
+                                                                       self)
 
                 # add replacement player to the remaining team which has selected the player
-                self.finalPlayerSelection = functions.assign_player(self.finalPlayerSelection, replacementPlayer,
+                self.finalPlayerSelection = functions.assign_player(self, replacementPlayer,
                                                                     remainingTeam)
 
                 # remove replacement player from available players in player pool
                 playerPool.remove_player_from_available(replacementPlayer)
 
-
             # update team data after each conflict so that it is up to date when resolving next conflict
-            self.teamData = functions.update_team_info(self.finalPlayerSelection, self.teamData,
-                                                    playerPool.allPlayersData)
+            self.teamData = functions.update_team_info(self, playerPool.allPlayersData)
 
-
-        # create team skill dictionary for next simulation step
-        self.create_skill_dictionary()
 
         # assert that constraints also hold in final player selection
         assert all(list({team: len(players) == teamSize for (team, players) in
@@ -382,43 +454,6 @@ class League(object):
         assert all([True if self.teamData.loc[x, 'budget'] - self.teamData.loc[x, 'payroll'] > 0 else False for x in
                     range(len(self.teamData))])  # payroll below budget
         assert functions.no_duplicates(self.finalPlayerSelection)
-
-        # return new player pool object
-        return playerPool
-
-    def check_intersection_optimal_final(self):
-        """
-        Description:
-        Check how many players initially wanted by the team end up on the team
-
-        Output:
-        Printing intersection for each team
-        """
-        # for each team
-        for team in self.finalPlayerSelection:
-            # extract final selection as set
-            finalSelectionSet = set(self.finalPlayerSelection[team])
-
-            # extract optimal selection as set
-            optimalSelectionSet = set(self.optimalPlayers[team])
-
-            # create intersection
-            intersection = finalSelectionSet.intersection(optimalSelectionSet)
-
-            # print
-            print('Team: {}, Total: {}, Set: {}'.format(team, len(intersection), intersection))
-
-    def create_skill_dictionary(self):
-        """
-        Description:
-        create a dictionary with the team as key and skill of team as value
-
-        Update:
-        teamSkills (dict): Updates dictionary containing teams and skill of teams
-        """
-
-        # create team skills dictionary
-        self.teamSkills = {self.teamData.loc[team, 'team']: self.teamData.loc[team, 'totalSkill'].round(2) for team in range(len(self.teams))}
 
     def simulate_season(self):
         """
@@ -430,13 +465,9 @@ class League(object):
 
         """
         # simulate regular season to obtain ranking
-        regularSeasonRanking = functions.simulate_regular_season(self.teams, self.teamSkills)
+        self.regularSeasonRanking = functions.simulate_regular_season(self)
 
         # simulate playoffs
-        champion = functions.simulate_playoffs(self.teamSkills, regularSeasonRanking)
+        champion = functions.simulate_playoffs(self)
 
         print(champion)
-
-
-
-
