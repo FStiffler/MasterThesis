@@ -381,8 +381,7 @@ def simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam, leagueObject
     if not placementGame:
 
         # calculate earned revenue of home team in this game
-        print('test')
-        print(seasonPhase)
+        leagueObject.calculate_game_revenue(homeTeam, winPercentageHome, seasonPhase)
 
     # determine whether or not home team wins
     homeVictory = ra.choices([True, False], [winPercentageHome, 1 - winPercentageHome])[0]
@@ -629,8 +628,17 @@ def simulate_regular_season(leagueObject):
     # sort ranking
     ranking.sort_values('winningPercentage', ascending=False, inplace=True, ignore_index=True)
 
+    # team revenues before resolving ranking conflicts
+    oldTeamRevenues = leagueObject.get_team_revenues()
+
     # resolve ranking conflicts
     resolvedRanking = solve_ranking_conflicts(ranking, record, leagueObject)
+
+    # team revenues after resolving ranking conflicts
+    newTeamRevenues = leagueObject.get_team_revenues()
+
+    # assert that revenues have not changed when ranking conflicts were resolved
+    assert all([oldTeamRevenues[i] == newTeamRevenues[i] for i in range(len(oldTeamRevenues))])
 
     # return ranking
     return resolvedRanking
@@ -841,6 +849,9 @@ def simulate_playoffs(leagueObject):
     # extract teams to play pre-playoffs in ranking order
     prePlayoffTeams = regularSeasonRanking.loc[regularSeasonRanking['rank'].isin([7, 8, 9, 10]), 'team'].tolist()
 
+    # extract not pre playoff teams
+    notPrePlayoffTeams = regularSeasonRanking.loc[~regularSeasonRanking['rank'].isin([7, 8, 9, 10]), 'team'].tolist()
+
     # create list of teams in first and second half of ranking so that the teams meet in pre playoffs elementwise
     firstHalf = [prePlayoffTeams[i] for i in range(0, int(len(prePlayoffTeams) / 2))]  # first half of ranking
     secondHalf = [prePlayoffTeams[j] for j in
@@ -849,8 +860,26 @@ def simulate_playoffs(leagueObject):
     # create pairings
     prePlayoffPairings = list(zip(firstHalf, secondHalf))
 
+    # extract team revenues of pre playoff teams and not pre playoff teams before pre playoff
+    prePlayoffTeamRevenuesBefore = leagueObject.get_team_revenues(prePlayoffTeams)
+    notPrePlayoffTeamRevenuesBefore = leagueObject.get_team_revenues(notPrePlayoffTeams)
+
     # simulate pre playoffs
     prePlayoffWinners = simulate_playoff_round(leagueObject, prePlayoffPairings, parameters.prePlayoff)
+
+    # extract team revenues of pre playoff teams and not pre playoff teams before pre playoff
+    prePlayoffTeamRevenuesAfter = leagueObject.get_team_revenues(prePlayoffTeams)
+    notPrePlayoffTeamRevenuesAfter = leagueObject.get_team_revenues(notPrePlayoffTeams)
+
+    # assertions ###
+
+    # assert that the revenues of pre playoff teams have changed
+    assert all([prePlayoffTeamRevenuesBefore[i] != prePlayoffTeamRevenuesAfter[i] for i in
+                range(len(prePlayoffTeamRevenuesAfter))])
+
+    # assert that the revenues of non pre playoff teams have not changed
+    assert all([notPrePlayoffTeamRevenuesBefore[i] == notPrePlayoffTeamRevenuesAfter[i] for i in
+                range(len(notPrePlayoffTeamRevenuesAfter))])
 
     # playoffs round 1 ###
 
@@ -861,6 +890,9 @@ def simulate_playoffs(leagueObject):
         'team'
     ].tolist()
 
+    # extract non round one teams
+    notRoundOneTeams = regularSeasonRanking.loc[~regularSeasonRanking['team'].isin(roundOneTeams), 'team'].tolist()
+
     # create list of teams in first and second half of ranking so that the teams meet in pre playoffs
     firstHalf = [roundOneTeams[i] for i in range(0, int(len(roundOneTeams) / 2))]  # first half of ranking
     secondHalf = [roundOneTeams[j] for j in
@@ -869,13 +901,34 @@ def simulate_playoffs(leagueObject):
     # create pairings
     roundOnePairings = list(zip(firstHalf, secondHalf))
 
+    # extract team revenues of round one teams and not round one teams before round one
+    roundOneTeamRevenuesBefore = leagueObject.get_team_revenues(roundOneTeams)
+    notRoundOneTeamRevenuesBefore = leagueObject.get_team_revenues(notRoundOneTeams)
+
     # simulate playoffs round 2
     roundOneWinners = simulate_playoff_round(leagueObject, roundOnePairings, parameters.playoffs)
+
+    # extract team revenues of round one teams and not round one teams after round one
+    roundOneTeamRevenuesAfter = leagueObject.get_team_revenues(roundOneTeams)
+    notRoundOneTeamRevenuesAfter = leagueObject.get_team_revenues(notRoundOneTeams)
+
+    # assertions ###
+
+    # assert that the revenues of round one teams have changed
+    assert all([roundOneTeamRevenuesBefore[i] != roundOneTeamRevenuesAfter[i] for i in
+                range(len(roundOneTeamRevenuesAfter))])
+
+    # assert that the revenues of non round one teams have not changed
+    assert all([notRoundOneTeamRevenuesBefore[i] == notRoundOneTeamRevenuesAfter[i] for i in
+                range(len(notRoundOneTeamRevenuesAfter))])
 
     # playoffs round 2 ###
 
     # extract round one winners for round two in ranking order
     roundTwoTeams = regularSeasonRanking.loc[regularSeasonRanking['team'].isin(roundOneWinners), 'team'].tolist()
+
+    # extract non round two teams
+    notRoundTwoTeams = regularSeasonRanking.loc[~regularSeasonRanking['team'].isin(roundTwoTeams), 'team'].tolist()
 
     # create list of teams in first and second half of ranking so that the teams meet in playoffs
     firstHalf = [roundTwoTeams[i] for i in range(0, int(len(roundTwoTeams) / 2))]  # first half of ranking
@@ -885,19 +938,58 @@ def simulate_playoffs(leagueObject):
     # create pairings
     roundTwoPairings = list(zip(firstHalf, secondHalf))
 
+    # extract team revenues of round two teams and not round two teams before round two
+    roundTwoTeamRevenuesBefore = leagueObject.get_team_revenues(roundTwoTeams)
+    notRoundTwoTeamRevenuesBefore = leagueObject.get_team_revenues(notRoundTwoTeams)
+
     # simulate playoffs round 1
     roundTwoWinners = simulate_playoff_round(leagueObject, roundTwoPairings, parameters.playoffs)
+
+    # extract team revenues of round two teams and not round two teams after round two
+    roundTwoTeamRevenuesAfter = leagueObject.get_team_revenues(roundTwoTeams)
+    notRoundTwoTeamRevenuesAfter = leagueObject.get_team_revenues(notRoundTwoTeams)
+
+    # assertions ###
+
+    # assert that the revenues of round two teams have changed
+    assert all([roundTwoTeamRevenuesBefore[i] != roundTwoTeamRevenuesAfter[i] for i in
+                range(len(roundTwoTeamRevenuesAfter))])
+
+    # assert that the revenues of non round two teams have not changed
+    assert all([notRoundTwoTeamRevenuesBefore[i] == notRoundTwoTeamRevenuesAfter[i] for i in
+                range(len(notRoundTwoTeamRevenuesAfter))])
 
     # playoffs round 3 ###
 
     # extract round two winners for round three in ranking order
     roundThreeTeams = regularSeasonRanking.loc[regularSeasonRanking['team'].isin(roundTwoWinners), 'team'].tolist()
 
+    # extract non round three teams
+    notRoundThreeTeams = regularSeasonRanking.loc[~regularSeasonRanking['team'].isin(roundThreeTeams), 'team'].tolist()
+
     # create pairing
     roundThreePairing = [(roundThreeTeams[0], roundThreeTeams[1])]
 
+    # extract team revenues of round three teams and not round three teams before round three
+    roundThreeTeamRevenuesBefore = leagueObject.get_team_revenues(roundThreeTeams)
+    notRoundThreeTeamRevenuesBefore = leagueObject.get_team_revenues(notRoundThreeTeams)
+
     # simulate playoffs round 3
     champion = simulate_playoff_round(leagueObject, roundThreePairing, parameters.playoffs)
+
+    # extract team revenues of round three teams and not round three teams after round three
+    roundThreeTeamRevenuesAfter = leagueObject.get_team_revenues(roundThreeTeams)
+    notRoundThreeTeamRevenuesAfter = leagueObject.get_team_revenues(notRoundThreeTeams)
+
+    # assertions ###
+
+    # assert that the revenues of round three teams have changed
+    assert all([roundThreeTeamRevenuesBefore[i] != roundThreeTeamRevenuesAfter[i] for i in
+                range(len(roundThreeTeamRevenuesAfter))])
+
+    # assert that the revenues of non round three teams have not changed
+    assert all([notRoundThreeTeamRevenuesBefore[i] == notRoundThreeTeamRevenuesAfter[i] for i in
+                range(len(notRoundThreeTeamRevenuesAfter))])
 
     # return champion
     return champion[0]

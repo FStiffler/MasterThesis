@@ -130,7 +130,7 @@ class League(object):
                                       'payroll': [0] * parameters.leagueSize,
                                       'totalSkill': [0] * parameters.leagueSize,
                                       'revenue': [0] * parameters.leagueSize,
-                                      'marketPotential': parameters.marketSize,
+                                      'marketSize': parameters.marketSize,
                                       'seasonPhaseFactor': parameters.seasonPhaseFactor,
                                       'compBalanceEffect': parameters.compBalanceEffect})
         self.optimalPlayers = {}
@@ -175,13 +175,37 @@ class League(object):
 
         return teamSkillsList
 
+    def get_team_revenues(self, teams=None):
+        """
+        Description:
+        Get a list of all team revenues
+
+        Input:
+        teams (list): The teams from which the revenues are required, default is none in which case all revenues are returned
+
+        Returns:
+        teamRevenues (list): List with all team revenues
+        """
+        # if no teams specific teams are asked
+        if teams is None:
+
+            # return all revenues
+            teamRevenuesList = self.teamData['revenue'].tolist()
+
+        elif type(teams) is list:
+
+            # return all revenues of requested teams
+            teamRevenuesList = self.teamData.loc[self.teamData['team'].isin(teams), 'revenue'].tolist()
+
+        return teamRevenuesList
+
     def get_skill_dictionary(self):
         """
         Description:
         Get a dictionary of teams and their according skill levels
 
         Returns:
-        skillDictionary (list): Dictionary with team as key and team skill as value
+        skillDictionary (dict): Dictionary with team as key and team skill as value
         """
         # get required team information
         teams = self.get_teams()
@@ -343,6 +367,49 @@ class League(object):
         assert all([True if self.teamData.loc[x, 'budget'] - self.teamData.loc[x, 'payroll'] > 0 else False for x in
                     range(len(self.teamData))])  # payroll below budget
         assert functions.no_duplicates(self.finalPlayerSelection)
+
+    def calculate_game_revenue(self, homeTeam, winPercentageHome, seasonPhase):
+        """
+        Description:
+        Calculates the revenue of the home team in one single game and appends it to the revenue information of the
+        team
+
+        Input:
+        homeTeam (str): Name of home team for which game revenue is to be calculated
+        winPercentageHome (float): The winning percentage of the home team winning
+        seasonPhase (int): Integer defining in which phase of season we are, 0 = Regular Season, 1 or 2 = pre playoffs
+        and playoffs respectively
+
+        Output:
+
+        """
+
+        # extract home team information in order to calculate game revenues ###
+
+        # if it is a game in the regular season
+        if seasonPhase == 0:
+
+            # extract regular season factor
+            seasonPhaseFactor = self.teamData.loc[self.teamData['team'] == homeTeam, 'seasonPhaseFactor'].values[0][0]
+
+        # if it is a game in the playoffs
+        elif seasonPhase in [1, 2]:
+
+            # extract playoff factor
+            seasonPhaseFactor = self.teamData.loc[self.teamData['team'] == homeTeam, 'seasonPhaseFactor'].values[0][1]
+
+        # extract market size
+        marketSize = self.teamData.loc[self.teamData['team'] == homeTeam, 'marketSize'].values[0]
+
+        # extract effect of competitive balance
+        compBalanceEffect = self.teamData.loc[self.teamData['team'] == homeTeam, 'compBalanceEffect'].values[0]
+
+        # calculate game revenue for team
+        gameRevenue = parameters.monetaryFactor * seasonPhaseFactor * (
+                marketSize * winPercentageHome - (compBalanceEffect / 2) * winPercentageHome ** 2)
+
+        # update revenue of home team
+        self.teamData.loc[self.teamData['team'] == homeTeam, 'revenue'] += gameRevenue
 
     def simulate_season(self):
         """
