@@ -1,5 +1,7 @@
 import classes
 
+season = 1
+
 # initialise the player pool
 playerPool = classes.PlayerPool()
 
@@ -17,3 +19,6 @@ league.resolve_player_conflicts(playerPool)
 
 # simulate season
 league.simulate_season()
+
+# calculate final team revenue
+league.calculate_season_revenue(season)

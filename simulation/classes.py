@@ -380,8 +380,8 @@ class League(object):
         seasonPhase (int): Integer defining in which phase of season we are, 0 = Regular Season, 1 or 2 = pre playoffs
         and playoffs respectively
 
-        Output:
-
+        Update:
+        self.teamData (dataframe): The dataframe containing team information is updated with new revenue data
         """
 
         # extract home team information in order to calculate game revenues ###
@@ -427,3 +427,27 @@ class League(object):
         champion = functions.simulate_playoffs(self)
 
         print(champion)
+
+    def calculate_season_revenue(self, season):
+        """
+        Description:
+        Calculates the total season revenue of all teams
+
+        Input:
+        season (int): Index of current season
+
+        Update:
+        self.teamData (dataframe): The dataframe containing team information is updated with final revenue data
+        """
+        # add remaining budget to revenue
+        self.teamData['revenue'] += self.teamData['budget'] - self.teamData['payroll']
+
+        # calculate broadcasting revenue for this season
+        currentBroadcastingRevenue = parameters.initialBroadcastingRevenue * (
+                    1 + parameters.broadcastingRevenueGrowth) ** season
+
+        # add broadcasting revenue to revenue
+        self.teamData['revenue'] += currentBroadcastingRevenue
+
+        # round values
+        self.teamData['revenue'] = self.teamData['revenue'].round().astype(int)
