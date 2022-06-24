@@ -354,7 +354,7 @@ def no_duplicates(finalPlayerSelection):
     return state
 
 
-def simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam):
+def simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam, leagueObject, placementGame=False):
     """
     Description:
     Function to simulate one game
@@ -364,6 +364,9 @@ def simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam):
     skillHomeTeam (float): Total skill of home team
     awayTeam (str): Name of away team
     skillAwayTeam (float): Total skill of away team
+    leagueObject (League): The initialised league of object League
+    placementGame (bool): Indicates if the game to be simulated is a placement game, False = no placement game,
+    True = placement game, default is False
 
     Returns:
     winner (str): Name of winner
@@ -371,6 +374,12 @@ def simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam):
 
     # calculate winning-percentage of home team in pairing
     winPercentageHome = skillHomeTeam / (skillHomeTeam + skillAwayTeam)
+
+    # if the game is not a placement game
+    if not placementGame:
+
+        # calculate earned revenue of home team in this game
+        print('test')
 
     # determine whether or not home team wins
     homeVictory = ra.choices([True, False], [winPercentageHome, 1 - winPercentageHome])[0]
@@ -388,19 +397,22 @@ def simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam):
         return awayTeam
 
 
-def placement_games(skillDictionary, equalTeams):
+def placement_games(equalTeams, leagueObject):
     """
     Description:
     Function to simulate placement games where teams replay each other for ranking when they are equally ranked and have
     a balanced score in direct  confrontation
 
     Input:
-    skillDictionary (dict): Dictionary with all teams and according skill
     equalTeams (list): List of all teams which have same  number of wins
+    leagueObject (League): The initialised league object of class League
 
     Returns:
     finalPlacementRanking (dataframe): Dataframe with a ranking of the placement games
     """
+
+    # initialise skillDictionary
+    skillDictionary = leagueObject.get_skill_dictionary()
 
     # initialise placement decision status
     placementDecision = False
@@ -429,7 +441,7 @@ def placement_games(skillDictionary, equalTeams):
             skillAwayTeam = skillDictionary[awayTeam]
 
             # simulate game between team pairing
-            winner = simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam)
+            winner = simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam, leagueObject, placementGame=True)
 
             # add a win to the winning team's record
             placementRanking.loc[placementRanking['team'] == winner, 'wins'] += 1
@@ -453,7 +465,7 @@ def placement_games(skillDictionary, equalTeams):
             return finalPlacementRanking
 
 
-def solve_ranking_conflicts(ranking, record, skillDictionary):
+def solve_ranking_conflicts(ranking, record, leagueObject):
     """
     Description:
     Function to solve ranking conflicts when two teams have same number of wins (and thus winning percentage)
@@ -461,12 +473,11 @@ def solve_ranking_conflicts(ranking, record, skillDictionary):
     Input:
     ranking (dataframe): Dataframe containing ranking with calculated winning percentages
     record (dataframe): Dataframe containing the record of all games played
-    skillDictionary (dict): Dictionary with all teams and their according skills
+    leagueObject (League): The initialised league object of class League
 
     Returns:
     resolvedRanking (dataframe): Dataframe with unambiguous ranking for all teams
     """
-
     # initialise row
     row = 0
 
@@ -501,7 +512,7 @@ def solve_ranking_conflicts(ranking, record, skillDictionary):
             if len(set(directWins)) == 1:
 
                 # play placement games
-                placementRanking = placement_games(skillDictionary, equalTeams)
+                placementRanking = placement_games(equalTeams, leagueObject)
 
                 # for each entry in resolved direct ranking
                 for index in range(len(placementRanking)):
@@ -524,8 +535,8 @@ def solve_ranking_conflicts(ranking, record, skillDictionary):
                 # sort direct ranking dataframe based on wins
                 directRanking.sort_values('wins', ignore_index=True, inplace=True, ascending=False)
 
-                # recursively call this function with direct rankin, direct record and skillDictionary
-                resolvedDirectRanking = solve_ranking_conflicts(directRanking, directRecord, skillDictionary)
+                # recursively call this function with direct rankin, direct record and leagueObject
+                resolvedDirectRanking = solve_ranking_conflicts(directRanking, directRecord, leagueObject)
 
                 # for each entry in resolved direct ranking
                 for index in range(len(resolvedDirectRanking)):
@@ -589,7 +600,7 @@ def simulate_regular_season(leagueObject):
         # as long as not 2 games have been played (two home games against each opponent)
         while game < 3:
             # simulate game between team pairing
-            winner = simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam)
+            winner = simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam, leagueObject)
 
             # add a win to the winning team's record
             ranking.loc[ranking['team'] == winner, 'wins'] += 1
@@ -614,19 +625,19 @@ def simulate_regular_season(leagueObject):
     ranking.sort_values('winningPercentage', ascending=False, inplace=True, ignore_index=True)
 
     # resolve ranking conflicts
-    resolvedRanking = solve_ranking_conflicts(ranking, record, skillDictionary)
+    resolvedRanking = solve_ranking_conflicts(ranking, record, leagueObject)
 
     # return ranking
     return resolvedRanking
 
 
-def simulate_playoff_round(skillDictionary, teamPairings, playoffsType):
+def simulate_playoff_round(leagueObject, teamPairings, playoffsType):
     """
     Description:
     Function to simulate one round of a certain playoff type (pre playoffs, playoffs)
 
     Input:
-    skillDictionary (dict): Dictionary containing each team as key and the according skill as value
+    leagueObject (League): The initialised league object of class League
     teamPairings (list): List of tuples with team pairings for the round
     playoffsType (int): Integer indicating which type of playoffs is to be played, 1 = pre playoffs -> best of three,
     2 = playoffs ->best of seven
@@ -634,6 +645,9 @@ def simulate_playoff_round(skillDictionary, teamPairings, playoffsType):
     Returns:
     winningTeams (list): List of teams which have won their respective pairing
     """
+    # initialise skillDictionary
+    skillDictionary = leagueObject.get_skill_dictionary()
+
     # if pre playoffs are to be played
     if playoffsType == 1:
         # create overall pre playoff record
@@ -670,7 +684,7 @@ def simulate_playoff_round(skillDictionary, teamPairings, playoffsType):
                 skillAwayTeam = skillDictionary[awayTeam]
 
                 # simulate game between teams
-                winner = simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam)
+                winner = simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam, leagueObject)
 
                 # write winner to record
                 prePlayoffPairingRecord.loc[gameIndex, 'winner'] = winner
@@ -753,7 +767,7 @@ def simulate_playoff_round(skillDictionary, teamPairings, playoffsType):
                 skillAwayTeam = skillDictionary[awayTeam]
 
                 # simulate game between teams
-                winner = simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam)
+                winner = simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam, leagueObject)
 
                 # write winner to record
                 playoffRoundPairingRecord.loc[gameIndex, 'winner'] = winner
@@ -814,7 +828,6 @@ def simulate_playoffs(leagueObject):
 
     # get required team information
     regularSeasonRanking = leagueObject.regularSeasonRanking
-    skillDictionary = leagueObject.get_skill_dictionary()
 
     # pre-playoffs ###
 
@@ -830,7 +843,7 @@ def simulate_playoffs(leagueObject):
     prePlayoffPairings = list(zip(firstHalf, secondHalf))
 
     # simulate pre playoffs
-    prePlayoffWinners = simulate_playoff_round(skillDictionary, prePlayoffPairings, 1)
+    prePlayoffWinners = simulate_playoff_round(leagueObject, prePlayoffPairings, parameters.prePlayoff)
 
     # playoffs round 1 ###
 
@@ -850,7 +863,7 @@ def simulate_playoffs(leagueObject):
     roundOnePairings = list(zip(firstHalf, secondHalf))
 
     # simulate playoffs round 2
-    roundOneWinners = simulate_playoff_round(skillDictionary, roundOnePairings, 2)
+    roundOneWinners = simulate_playoff_round(leagueObject, roundOnePairings, parameters.playoffs)
 
     # playoffs round 2 ###
 
@@ -866,7 +879,7 @@ def simulate_playoffs(leagueObject):
     roundTwoPairings = list(zip(firstHalf, secondHalf))
 
     # simulate playoffs round 1
-    roundTwoWinners = simulate_playoff_round(skillDictionary, roundTwoPairings, 2)
+    roundTwoWinners = simulate_playoff_round(leagueObject, roundTwoPairings, parameters.playoffs)
 
     # playoffs round 3 ###
 
@@ -877,7 +890,7 @@ def simulate_playoffs(leagueObject):
     roundThreePairing = [(roundThreeTeams[0], roundThreeTeams[1])]
 
     # simulate playoffs round 3
-    champion = simulate_playoff_round(skillDictionary, roundThreePairing, 2)
+    champion = simulate_playoff_round(leagueObject, roundThreePairing, parameters.playoffs)
 
     # return champion
     return champion[0]
