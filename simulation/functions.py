@@ -354,7 +354,7 @@ def no_duplicates(finalPlayerSelection):
     return state
 
 
-def simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam, leagueObject, placementGame=False):
+def simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam, leagueObject, seasonPhase, placementGame=False):
     """
     Description:
     Function to simulate one game
@@ -365,6 +365,8 @@ def simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam, leagueObject
     awayTeam (str): Name of away team
     skillAwayTeam (float): Total skill of away team
     leagueObject (League): The initialised league of object League
+    seasonPhase (int): seasonPhase (int): Integer defining in which phase of season we are, 0 = Regular Season,
+    1 or 2 = pre playoffs and playoffs respectively
     placementGame (bool): Indicates if the game to be simulated is a placement game, False = no placement game,
     True = placement game, default is False
 
@@ -380,6 +382,7 @@ def simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam, leagueObject
 
         # calculate earned revenue of home team in this game
         print('test')
+        print(seasonPhase)
 
     # determine whether or not home team wins
     homeVictory = ra.choices([True, False], [winPercentageHome, 1 - winPercentageHome])[0]
@@ -441,7 +444,8 @@ def placement_games(equalTeams, leagueObject):
             skillAwayTeam = skillDictionary[awayTeam]
 
             # simulate game between team pairing
-            winner = simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam, leagueObject, placementGame=True)
+            winner = simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam, leagueObject,
+                                   parameters.regularSeason, placementGame=True)
 
             # add a win to the winning team's record
             placementRanking.loc[placementRanking['team'] == winner, 'wins'] += 1
@@ -600,7 +604,8 @@ def simulate_regular_season(leagueObject):
         # as long as not 2 games have been played (two home games against each opponent)
         while game < 3:
             # simulate game between team pairing
-            winner = simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam, leagueObject)
+            winner = simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam,
+                                   leagueObject, parameters.regularSeason)
 
             # add a win to the winning team's record
             ranking.loc[ranking['team'] == winner, 'wins'] += 1
@@ -684,7 +689,8 @@ def simulate_playoff_round(leagueObject, teamPairings, playoffsType):
                 skillAwayTeam = skillDictionary[awayTeam]
 
                 # simulate game between teams
-                winner = simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam, leagueObject)
+                winner = simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam,
+                                       leagueObject, parameters.prePlayoff)
 
                 # write winner to record
                 prePlayoffPairingRecord.loc[gameIndex, 'winner'] = winner
@@ -767,7 +773,8 @@ def simulate_playoff_round(leagueObject, teamPairings, playoffsType):
                 skillAwayTeam = skillDictionary[awayTeam]
 
                 # simulate game between teams
-                winner = simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam, leagueObject)
+                winner = simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam,
+                                       leagueObject, parameters.playoffs)
 
                 # write winner to record
                 playoffRoundPairingRecord.loc[gameIndex, 'winner'] = winner
