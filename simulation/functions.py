@@ -16,7 +16,8 @@ def get_all_player_data():
     allPlayersData (dataframe): Dataframe with information about all players
     """
     allPlayersData = pd.DataFrame(
-        data=np.column_stack((parameters.allPlayers, parameters.allPlayerSkills, parameters.allPlayerSalaries)),  # arrays as columns
+        data=np.column_stack((parameters.allPlayers, parameters.allPlayerSkills, parameters.allPlayerSalaries)),
+        # arrays as columns
         columns=["player", "skill", "salary"]
     )
     allPlayersData = allPlayersData.astype({"player": int, 'salary': int})  # change player to integer
@@ -296,7 +297,7 @@ def teams_choose_replacement(player, team, playerPool, leagueObject):
     while index < len(availablePlayersData):
 
         # identify a replacement player in increasing order of skill gab
-        replacementPlayerInfo = availablePlayersData.iloc[index, ]
+        replacementPlayerInfo = availablePlayersData.iloc[index,]
 
         # identify salary of replacement player
         replacementPlayerSalary = replacementPlayerInfo['salary']
@@ -353,38 +354,38 @@ def no_duplicates(finalPlayerSelection):
     return state
 
 
-def simulate_game(nameFirstTeam, skillFirstTeam, nameSecondTeam, skillSecondTeam):
+def simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam):
     """
     Description:
     Function to simulate one game
 
     Input:
-    nameFirstTeam (str): Name of first team in pairing
-    skillFirstTeam (float): Total skill of first team in pairing
-    nameSecondTeam (str): Name of second team in pairing
-    skillSecondTeam (float): Total skill of second team in pairing
+    homeTeam (str): Name of first home team
+    skillHomeTeam (float): Total skill of home team
+    awayTeam (str): Name of away team
+    skillAwayTeam (float): Total skill of away team
 
     Returns:
     winner (str): Name of winner
     """
 
-    # calculate winning-percentage of first team in pairing
-    winPercentageFirstTeam = skillFirstTeam / (skillFirstTeam + skillSecondTeam)
+    # calculate winning-percentage of home team in pairing
+    winPercentageHome = skillHomeTeam / (skillHomeTeam + skillAwayTeam)
 
-    # determine whether or not first team wins
-    firstTeamVictory = ra.choices([True, False], [winPercentageFirstTeam, 1 - winPercentageFirstTeam])[0]
+    # determine whether or not home team wins
+    homeVictory = ra.choices([True, False], [winPercentageHome, 1 - winPercentageHome])[0]
 
-    # if first team in pairing has won
-    if firstTeamVictory:
+    # if home team in pairing has won
+    if homeVictory:
 
-        # return name of first team
-        return nameFirstTeam
+        # return name of home team
+        return homeTeam
 
-    # if second team in pairing has won
+    # if away team in pairing has won
     else:
 
-        # return name of second team
-        return nameSecondTeam
+        # return name of away team
+        return awayTeam
 
 
 def placement_games(skillDictionary, equalTeams):
@@ -414,21 +415,21 @@ def placement_games(skillDictionary, equalTeams):
                                          })
 
         # initialise record of all game outcomes
-        placementGamesRecord = pd.DataFrame({'firstTeam': [], 'secondTeam': [], 'winner': []})
+        placementGamesRecord = pd.DataFrame({'homeTeam': [], 'awayTeam': [], 'winner': []})
 
-        # create each possible team pairing for regular season
+        # create each possible team pairing for placement round, one game against each opponent, one team is away one home but it does not affect revenue
         placementPairings = list(it.combinations(equalTeams, 2))
 
         # for each pairing
         for pairing in placementPairings:
             # extract skills of both teams
-            nameFirstTeam = pairing[0]
-            nameSecondTeam = pairing[1]
-            skillFirstTeam = skillDictionary[nameFirstTeam]  # extract of first team in pairing by team name
-            skillSecondTeam = skillDictionary[nameSecondTeam]  # extract of second team in pairing by team name
+            homeTeam = pairing[0]
+            awayTeam = pairing[1]
+            skillHomeTeam = skillDictionary[homeTeam]
+            skillAwayTeam = skillDictionary[awayTeam]
 
             # simulate game between team pairing
-            winner = simulate_game(nameFirstTeam, skillFirstTeam, nameSecondTeam, skillSecondTeam)
+            winner = simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam)
 
             # add a win to the winning team's record
             placementRanking.loc[placementRanking['team'] == winner, 'wins'] += 1
@@ -438,7 +439,7 @@ def placement_games(skillDictionary, equalTeams):
 
             # newPlacementRecord
             newRecord = pd.DataFrame(
-                {'firstTeam': [nameFirstTeam], 'secondTeam': [nameSecondTeam], 'winner': [winner]})
+                {'homeTeam': [homeTeam], 'awayTeam': [awayTeam], 'winner': [winner]})
 
             # concat new record with record of previous games
             placementGamesRecord = pd.concat([placementGamesRecord, newRecord], ignore_index=True)
@@ -491,7 +492,7 @@ def solve_ranking_conflicts(ranking, record, skillDictionary):
             equalTeams = ranking.loc[ranking['wins'] == winNumber, 'team'].tolist()
 
             # extract all direct games between these teams
-            directRecord = record.loc[(record['firstTeam'].isin(equalTeams)) & (record['secondTeam'].isin(equalTeams))]
+            directRecord = record.loc[(record['homeTeam'].isin(equalTeams)) & (record['awayTeam'].isin(equalTeams))]
 
             # calculate the direct wins by each team
             directWins = [len(directRecord.loc[directRecord['winner'] == team]) for team in equalTeams]
@@ -568,34 +569,34 @@ def simulate_regular_season(leagueObject):
                             'winningPercentage': ['-'] * len(parameters.teams)})
 
     # initialise record of all game outcomes
-    record = pd.DataFrame({'firstTeam': [], 'secondTeam': [], 'winner': []})
+    record = pd.DataFrame({'homeTeam': [], 'awayTeam': [], 'winner': []})
 
-    # create each possible team pairing for regular season
-    pairings = list(it.combinations(parameters.teams, 2))
+    # create pairings that each team faces any other team at home and away (first team is home team)
+    pairings = list(it.permutations(parameters.teams, 2))
 
     # for each pairing
     for pairing in pairings:
 
-        # extract skills of both teams
-        nameFirstTeam = pairing[0]
-        nameSecondTeam = pairing[1]
-        skillFirstTeam = skillDictionary[nameFirstTeam]  # extract of first team in pairing by team name
-        skillSecondTeam = skillDictionary[nameSecondTeam]  # extract of second team in pairing by team name
+        # extract names and skills of both teams
+        homeTeam = pairing[0]
+        awayTeam = pairing[1]
+        skillHomeTeam = skillDictionary[homeTeam]
+        skillAwayTeam = skillDictionary[awayTeam]
 
         # initialise game count
         game = 1
 
-        # as long as not 4 games have been played
-        while game < 5:
+        # as long as not 2 games have been played (two home games against each opponent)
+        while game < 3:
             # simulate game between team pairing
-            winner = simulate_game(nameFirstTeam, skillFirstTeam, nameSecondTeam, skillSecondTeam)
+            winner = simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam)
 
             # add a win to the winning team's record
             ranking.loc[ranking['team'] == winner, 'wins'] += 1
 
             # create a new record for this game
             newRecord = pd.DataFrame(
-                {'firstTeam': [nameFirstTeam], 'secondTeam': [nameSecondTeam], 'winner': [winner]})
+                {'homeTeam': [homeTeam], 'awayTeam': [awayTeam], 'winner': [winner]})
 
             # concat new record with record of previous games
             record = pd.concat([record, newRecord], ignore_index=True)
@@ -627,7 +628,7 @@ def simulate_playoff_round(skillDictionary, teamPairings, playoffsType):
     Input:
     skillDictionary (dict): Dictionary containing each team as key and the according skill as value
     teamPairings (list): List of tuples with team pairings for the round
-    playoffsType (int): Integer indicating which type of playoffs is to be played, 1 = pre playoffs -> best of five,
+    playoffsType (int): Integer indicating which type of playoffs is to be played, 1 = pre playoffs -> best of three,
     2 = playoffs ->best of seven
 
     Returns:
@@ -636,68 +637,81 @@ def simulate_playoff_round(skillDictionary, teamPairings, playoffsType):
     # if pre playoffs are to be played
     if playoffsType == 1:
         # create overall pre playoff record
-        playoffRecord = pd.DataFrame({'firstTeam': [], 'secondTeam': [], 'winner': []})
+        prePlayoffsRecord = pd.DataFrame({'higherRankedTeam': [], 'lowerRankedTeam': [], 'winner': []})
 
-        # for each pairing
+        # for each pairing in pre playoffs
         for pairing in teamPairings:
 
-            # extract skills of both teams
-            nameFirstTeam = pairing[0]
-            nameSecondTeam = pairing[1]
-            skillFirstTeam = skillDictionary[nameFirstTeam]
-            skillSecondTeam = skillDictionary[nameSecondTeam]
-            winsFirstTeam = 0
-            winsSecondTeam = 0
+            # determine higher ranked team
+            higherRankedTeam = pairing[0]
+
+            # determine lower ranked team
+            lowerRankedTeam = pairing[1]
+
+            # create a within playoff pairing record of home and away games
+            prePlayoffPairingRecord = pd.DataFrame({
+                'homeTeam': [i for i in 1*[higherRankedTeam, lowerRankedTeam]+[higherRankedTeam]],
+                'awayTeam': [i for i in 1*[lowerRankedTeam, higherRankedTeam]+[lowerRankedTeam]],
+                'winner': ['']*3})
 
             # initialise game count
             game = 1
 
             # as long as not 4 games have been played
             while game < 4:
-                # simulate game between team pairing
-                winner = simulate_game(nameFirstTeam, skillFirstTeam, nameSecondTeam, skillSecondTeam)
 
-                # if first team has won
-                if winner == nameFirstTeam:
+                # get index of game
+                gameIndex = game - 1
 
-                    # add a win to first team
-                    winsFirstTeam += 1
+                # define teams in that game
+                homeTeam = prePlayoffPairingRecord.loc[gameIndex, 'homeTeam']
+                awayTeam = prePlayoffPairingRecord.loc[gameIndex, 'awayTeam']
+                skillHomeTeam = skillDictionary[homeTeam]
+                skillAwayTeam = skillDictionary[awayTeam]
 
-                    # if the team has 2 wins
-                    if winsFirstTeam == 2:
-                        # create new playoffs record to report series win
-                        newRecord = pd.DataFrame(
-                            {'firstTeam': [nameFirstTeam], 'secondTeam': [nameSecondTeam], 'winner': [nameFirstTeam]})
+                # simulate game between teams
+                winner = simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam)
 
-                        # concat new record with record of previous games
-                        playoffRecord = pd.concat([playoffRecord, newRecord], ignore_index=True)
+                # write winner to record
+                prePlayoffPairingRecord.loc[gameIndex, 'winner'] = winner
 
-                        # stop pre playoff series
-                        break
+                # check if higher ranked team in pairing has already won pre playoff round
+                if len(prePlayoffPairingRecord.loc[prePlayoffPairingRecord['winner'] == higherRankedTeam]) == 2:
 
-                # if second team has won
-                else:
+                    # create new playoff record for this pairing
+                    newPrePlayoffsRecord = pd.DataFrame(
+                        {'higherRankedTeam': [higherRankedTeam],
+                         'lowerRankedTeam': [lowerRankedTeam],
+                         'winner': [higherRankedTeam]}
+                    )
 
-                    # add a win to first team
-                    winsSecondTeam += 1
+                    # concat new record with record of previous games
+                    prePlayoffsRecord = pd.concat([prePlayoffsRecord, newPrePlayoffsRecord], ignore_index=True)
 
-                    # if the team has 2 wins
-                    if winsSecondTeam == 2:
-                        # create new pre playoffs record to report series win
-                        newRecord = pd.DataFrame(
-                            {'firstTeam': [nameFirstTeam], 'secondTeam': [nameSecondTeam], 'winner': [nameSecondTeam]})
+                    # break loop
+                    break
 
-                        # concat new record with record of previous games
-                        playoffRecord = pd.concat([playoffRecord, newRecord], ignore_index=True)
+                # check if lower ranked team in pairing has already won pre playoff round
+                elif len(prePlayoffPairingRecord.loc[prePlayoffPairingRecord['winner'] == lowerRankedTeam]) == 2:
 
-                        # stop pre playoff series
-                        break
+                    # create new playoff record for this pairing
+                    newPrePlayoffsRecord = pd.DataFrame(
+                        {'higherRankedTeam': [higherRankedTeam],
+                         'lowerRankedTeam': [lowerRankedTeam],
+                         'winner': [lowerRankedTeam]}
+                    )
+
+                    # concat new record with record of previous games
+                    prePlayoffsRecord = pd.concat([prePlayoffsRecord, newPrePlayoffsRecord], ignore_index=True)
+
+                    # break loop
+                    break
 
                 # end of game 1
                 game += 1
 
         # create list of winning teams
-        winningTeams = playoffRecord['winner'].tolist()
+        winningTeams = prePlayoffsRecord['winner'].tolist()
 
         # return winning teams
         return winningTeams
@@ -706,62 +720,75 @@ def simulate_playoff_round(skillDictionary, teamPairings, playoffsType):
     elif playoffsType == 2:
 
         # create overall playoff round record
-        playoffRoundRecord = pd.DataFrame({'firstTeam': [], 'secondTeam': [], 'winner': []})
+        playoffRoundRecord = pd.DataFrame({'higherRankedTeam': [], 'lowerRankedTeam': [], 'winner': []})
 
-        # for each pairing
+        # for each pairing in playoff round
         for pairing in teamPairings:
 
-            # extract skills of both teams
-            nameFirstTeam = pairing[0]
-            nameSecondTeam = pairing[1]
-            skillFirstTeam = skillDictionary[nameFirstTeam]
-            skillSecondTeam = skillDictionary[nameSecondTeam]
-            winsFirstTeam = 0
-            winsSecondTeam = 0
+            # determine higher ranked team
+            higherRankedTeam = pairing[0]
+
+            # determine lower ranked team
+            lowerRankedTeam = pairing[1]
+
+            # create a within playoff round pairing record of home and away games
+            playoffRoundPairingRecord = pd.DataFrame({
+                'homeTeam': [i for i in 3 * [higherRankedTeam, lowerRankedTeam] + [higherRankedTeam]],
+                'awayTeam': [i for i in 3 * [lowerRankedTeam, higherRankedTeam] + [lowerRankedTeam]],
+                'winner': [''] * 7})
 
             # initialise game count
             game = 1
 
-            # as long as not 7 games have been played
+            # as long as not 8 games have been played
             while game < 8:
-                # simulate game between team pairing
-                winner = simulate_game(nameFirstTeam, skillFirstTeam, nameSecondTeam, skillSecondTeam)
 
-                # if first team has won
-                if winner == nameFirstTeam:
+                # get index of game
+                gameIndex = game - 1
 
-                    # add a win to first team
-                    winsFirstTeam += 1
+                # define teams in that game
+                homeTeam = playoffRoundPairingRecord.loc[gameIndex, 'homeTeam']
+                awayTeam = playoffRoundPairingRecord.loc[gameIndex, 'awayTeam']
+                skillHomeTeam = skillDictionary[homeTeam]
+                skillAwayTeam = skillDictionary[awayTeam]
 
-                    # if the team has 4 wins
-                    if winsFirstTeam == 4:
-                        # create new playoffs record to report series win
-                        newRecord = pd.DataFrame(
-                            {'firstTeam': [nameFirstTeam], 'secondTeam': [nameSecondTeam], 'winner': [nameFirstTeam]})
+                # simulate game between teams
+                winner = simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam)
 
-                        # concat new record with record of previous games
-                        playoffRoundRecord = pd.concat([playoffRoundRecord, newRecord], ignore_index=True)
+                # write winner to record
+                playoffRoundPairingRecord.loc[gameIndex, 'winner'] = winner
 
-                        # stop playoff series
-                        break
+                # check if higher ranked team in pairing has already won playoff round
+                if len(playoffRoundPairingRecord.loc[playoffRoundPairingRecord['winner'] == higherRankedTeam]) == 4:
 
-                # if second team has won
-                else:
+                    # create new playoff round record for this pairing
+                    newPlayoffRoundRecord = pd.DataFrame(
+                        {'higherRankedTeam': [higherRankedTeam],
+                         'lowerRankedTeam': [lowerRankedTeam],
+                         'winner': [higherRankedTeam]}
+                    )
 
-                    # add a win to first team
-                    winsSecondTeam += 1
+                    # concat new record with record of previous games
+                    playoffRoundRecord = pd.concat([playoffRoundRecord, newPlayoffRoundRecord], ignore_index=True)
 
-                    # if the team has 4 wins
-                    if winsSecondTeam == 4:
-                        # create new playoffs record to report series win
-                        newRecord = pd.DataFrame(
-                            {'firstTeam': [nameFirstTeam], 'secondTeam': [nameSecondTeam], 'winner': [nameSecondTeam]})
+                    # break loop
+                    break
 
-                        # concat new record with record of previous games
-                        playoffRoundRecord = pd.concat([playoffRoundRecord, newRecord], ignore_index=True)
+                # check if lower ranked team in pairing has already won playoff round
+                elif len(playoffRoundPairingRecord.loc[playoffRoundPairingRecord['winner'] == lowerRankedTeam]) == 4:
 
-                        # stop playoff series
-                        break
+                    # create new playoff round record for this pairing
+                    newPlayoffRoundRecord = pd.DataFrame(
+                        {'higherRankedTeam': [higherRankedTeam],
+                         'lowerRankedTeam': [lowerRankedTeam],
+                         'winner': [lowerRankedTeam]}
+                    )
+
+                    # concat new record with record of previous games
+                    playoffRoundRecord = pd.concat([playoffRoundRecord, newPlayoffRoundRecord], ignore_index=True)
+
+                    # break loop
+                    break
 
                 # end of game 1
                 game += 1
@@ -769,7 +796,7 @@ def simulate_playoff_round(skillDictionary, teamPairings, playoffsType):
         # create list of winning teams
         winningTeams = playoffRoundRecord['winner'].tolist()
 
-        # return list of winning teams
+        # return winning teams
         return winningTeams
 
 

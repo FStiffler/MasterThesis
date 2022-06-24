@@ -4,6 +4,7 @@ import itertools as it
 from functions import solve_ranking_conflicts
 from functions import simulate_game
 
+
 class Test(TestCase):
     def test_solve_ranking_conflicts(self):
         """
@@ -24,7 +25,7 @@ class Test(TestCase):
         pairings = list(it.combinations(equalTeams, 2))
 
         # create empty record
-        record = pd.DataFrame({'firstTeam': [], 'secondTeam': [], 'winner': []})
+        record = pd.DataFrame({'homeTeam': [], 'awayTeam': [], 'winner': []})
 
         # create predefined ranking
         ranking = pd.DataFrame({'rank': [0] * len(equalTeams),
@@ -34,8 +35,8 @@ class Test(TestCase):
         # for each pairing
         for pairing in pairings:
             # extract names of both teams
-            nameFirstTeam = pairing[0]
-            nameSecondTeam = pairing[1]
+            homeTeam = pairing[0]
+            awayTeam = pairing[1]
 
             # create game count
             game = 1
@@ -46,9 +47,9 @@ class Test(TestCase):
                 # in the first two games
                 if game < 3:
 
-                    # the first team of pairing wins
+                    # the home team of pairing wins
                     newRecord = pd.DataFrame(
-                        {'firstTeam': [nameFirstTeam], 'secondTeam': [nameSecondTeam], 'winner': [nameFirstTeam]})
+                        {'homeTeam': [homeTeam], 'awayTeam': [awayTeam], 'winner': [homeTeam]})
                     record = pd.concat([record, newRecord], ignore_index=True)
 
                     game += 1
@@ -56,9 +57,9 @@ class Test(TestCase):
                 # in the second two games
                 elif game > 2:
 
-                    # the first team of pairing wins
+                    # the home team of pairing wins
                     newRecord = pd.DataFrame(
-                        {'firstTeam': [nameFirstTeam], 'secondTeam': [nameSecondTeam], 'winner': [nameSecondTeam]})
+                        {'homeTeam': [homeTeam], 'awayTeam': [awayTeam], 'winner': [awayTeam]})
                     record = pd.concat([record, newRecord], ignore_index=True)
 
                     game += 1
@@ -88,7 +89,7 @@ class Test(TestCase):
         pairings = list(it.combinations(equalTeams, 2))
 
         # create empty record
-        record = pd.DataFrame({'firstTeam': [], 'secondTeam': [], 'winner': []})
+        record = pd.DataFrame({'homeTeam': [], 'awayTeam': [], 'winner': []})
 
         # create predefined ranking
         ranking = pd.DataFrame({'rank': [0] * len(equalTeams),
@@ -98,8 +99,8 @@ class Test(TestCase):
         # create predefined record
         for pairing in pairings:
             # extract names of both teams
-            nameFirstTeam = pairing[0]
-            nameSecondTeam = pairing[1]
+            homeTeam = pairing[0]
+            awayTeam = pairing[1]
 
             # create game count
             game = 1
@@ -110,9 +111,9 @@ class Test(TestCase):
                 # in the first two games
                 if game < 3:
 
-                    # the first team of pairing wins
+                    # the home team of pairing wins
                     newRecord = pd.DataFrame(
-                        {'firstTeam': [nameFirstTeam], 'secondTeam': [nameSecondTeam], 'winner': [nameFirstTeam]})
+                        {'homeTeam': [homeTeam], 'awayTeam': [awayTeam], 'winner': [homeTeam]})
                     record = pd.concat([record, newRecord], ignore_index=True)
 
                     game += 1
@@ -120,9 +121,9 @@ class Test(TestCase):
                 # in the second two games
                 elif game > 2:
 
-                    # the first team of pairing wins
+                    # the home team of pairing wins
                     newRecord = pd.DataFrame(
-                        {'firstTeam': [nameFirstTeam], 'secondTeam': [nameSecondTeam], 'winner': [nameSecondTeam]})
+                        {'homeTeam': [homeTeam], 'awayTeam': [awayTeam], 'winner': [awayTeam]})
                     record = pd.concat([record, newRecord], ignore_index=True)
 
                     game += 1
@@ -130,11 +131,8 @@ class Test(TestCase):
         # initialise placement decision status
         placementDecision = False
 
-        # while no decisison
+        # while no decision
         while not placementDecision:
-
-            # get skills of teams which have equally often won
-            equalSkills = [skillDictionary[team] for team in equalTeams]
 
             # initialise empty ranking
             placementRanking = pd.DataFrame({'rank': [0] * len(equalTeams),
@@ -143,7 +141,7 @@ class Test(TestCase):
                                              })
 
             # initialise record of all game outcomes
-            placementGamesRecord = pd.DataFrame({'firstTeam': [], 'secondTeam': [], 'winner': []})
+            placementGamesRecord = pd.DataFrame({'homeTeam': [], 'awayTeam': [], 'winner': []})
 
             # create each possible team pairing for regular season
             placementPairings = list(it.combinations(equalTeams, 2))
@@ -151,13 +149,13 @@ class Test(TestCase):
             # for each pairing
             for pairing in placementPairings:
                 # extract skills of both teams
-                nameFirstTeam = pairing[0]
-                nameSecondTeam = pairing[1]
-                skillFirstTeam = skillDictionary[nameFirstTeam]  # extract of first team in pairing by team name
-                skillSecondTeam = skillDictionary[nameSecondTeam]  # extract of second team in pairing by team name
+                homeTeam = pairing[0]
+                awayTeam = pairing[1]
+                skillFirstTeam = skillDictionary[homeTeam]
+                skillSecondTeam = skillDictionary[awayTeam]
 
                 # simulate game between team pairing
-                winner = simulate_game(nameFirstTeam, skillFirstTeam, nameSecondTeam, skillSecondTeam)
+                winner = simulate_game(homeTeam, skillFirstTeam, awayTeam, skillSecondTeam)
 
                 # add a win to the winning team's record
                 placementRanking.loc[placementRanking['team'] == winner, 'wins'] += 1
@@ -167,7 +165,7 @@ class Test(TestCase):
 
                 # newPlacementRecord
                 newRecord = pd.DataFrame(
-                    {'firstTeam': [nameFirstTeam], 'secondTeam': [nameSecondTeam], 'winner': [winner]})
+                    {'homeTeam': [homeTeam], 'awayTeam': [awayTeam], 'winner': [winner]})
 
                 # concat new record with record of previous games
                 placementGamesRecord = pd.concat([placementGamesRecord, newRecord], ignore_index=True)
