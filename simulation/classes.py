@@ -1,4 +1,5 @@
 import parameters
+import variables
 import functions
 import pandas as pd
 import random as ra
@@ -9,14 +10,14 @@ class PlayerPool(object):
     def __init__(self):
         """
         Description:
-        Initializes the player pool object. The object is fully initialised based on parameters
+        Initializes the player pool object. The object is fully initialised based on parameters and variables
 
         A player pool object has the following attributes:
             self.size (int): Determines pool size (number of available players)
             self.allPlayersData (dataframe): A dataframe with information about all initialised players, infos are to be found in parameter file
             self.availablePlayersData (dataframe): A dataframe with information about available players not yet picked by a team, initialised with all players
         """
-        self.size = parameters.newPlayerPoolSize
+        self.size = variables.playerPoolSize
         self.allPlayersData = functions.get_all_player_data()
         self.availablePlayersData = functions.get_all_player_data()
 
@@ -115,10 +116,10 @@ class League(object):
     def __init__(self):
         """
         Description:
-        Initializes a league object. The object is fully initialised based on parameters
+        Initializes a league object. The object is fully initialised based on parameters and variables
 
         A league object has the following attributes:
-            self.teamData (dataframe): Dataframe with information about the team, information about the parameters are to be found in the parameters file
+            self.teamData (dataframe): Dataframe with information about the team, information about the parameters and variables are to be found in the parameters and variables files
             self.optimalPlayers (dict): Dictionary with each team as key and a list of optimal players selected by the team in maximization process, is initialised empty
             self.optimalPlayersSet (set): Set containing every selected player in the maximization process once, is initialised empty
             self.optimalPlayersData (dataframe): Dataframe containing information about the selected players in maximization process, is initialised empty
@@ -126,10 +127,10 @@ class League(object):
             self.regularSeasonRanking (dataframe): Dataframe which contains regular season ranking, is initialised empty
         """
         self.teamData = pd.DataFrame({'team': parameters.teams,
-                                      'budget': parameters.teamBudgets,
-                                      'payroll': [0] * parameters.leagueSize,
-                                      'totalSkill': [0] * parameters.leagueSize,
-                                      'revenue': [0] * parameters.leagueSize,
+                                      'budget': variables.teamBudget,
+                                      'payroll': variables.teamPayroll,
+                                      'totalSkill': variables.teamSkill,
+                                      'revenue': variables.teamRevenue,
                                       'marketSize': parameters.marketSize,
                                       'seasonPhaseFactor': parameters.seasonPhaseFactor,
                                       'compBalanceEffect': parameters.compBalanceEffect})

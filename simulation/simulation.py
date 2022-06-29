@@ -1,6 +1,7 @@
 import classes
+import variables
 
-season = 1
+season = variables.season
 
 # initialise the player pool
 playerPool = classes.PlayerPool()

@@ -1,4 +1,5 @@
 import parameters
+import variables
 from pulp import PULP_CBC_CMD
 import numpy as np
 import pandas as pd
@@ -16,7 +17,7 @@ def get_all_player_data():
     allPlayersData (dataframe): Dataframe with information about all players
     """
     allPlayersData = pd.DataFrame(
-        data=np.column_stack((parameters.allPlayers, parameters.allPlayerSkills, parameters.allPlayerSalaries)),
+        data=np.column_stack((variables.allPlayers, variables.allPlayerSkills, variables.allPlayerSalaries)),
         # arrays as columns
         columns=["player", "skill", "salary"]
     )
