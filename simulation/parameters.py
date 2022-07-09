@@ -1,8 +1,8 @@
 import imports
 
 # global parameters (do not change during simulation)
-alpha = 1  # parameter 'alpha' of beta distribution
-beta = 1  # parameter 'beta' of beta distribution
+alpha = 1.48  # parameter 'alpha' of beta distribution
+beta = 3.56  # parameter 'beta' of beta distribution
 initialPlayerPoolSize = 342  # initial size of player pool at beginning of simulation, references 'k_0' in thesis
 naturalPlayerPoolGrowth = 0.021  # natural annual growth of player pool size (without changes at player limit)
 leagueSize = 14  # number of teams in the league, references 'n' in thesis
