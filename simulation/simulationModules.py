@@ -13,7 +13,8 @@ def simulate_one_season(league, season):
     season (int): An integer indicating the season
 
     Returns:
-    seasonResults (data frame): A data frame with all relevant results from the season simulation
+    seasonTeamResults (data frame): A data frame with all relevant team results from the season simulation
+    seasonPlayerResults (data frame): A data frame with all relevant player results from the season simulation
     """
     # get maximal budget
     maximalBudget = max(league.get_team_budgets())
@@ -37,26 +38,34 @@ def simulate_one_season(league, season):
     league.calculate_season_revenue(season)
 
     # create season results
-    seasonResults = league.teamData.iloc[:, :-4]
+    seasonTeamResults = league.teamData.iloc[:, :-4]
 
     # add column for season
-    seasonResults.insert(loc=0, column='Season', value=[season]*parameters.leagueSize)
+    seasonTeamResults.insert(loc=0, column='Season', value=[season]*parameters.leagueSize)
+
+    # extract player stats
+    seasonPlayerResults = playerPool.get_player_stats()
+
+    # add column for season
+    seasonPlayerResults.insert(loc=0, column='Season', value=season)
 
     # return seasonResults
-    return seasonResults
+    return seasonTeamResults, seasonPlayerResults
 
 
-def simulate_consecutive_seasons(simulationResults, seasons):
+def simulate_consecutive_seasons(simulationTeamResults, simulationPlayerResults, seasons):
     """
     Description:
     Module to simulate consecutive seasons
 
     Input:
-    simulationResults (data frame): data frame containing all the simulation results
+    simulationTeamResults (data frame): data frame containing all the simulation team results
+    simulationPlayerResults (data frame): data frame containing all the simulation player results
     seasons (int): the number of consecutive seasons to simulate
 
     Returns:
-    simulationResults (data frame): data frame containing the updated simulation results
+    simulationTeamResults (data frame): data frame containing the updated simulation team results
+    simulationPlayerResults (data frame): data frame containing the updated simulation player results
     """
     for season in range(1, seasons+1):
         # if it is the first season
@@ -65,13 +74,16 @@ def simulate_consecutive_seasons(simulationResults, seasons):
             league = classes.League()
 
         # simulate season and get results
-        seasonResults = simulate_one_season(league, season)
+        seasonTeamResults, seasonPlayerResults = simulate_one_season(league, season)
 
-        # add season result to simulation results
-        simulationResults = pd.concat([simulationResults, seasonResults])
+        # add season team result to simulation results
+        simulationTeamResults = pd.concat([simulationTeamResults, seasonTeamResults], ignore_index=True)
+
+        # add season player result to simulation results
+        simulationPlayerResults = pd.concat([simulationPlayerResults, seasonPlayerResults], ignore_index=True)
 
         # prepare data for following season
         league.reset_for_new_season()
 
     # return simulation result
-    return simulationResults
+    return simulationTeamResults, simulationPlayerResults

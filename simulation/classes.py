@@ -135,6 +135,26 @@ class PlayerPool(object):
         # remove optimal players from available player data
         self.availablePlayersData = self.availablePlayersData.loc[self.availablePlayersData['player'] != player]
 
+    def get_player_stats(self):
+        """
+        Description:
+        Calculate and return player stats
+
+        Return:
+        seasonPlayerResults (data frame): Data frame with player stats, one metric per column
+        """
+
+        seasonPlayerResults = pd.DataFrame({
+            'players': [len(self.allPlayers)],
+            'lowestSalary': [np.round(self.allPlayerSalaries.min())],
+            'averageSalary': [np.round(np.mean(self.allPlayerSalaries))],
+            'medianSalary': [np.round(np.median(self.allPlayerSalaries))],
+            'maximalSalary': [np.round(self.allPlayerSalaries.max())]
+        })
+
+        return seasonPlayerResults
+
+
 
 # define league as class
 class League(object):

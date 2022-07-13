@@ -2,6 +2,9 @@ import pandas as pd
 import simulationModules
 import parameters
 
-simulationResults = pd.DataFrame()
+# initialize empty data frames to log results
+simulationTeamResults = pd.DataFrame()
+simulationPlayerResults = pd.DataFrame()
 
-simulationResults = simulationModules.simulate_consecutive_seasons(simulationResults, parameters.seasons)
+# simulate consecutive seasons
+simulationTeamResults, simulationPlayerResults = simulationModules.simulate_consecutive_seasons(simulationTeamResults, simulationPlayerResults, parameters.seasons)
