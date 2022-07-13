@@ -1,25 +1,50 @@
 import parameters
-import variables
 import functions
 import pandas as pd
 import random as ra
+import numpy as np
 
 
 # define player pool as class
 class PlayerPool(object):
-    def __init__(self):
+    def __init__(self, season=1, maximalBudget=max(parameters.initialTeamBudget)):
         """
         Description:
         Initializes the player pool object. The object is fully initialised based on parameters and variables
 
+        Input:
+        season (int): the index of season currently played, default is 1
+        maximalBudget: the highest team budget, default is defined highest initial team budget
+
         A player pool object has the following attributes:
-            self.size (int): Determines pool size (number of available players)
-            self.allPlayersData (dataframe): A dataframe with information about all initialised players, infos are to be found in parameter file
-            self.availablePlayersData (dataframe): A dataframe with information about available players not yet picked by a team, initialised with all players
+        self.size (int): Determines pool size (number of available players)
+        self.allPlayersData (dataframe): A dataframe with information about all initialised players, infos are to be found in parameter file
+        self.availablePlayersData (dataframe): A dataframe with information about available players not yet picked by a team, initialised with all players
         """
-        self.size = variables.playerPoolSize
-        self.allPlayersData = functions.get_all_player_data()
-        self.availablePlayersData = functions.get_all_player_data()
+        self.maximalSalary = round(parameters.bestPlayerRevenueShare * maximalBudget)  # maximal salary for best available player, references 'w_max' in thesis
+        self.size = round(parameters.initialPlayerPoolSize * (1 + parameters.naturalPlayerPoolGrowth) ** season)  # new player pool size, references 'k_t' in thesis
+        self.allPlayers = np.arange(start=1, stop=self.size + 1)  # create players with numbers from 1 to player pool size to create all players in player pool, references 'p' in thesis
+        self.allPlayerSkills = np.round(np.random.beta(a=parameters.alpha, b=parameters.beta, size=self.size), 2)  # draw skill from beta distribution to create all skill levels of players in player pool, references 'S_p' in thesis
+        self.allPlayerSalaries = np.round(self.maximalSalary * self.allPlayerSkills * (1 - ((self.size - parameters.initialPlayerPoolSize) / parameters.initialPlayerPoolSize)))  # calculate player salaries to create all salaries in the player pool, references 'W_p' in thesis
+        self.allPlayersData = self.get_all_player_data()
+        self.availablePlayersData = self.get_all_player_data()
+
+    def get_all_player_data(self):
+        """
+        Description:
+        Create data frame with all player information
+
+        Returns:
+        allPlayersData (dataframe): Dataframe with information about all players
+        """
+        allPlayersData = pd.DataFrame(
+            data=np.column_stack((self.allPlayers, self.allPlayerSkills, self.allPlayerSalaries)),
+            # arrays as columns
+            columns=["player", "skill", "salary"]
+        )
+        allPlayersData = allPlayersData.astype({"player": int, 'salary': int})  # change player to integer
+
+        return allPlayersData
 
     def get_all_players(self):
         """
@@ -119,27 +144,27 @@ class League(object):
         Initializes a league object. The object is fully initialised based on parameters and variables
 
         A league object has the following attributes:
-            self.teamData (dataframe): Dataframe with information about the team, information about the parameters and variables are to be found in the parameters and variables files
-            self.optimalPlayers (dict): Dictionary with each team as key and a list of optimal players selected by the team in maximization process, is initialised empty
-            self.optimalPlayersSet (set): Set containing every selected player in the maximization process once, is initialised empty
-            self.optimalPlayersData (dataframe): Dataframe containing information about the selected players in maximization process, is initialised empty
-            self.finalPlayerSelection (dict): Dictionary with each team as key and a list of the final players selected by the team in replacement process, is initialised empty
-            self.regularSeasonRanking (dataframe): Dataframe which contains regular season ranking, is initialised empty
+        self.teamData (dataframe): Dataframe with information about the team, parameter description in parameters file
+        self.optimalPlayers (dict): Dictionary with each team as key and a list of optimal players selected by the team in maximization process, is initialised empty
+        self.optimalPlayersSet (set): Set containing every selected player in the maximization process once, is initialised empty
+        self.optimalPlayersData (dataframe): Dataframe containing information about the selected players in maximization process, is initialised empty
+        self.finalPlayerSelection (dict): Dictionary with each team as key and a list of the final players selected by the team in replacement process, is initialised empty
+        self.regularSeasonRanking (dataframe): Dataframe which contains regular season ranking, is initialised empty
         """
         self.teamData = pd.DataFrame({'team': parameters.teams,
-                                      'budget': variables.teamBudget,
-                                      'payroll': variables.teamPayroll,
-                                      'totalSkill': variables.teamSkill,
-                                      'revenue': variables.teamRevenue,
-                                      'wins': variables.teamWins,
-                                      'games': variables.teamGames,
-                                      'rank': variables.teamRank,
-                                      'eliminatedRS': variables.eliminatedRS,
-                                      'eliminatedPP': variables.eliminatedPP,
-                                      'eliminatedPR1': variables.eliminatedPR1,
-                                      'eliminatedPR2': variables.eliminatedPR2,
-                                      'eliminatedPR3': variables.eliminatedPR3,
-                                      'champion': variables.champion,
+                                      'budget': parameters.initialTeamBudget,  # create variable team budgets, references 'R_tot_it-1',
+                                      'payroll': [0] * parameters.leagueSize,  # create variable team payrolls, references 'sum(W_p * d_p)' in thesis
+                                      'totalSkill': [0] * parameters.leagueSize,  # create variable team skills, references 'S_i' in thesis
+                                      'revenue': [0] * parameters.leagueSize,  # create variable revenue, references 'R_tot_it' in thesis
+                                      'wins': [0] * parameters.leagueSize,  # create variable for win count
+                                      'games': [0] * parameters.leagueSize,  # create variable for game count
+                                      'rank': [0] * parameters.leagueSize,  # create variable for final regular season rank
+                                      'eliminatedRS': [0] * parameters.leagueSize,  # create binary variable indicating regular season elimination
+                                      'eliminatedPP': [0] * parameters.leagueSize,  # create binary variable indicating pre playoffs elimination
+                                      'eliminatedPR1': [0] * parameters.leagueSize,  # create binary variable indicating playoffs round 1 elimination
+                                      'eliminatedPR2': [0] * parameters.leagueSize,  # create binary variable indicating playoffs round 2 elimination
+                                      'eliminatedPR3': [0] * parameters.leagueSize,  # create binary variable indicating playoffs round 3 elimination
+                                      'champion': [0] * parameters.leagueSize,  # create binary variable indicating league champion
                                       'monetaryFactor': parameters.monetaryFactor,
                                       'marketSize': parameters.marketSize,
                                       'seasonPhaseFactor': parameters.seasonPhaseFactor,
@@ -494,3 +519,46 @@ class League(object):
 
         # round values
         self.teamData['revenue'] = self.teamData['revenue'].round().astype(int)
+
+    def reset_for_new_season(self):
+        """
+        Description:
+        Resets the league object for a new season simulation
+
+        Update:
+        self.teamData (dataframe): team data is prepared for new season
+        self.optimalPlayers (dict): reset to state of league initialisation
+        self.optimalPlayersSet (set): reset to state of league initialisation
+        self.optimalPlayersData (dataframe): reset to state of league initialisation
+        self.finalPlayerSelection (dict): reset to state of league initialisation
+        self.regularSeasonRanking (dataframe): reset to state of league initialisation
+        """
+        # extract new team budgets which is revenue of previous season
+        budgets = self.teamData['revenue'].tolist()
+
+        # update teamData
+        self.teamData = pd.DataFrame({'team': parameters.teams,
+                                      'budget': budgets,
+                                      'payroll': [0] * parameters.leagueSize,  # create variable team payrolls, references 'sum(W_p * d_p)' in thesis
+                                      'totalSkill': [0] * parameters.leagueSize,  # create variable team skills, references 'S_i' in thesis
+                                      'revenue': [0] * parameters.leagueSize,  # create variable revenue, references 'R_tot_it' in thesis
+                                      'wins': [0] * parameters.leagueSize,  # create variable for win count
+                                      'games': [0] * parameters.leagueSize,  # create variable for game count
+                                      'rank': [0] * parameters.leagueSize,  # create variable for final regular season rank
+                                      'eliminatedRS': [0] * parameters.leagueSize,  # create binary variable indicating regular season elimination
+                                      'eliminatedPP': [0] * parameters.leagueSize,  # create binary variable indicating pre playoffs elimination
+                                      'eliminatedPR1': [0] * parameters.leagueSize,  # create binary variable indicating playoffs round 1 elimination
+                                      'eliminatedPR2': [0] * parameters.leagueSize,  # create binary variable indicating playoffs round 2 elimination
+                                      'eliminatedPR3': [0] * parameters.leagueSize,  # create binary variable indicating playoffs round 3 elimination
+                                      'champion': [0] * parameters.leagueSize,  # create binary variable indicating league champion
+                                      'monetaryFactor': parameters.monetaryFactor,
+                                      'marketSize': parameters.marketSize,
+                                      'seasonPhaseFactor': parameters.seasonPhaseFactor,
+                                      'compBalanceEffect': parameters.compBalanceEffect})
+        self.optimalPlayers = {}
+        self.optimalPlayersSet = set()
+        self.optimalPlayersData = pd.DataFrame()
+        self.finalPlayerSelection = {}
+        self.regularSeasonRanking = pd.DataFrame()
+
+

@@ -1,6 +1,7 @@
 import pandas as pd
 import simulationModules
+import parameters
 
 simulationResults = pd.DataFrame()
 
-simulationResults = simulationModules.simulate_consecutive_seasons(simulationResults)
+simulationResults = simulationModules.simulate_consecutive_seasons(simulationResults, parameters.seasons)

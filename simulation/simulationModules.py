@@ -1,19 +1,26 @@
 import pandas as pd
+import classes
+import parameters
 
 
-def simulate_one_season(playerPool, league, season):
+def simulate_one_season(league, season):
     """
     Description:
     Module to simulate one single season
 
     Input:
-    playerPool (PlayerPool): A player pool of object PlayerPool
     league (League): A league of object League
     season (int): An integer indicating the season
 
     Returns:
     seasonResults (data frame): A data frame with all relevant results from the season simulation
     """
+    # get maximal budget
+    maximalBudget = max(league.get_team_budgets())
+
+    # initialise player pool
+    playerPool = classes.PlayerPool(season, maximalBudget)
+
     # solve skill maximization problem for each team
     league.select_optimal_players(playerPool)
 
@@ -32,38 +39,39 @@ def simulate_one_season(playerPool, league, season):
     # create season results
     seasonResults = league.teamData.iloc[:, :-4]
 
+    # add column for season
+    seasonResults.insert(loc=0, column='Season', value=[season]*parameters.leagueSize)
+
     # return seasonResults
     return seasonResults
 
 
-def simulate_consecutive_seasons(simulationResults):
+def simulate_consecutive_seasons(simulationResults, seasons):
     """
     Description:
     Module to simulate consecutive seasons
 
     Input:
-    simulationResults
+    simulationResults (data frame): data frame containing all the simulation results
+    seasons (int): the number of consecutive seasons to simulate
 
     Returns:
-
+    simulationResults (data frame): data frame containing the updated simulation results
     """
-    import classes
-    import variables
+    for season in range(1, seasons+1):
+        # if it is the first season
+        if season == 1:
+            # initialise the league
+            league = classes.League()
 
-    # initialise the player pool
-    playerPool = classes.PlayerPool()
+        # simulate season and get results
+        seasonResults = simulate_one_season(league, season)
 
-    # initialise the league
-    league = classes.League()
+        # add season result to simulation results
+        simulationResults = pd.concat([simulationResults, seasonResults])
 
-    # initialise season
-    season = variables.season
-
-    # simulate season and get results
-    seasonResults = simulate_one_season(playerPool, league, season)
-
-    # add season result to simulation results
-    simulationResults = pd.concat([simulationResults, seasonResults])
+        # prepare data for following season
+        league.reset_for_new_season()
 
     # return simulation result
     return simulationResults

@@ -1,29 +1,10 @@
 import parameters
-import variables
 from pulp import PULP_CBC_CMD
 import numpy as np
 import pandas as pd
 import pulp as pl
 import random as ra
 import itertools as it
-
-
-def get_all_player_data():
-    """
-    Description:
-    Get all player information as data frame
-
-    Returns:
-    allPlayersData (dataframe): Dataframe with information about all players
-    """
-    allPlayersData = pd.DataFrame(
-        data=np.column_stack((variables.allPlayers, variables.allPlayerSkills, variables.allPlayerSalaries)),
-        # arrays as columns
-        columns=["player", "skill", "salary"]
-    )
-    allPlayersData = allPlayersData.astype({"player": int, 'salary': int})  # change player to integer
-
-    return allPlayersData
 
 
 def skill_maximization(playerPool, teamBudget):
@@ -380,7 +361,6 @@ def simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam, leagueObject
 
     # if the game is not a placement game
     if not placementGame:
-
         # calculate earned revenue of home team in this game
         leagueObject.calculate_game_revenue(homeTeam, winPercentageHome, seasonPhase)
 
@@ -678,9 +658,9 @@ def simulate_playoff_round(leagueObject, teamPairings, playoffsType):
 
             # create a within playoff pairing record of home and away games
             prePlayoffPairingRecord = pd.DataFrame({
-                'homeTeam': [i for i in 1*[higherRankedTeam, lowerRankedTeam]+[higherRankedTeam]],
-                'awayTeam': [i for i in 1*[lowerRankedTeam, higherRankedTeam]+[lowerRankedTeam]],
-                'winner': ['']*3})
+                'homeTeam': [i for i in 1 * [higherRankedTeam, lowerRankedTeam] + [higherRankedTeam]],
+                'awayTeam': [i for i in 1 * [lowerRankedTeam, higherRankedTeam] + [lowerRankedTeam]],
+                'winner': [''] * 3})
 
             # initialise game count
             game = 1

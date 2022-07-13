@@ -22,3 +22,4 @@ broadcastingRevenueGrowth = 0.031  # factor by which the revenue of teams from b
 regularSeason = 0  # parameter indicating regular season
 prePlayoff = 1  # parameter indicating prePlayoffs which means best of five series
 playoffs = 2  # parameter indicating Playoffs which means best of seven series
+seasons = 2  # the number of consecutive seasons to simulate
