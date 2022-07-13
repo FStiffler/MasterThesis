@@ -131,6 +131,7 @@ class League(object):
                                       'payroll': variables.teamPayroll,
                                       'totalSkill': variables.teamSkill,
                                       'revenue': variables.teamRevenue,
+                                      'monetaryFactor': parameters.monetaryFactor,
                                       'marketSize': parameters.marketSize,
                                       'seasonPhaseFactor': parameters.seasonPhaseFactor,
                                       'compBalanceEffect': parameters.compBalanceEffect})
@@ -399,6 +400,9 @@ class League(object):
             # extract playoff factor
             seasonPhaseFactor = self.teamData.loc[self.teamData['team'] == homeTeam, 'seasonPhaseFactor'].values[0][1]
 
+        # extract monetaryFactor
+        monetaryFactor = self.teamData.loc[self.teamData['team'] == homeTeam, 'monetaryFactor'].values[0]
+
         # extract market size
         marketSize = self.teamData.loc[self.teamData['team'] == homeTeam, 'marketSize'].values[0]
 
@@ -406,7 +410,7 @@ class League(object):
         compBalanceEffect = self.teamData.loc[self.teamData['team'] == homeTeam, 'compBalanceEffect'].values[0]
 
         # calculate game revenue for team
-        gameRevenue = parameters.monetaryFactor * seasonPhaseFactor * (
+        gameRevenue = monetaryFactor * seasonPhaseFactor * (
                 marketSize * winPercentageHome - (compBalanceEffect / 2) * winPercentageHome ** 2)
 
         # update revenue of home team
