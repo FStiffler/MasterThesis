@@ -131,6 +131,15 @@ class League(object):
                                       'payroll': variables.teamPayroll,
                                       'totalSkill': variables.teamSkill,
                                       'revenue': variables.teamRevenue,
+                                      'wins': variables.teamWins,
+                                      'games': variables.teamGames,
+                                      'rank': variables.teamRank,
+                                      'eliminatedRS': variables.eliminatedRS,
+                                      'eliminatedPP': variables.eliminatedPP,
+                                      'eliminatedPR1': variables.eliminatedPR1,
+                                      'eliminatedPR2': variables.eliminatedPR2,
+                                      'eliminatedPR3': variables.eliminatedPR3,
+                                      'champion': variables.champion,
                                       'monetaryFactor': parameters.monetaryFactor,
                                       'marketSize': parameters.marketSize,
                                       'seasonPhaseFactor': parameters.seasonPhaseFactor,
@@ -217,6 +226,32 @@ class League(object):
         skillDictionary = {teams[team]: round(skills[team], 2) for team in range(len(teams))}
 
         return skillDictionary
+
+    def update_team_data_post_regular_season(self):
+        """
+        Description:
+        update team data with regular season results
+
+        updates:
+        self.teamData (data frame): Data frame with data to team performance in season
+        """
+        # get required team information
+        teams = self.get_teams()
+        teamData = self.teamData.copy()
+        regularSeasonRanking = self.regularSeasonRanking.copy()
+
+        # for each team
+        for team in teams:
+            # update team data
+            teamData.loc[teamData['team'] == team, 'wins'] = regularSeasonRanking.loc[regularSeasonRanking['team'] == team, 'wins'].values[0]
+            teamData.loc[teamData['team'] == team, 'games'] = regularSeasonRanking.loc[regularSeasonRanking['team'] == team, 'games'].values[0]
+            teamData.loc[teamData['team'] == team, 'rank'] = regularSeasonRanking.loc[regularSeasonRanking['team'] == team, 'rank'].values[0]
+
+        # label eliminated teams in regular season
+        teamData['eliminatedRS'] = teamData['rank'].map(lambda x: 1 if x in [11, 12, 13, 14] else 0)
+
+        # assign new data back
+        self.teamData = teamData
 
     def check_intersection_optimal_final(self):
         """
@@ -428,6 +463,9 @@ class League(object):
         # simulate regular season to obtain ranking
         self.regularSeasonRanking = functions.simulate_regular_season(self)
 
+        # update team data based on regular season ranking
+        self.update_team_data_post_regular_season()
+
         # simulate playoffs
         champion = functions.simulate_playoffs(self)
 
@@ -449,7 +487,7 @@ class League(object):
 
         # calculate broadcasting revenue for this season
         currentBroadcastingRevenue = parameters.initialBroadcastingRevenue * (
-                    1 + parameters.broadcastingRevenueGrowth) ** season
+                1 + parameters.broadcastingRevenueGrowth) ** season
 
         # add broadcasting revenue to revenue
         self.teamData['revenue'] += currentBroadcastingRevenue

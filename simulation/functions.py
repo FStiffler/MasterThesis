@@ -697,12 +697,18 @@ def simulate_playoff_round(leagueObject, teamPairings, playoffsType):
                 skillHomeTeam = skillDictionary[homeTeam]
                 skillAwayTeam = skillDictionary[awayTeam]
 
+                # add a game to count for both teams
+                leagueObject.teamData.loc[leagueObject.teamData['team'].isin([homeTeam, awayTeam]), 'games'] += 1
+
                 # simulate game between teams
                 winner = simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam,
                                        leagueObject, parameters.prePlayoff)
 
                 # write winner to record
                 prePlayoffPairingRecord.loc[gameIndex, 'winner'] = winner
+
+                # add a win to count of winning team
+                leagueObject.teamData.loc[leagueObject.teamData['team'] == winner, 'wins'] += 1
 
                 # check if higher ranked team in pairing has already won pre playoff round
                 if len(prePlayoffPairingRecord.loc[prePlayoffPairingRecord['winner'] == higherRankedTeam]) == 2:
@@ -781,12 +787,18 @@ def simulate_playoff_round(leagueObject, teamPairings, playoffsType):
                 skillHomeTeam = skillDictionary[homeTeam]
                 skillAwayTeam = skillDictionary[awayTeam]
 
+                # add a game to count for both teams
+                leagueObject.teamData.loc[leagueObject.teamData['team'].isin([homeTeam, awayTeam]), 'games'] += 1
+
                 # simulate game between teams
                 winner = simulate_game(homeTeam, skillHomeTeam, awayTeam, skillAwayTeam,
                                        leagueObject, parameters.playoffs)
 
                 # write winner to record
                 playoffRoundPairingRecord.loc[gameIndex, 'winner'] = winner
+
+                # add a win to count of winning team
+                leagueObject.teamData.loc[leagueObject.teamData['team'] == winner, 'wins'] += 1
 
                 # check if higher ranked team in pairing has already won playoff round
                 if len(playoffRoundPairingRecord.loc[playoffRoundPairingRecord['winner'] == higherRankedTeam]) == 4:
@@ -868,6 +880,12 @@ def simulate_playoffs(leagueObject):
     # simulate pre playoffs
     prePlayoffWinners = simulate_playoff_round(leagueObject, prePlayoffPairings, parameters.prePlayoff)
 
+    # identify losers
+    prePlayoffLosers = set(prePlayoffTeams).difference(set(prePlayoffWinners))
+
+    # label eliminated teams in data
+    leagueObject.teamData.loc[leagueObject.teamData['team'].isin(prePlayoffLosers), 'eliminatedPP'] += 1
+
     # extract team revenues of pre playoff teams and not pre playoff teams before pre playoff
     prePlayoffTeamRevenuesAfter = leagueObject.get_team_revenues(prePlayoffTeams)
     notPrePlayoffTeamRevenuesAfter = leagueObject.get_team_revenues(notPrePlayoffTeams)
@@ -909,6 +927,12 @@ def simulate_playoffs(leagueObject):
     # simulate playoffs round 2
     roundOneWinners = simulate_playoff_round(leagueObject, roundOnePairings, parameters.playoffs)
 
+    # identify losers
+    roundOneLosers = set(roundOneTeams).difference(set(roundOneWinners))
+
+    # label eliminated teams in data
+    leagueObject.teamData.loc[leagueObject.teamData['team'].isin(roundOneLosers), 'eliminatedPR1'] += 1
+
     # extract team revenues of round one teams and not round one teams after round one
     roundOneTeamRevenuesAfter = leagueObject.get_team_revenues(roundOneTeams)
     notRoundOneTeamRevenuesAfter = leagueObject.get_team_revenues(notRoundOneTeams)
@@ -946,6 +970,12 @@ def simulate_playoffs(leagueObject):
     # simulate playoffs round 1
     roundTwoWinners = simulate_playoff_round(leagueObject, roundTwoPairings, parameters.playoffs)
 
+    # identify losers
+    roundTwoLosers = set(roundTwoTeams).difference(set(roundTwoWinners))
+
+    # label eliminated teams in data
+    leagueObject.teamData.loc[leagueObject.teamData['team'].isin(roundTwoLosers), 'eliminatedPR2'] += 1
+
     # extract team revenues of round two teams and not round two teams after round two
     roundTwoTeamRevenuesAfter = leagueObject.get_team_revenues(roundTwoTeams)
     notRoundTwoTeamRevenuesAfter = leagueObject.get_team_revenues(notRoundTwoTeams)
@@ -977,6 +1007,15 @@ def simulate_playoffs(leagueObject):
 
     # simulate playoffs round 3
     champion = simulate_playoff_round(leagueObject, roundThreePairing, parameters.playoffs)
+
+    # identify loser
+    roundThreeLoser = set(roundThreeTeams).difference(set(champion))
+
+    # label eliminated teams in data
+    leagueObject.teamData.loc[leagueObject.teamData['team'].isin(roundThreeLoser), 'eliminatedPR3'] += 1
+
+    # label champion
+    leagueObject.teamData.loc[leagueObject.teamData['team'] == champion[0], 'champion'] += 1
 
     # extract team revenues of round three teams and not round three teams after round three
     roundThreeTeamRevenuesAfter = leagueObject.get_team_revenues(roundThreeTeams)
