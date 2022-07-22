@@ -3,11 +3,14 @@ import imports
 # global parameters (do not change during simulation)
 alpha = 1.48  # parameter 'alpha' of beta distribution
 beta = 3.56  # parameter 'beta' of beta distribution
-initialPlayerPoolSize = 342  # initial size of player pool at beginning of simulation, references 'k_0' in thesis
-naturalPlayerPoolGrowth = 0.021  # natural annual growth of player pool size (without changes at player limit)
+initialSwissPlayers = 300  # initial number of Swiss players in player pool, references 'k_Swiss,0' in thesis
+naturalPlayerBaseGrowth = 0.021  # natural annual growth of swiss player base, references 'kappa' in thesis
 leagueSize = 14  # number of teams in the league, references 'n' in thesis
 teams = imports.gameAttendanceData['team'].tolist()  # import names of teams, references 'i'
 teamSize = 22  # number of players in each team, references 'h' in thesis
+playerNumberMin = leagueSize*teamSize  # the number of minimal required players in the player pool, references 'k_min' in thesis
+pLambda = 356  # parameter 'lambda' of supply effect
+pGamma = 0  # parameter 'gamma' of supply effect
 bestPlayerRevenueShare = 0.05  # the share of the best player's salary of the highest team's revenue, references 'gamma' in thesis
 marketSize = imports.gameAttendanceData['rsMedian'].tolist()  # per team median of average game attendances in past years, references market size 'm_i' in thesis
 seasonPhaseFactor = list(zip([1]*leagueSize, imports.gameAttendanceData['grMedian'].tolist()))  # tuple of season phase factors per team where the first factor is the regular season factor and the second the playoffs factor, references season phase factor 'r_ig' in thesis
@@ -22,4 +25,3 @@ broadcastingRevenueGrowth = 0.031  # factor by which the revenue of teams from b
 regularSeason = 0  # parameter indicating regular season
 prePlayoff = 1  # parameter indicating prePlayoffs which means best of five series
 playoffs = 2  # parameter indicating Playoffs which means best of seven series
-seasons = 2  # the number of consecutive seasons to simulate

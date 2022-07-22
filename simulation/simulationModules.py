@@ -3,13 +3,14 @@ import classes
 import parameters
 
 
-def simulate_one_season(league, season):
+def simulate_one_season(league, allowedImports, season):
     """
     Description:
     Module to simulate one single season
 
     Input:
     league (League): A league of object League
+    season (int): An integer the number of allowed import players per team
     season (int): An integer indicating the season
 
     Returns:
@@ -20,7 +21,7 @@ def simulate_one_season(league, season):
     maximalBudget = max(league.get_team_budgets())
 
     # initialise player pool
-    playerPool = classes.PlayerPool(season, maximalBudget)
+    playerPool = classes.PlayerPool(season, maximalBudget, allowedImports)
 
     # solve skill maximization problem for each team
     league.select_optimal_players(playerPool)
@@ -53,7 +54,7 @@ def simulate_one_season(league, season):
     return seasonTeamResults, seasonPlayerResults
 
 
-def simulate_consecutive_seasons(simulationTeamResults, simulationPlayerResults, seasons):
+def simulate_consecutive_seasons(simulationTeamResults, simulationPlayerResults, allowedImports, seasons):
     """
     Description:
     Module to simulate consecutive seasons
@@ -61,6 +62,7 @@ def simulate_consecutive_seasons(simulationTeamResults, simulationPlayerResults,
     Input:
     simulationTeamResults (data frame): data frame containing all the simulation team results
     simulationPlayerResults (data frame): data frame containing all the simulation player results
+    allowedImports (int): the number of allowed import players per team
     seasons (int): the number of consecutive seasons to simulate
 
     Returns:
@@ -74,7 +76,7 @@ def simulate_consecutive_seasons(simulationTeamResults, simulationPlayerResults,
             league = classes.League()
 
         # simulate season and get results
-        seasonTeamResults, seasonPlayerResults = simulate_one_season(league, season)
+        seasonTeamResults, seasonPlayerResults = simulate_one_season(league, allowedImports, season)
 
         # add season team result to simulation results
         simulationTeamResults = pd.concat([simulationTeamResults, seasonTeamResults], ignore_index=True)

@@ -7,6 +7,29 @@ import random as ra
 import itertools as it
 
 
+def supply_effect(playerPoolSize):
+    """
+    Description:
+    Function to calculate supply effect
+
+    Input:
+    playerPoolSize (int): The number of players in the player pool
+
+    Returns:
+    supply effect (nan,int): either 'not defined' or integer expressing the effect
+    """
+
+    # if player pool is smaller than the defined minimum
+    if playerPoolSize < parameters.playerNumberMin:
+        # wages are not defined
+        return np.nan
+
+    # if player pool is at least as large as the required minimum
+    else:
+        # calculate and return the supply effect
+        return parameters.pLambda / (playerPoolSize - parameters.pGamma)
+
+
 def skill_maximization(playerPool, teamBudget):
     """
     Description:

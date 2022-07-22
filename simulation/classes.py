@@ -7,7 +7,7 @@ import numpy as np
 
 # define player pool as class
 class PlayerPool(object):
-    def __init__(self, season=1, maximalBudget=max(parameters.initialTeamBudget)):
+    def __init__(self, season=1, maximalBudget=max(parameters.initialTeamBudget), allowedImports=4):
         """
         Description:
         Initializes the player pool object. The object is fully initialised based on parameters and variables
@@ -22,10 +22,10 @@ class PlayerPool(object):
         self.availablePlayersData (dataframe): A dataframe with information about available players not yet picked by a team, initialised with all players
         """
         self.maximalSalary = round(parameters.bestPlayerRevenueShare * maximalBudget)  # maximal salary for best available player, references 'w_max' in thesis
-        self.size = round(parameters.initialPlayerPoolSize * (1 + parameters.naturalPlayerPoolGrowth) ** season)  # new player pool size, references 'k_t' in thesis
+        self.size = round(parameters.initialSwissPlayers * (1 + parameters.naturalPlayerBaseGrowth) ** season + allowedImports * parameters.leagueSize)  # new player pool size, references 'k_t' in thesis
         self.allPlayers = np.arange(start=1, stop=self.size + 1)  # create players with numbers from 1 to player pool size to create all players in player pool, references 'p' in thesis
         self.allPlayerSkills = np.round(np.random.beta(a=parameters.alpha, b=parameters.beta, size=self.size), 2)  # draw skill from beta distribution to create all skill levels of players in player pool, references 'S_p' in thesis
-        self.allPlayerSalaries = np.round(self.maximalSalary * self.allPlayerSkills * (1 - ((self.size - parameters.initialPlayerPoolSize) / parameters.initialPlayerPoolSize)))  # calculate player salaries to create all salaries in the player pool, references 'W_p' in thesis
+        self.allPlayerSalaries = np.round(self.maximalSalary * self.allPlayerSkills * functions.supply_effect(self.size))  # calculate player salaries to create all salaries in the player pool, references 'W_p' in thesis
         self.allPlayersData = self.get_all_player_data()
         self.availablePlayersData = self.get_all_player_data()
 

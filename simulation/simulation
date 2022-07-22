@@ -1,10 +1,13 @@
 import pandas as pd
 import simulationModules
-import parameters
 
 # initialize empty data frames to log results
 simulationTeamResults = pd.DataFrame()
 simulationPlayerResults = pd.DataFrame()
 
+# simulation parameters
+allowedImports = 4  # the number of allowed import players per team, references 'zeta' in thesis
+seasons = 5  # the number of consecutive seasons to simulate, references 't' in thesis
+
 # simulate consecutive seasons
-simulationTeamResults, simulationPlayerResults = simulationModules.simulate_consecutive_seasons(simulationTeamResults, simulationPlayerResults, parameters.seasons)
+simulationTeamResults, simulationPlayerResults = simulationModules.simulate_consecutive_seasons(simulationTeamResults, simulationPlayerResults, allowedImports, seasons)
