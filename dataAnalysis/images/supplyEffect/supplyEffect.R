@@ -5,9 +5,9 @@ source("../dependencies.R")
 colors <- brewer.pal(4, "Set1")
 
 # create supply effect function
-supplyFunction <- function(k, kmin, theta, lambda){
+supplyFunction <- function(k, kmin, lambda, gamma){
   
-  solution <- theta/(k+lambda)
+  solution <- lambda/(k+gamma)
   solution[k<kmin]<-NA
   solution
    
@@ -17,17 +17,26 @@ supplyFunction <- function(k, kmin, theta, lambda){
 xmax= 7500
 kmin = 300
 k0=350
-theta = 500
-lambda = 0
+lambda = 500
+gamma = 0
 
-# function to find parameters theta and lambda based on solution to equation system:
-#   theta/(k0+lambda)=1
-#   theta/(epsilon*k0+lambda)=0.5
+# import font
+font_add(family="CM",
+         regular='../fonts/cmunrm.ttf')
+showtext_auto()
+
+# font sizes
+titleSize <- 60
+textSize <- 55
+
+# function to find parameters lambda and gamma based on solution to equation system:
+#   lambda/(k0+gamma)=1
+#   lambda/(epsilon*k0+gamma)=0.5
 findParameters<-function(k0, epsilon){
   
-  lambda <- epsilon*k0-k0/0.5
-  theta <- k0 + lambda
-  params = list("epsilon"=epsilon, "theta"=theta, "lambda"=lambda)
+  gamma <- epsilon*k0-k0/0.5
+  lambda <- k0 + gamma
+  params = list("epsilon"=epsilon, "lambda"=lambda, "gamma"=gamma)
   return(params)
   
 }
@@ -35,25 +44,25 @@ findParameters<-function(k0, epsilon){
 
 # explanatory plots ####
 
-# plot supply effect function for different theta with constant kmin and lambda
-supplyFunctionTheta<-ggplot()+
+# plot supply effect function for different lambda with constant kmin and gamma
+supplyFunctionLambda<-ggplot()+
   stat_function(fun=supplyFunction,
-                args = list(kmin = kmin, theta = 0.5*theta, lambda = lambda),
+                args = list(kmin = kmin, lambda = 0.5*lambda, gamma = gamma),
                 aes(color="first"),
                 xlim = c(0,xmax)
   )+
   stat_function(fun=supplyFunction,
-                args = list(kmin = kmin, theta = 1*theta, lambda = lambda),
+                args = list(kmin = kmin, lambda = 1*lambda, gamma = gamma),
                 aes(color="second"),
                 xlim = c(0,xmax)
   )+
   stat_function(fun=supplyFunction,
-                args = list(kmin = kmin, theta = 2*theta, lambda = lambda),
+                args = list(kmin = kmin, lambda = 2*lambda, gamma = gamma),
                 aes(color="third"),
                 xlim = c(0,xmax)
   )+
   stat_function(fun=supplyFunction,
-                args = list(kmin = kmin, theta = 5*theta, lambda = lambda),
+                args = list(kmin = kmin, lambda = 5*lambda, gamma = gamma),
                 aes(color="fourth"),
                 xlim = c(0,xmax)
   )+
@@ -62,17 +71,17 @@ supplyFunctionTheta<-ggplot()+
     breaks = c("first", "second", "third", "fourth"),
     values = colors,
     labels = c(
-      expression(paste("0.5",theta)),
-      expression(paste(theta)),
-      expression(paste("2",theta)),
-      expression(paste("5",theta))
+      expression(paste("0.5",lambda)),
+      expression(paste(lambda)),
+      expression(paste("2",lambda)),
+      expression(paste("5",lambda))
     )
   )+
   scale_x_continuous(expand = c(0,0),
                      breaks = c(kmin),
                      labels = expression(k[min]))+
   scale_y_continuous(expand = c(0,0),
-                     limits = c(0, 10.5),
+                     limits = c(0, 10),
                      breaks = seq(0,10,1))+
   theme_minimal()+
   labs(
@@ -84,40 +93,46 @@ supplyFunctionTheta<-ggplot()+
     panel.grid.major.x  = element_blank(),
     panel.grid.major.y = element_blank(),
     plot.title = element_text(hjust = 0.5),
-    axis.title.x = element_text(family = "CM", size=20, margin=margin(10,0,0,0)),
-    axis.title.y = element_text(family = "CM", size=20, margin=margin(0,10,0,0)),
+    axis.title.x = element_text(family = "CM", size=titleSize, margin=margin(7,0,0,0)),
+    axis.title.y = element_text(family = "CM", size=titleSize, margin=margin(0,7,0,0)),
     legend.title = element_blank(),
-    legend.position = c(0.95, 0.9),
-    legend.text = element_text(family="CM", size=20),
+    legend.justification = c(1,1),
+    legend.position = c(1, 1),
+    legend.key.size = unit(5, "pt"),
+    legend.key.width = unit(10, "pt"),
+    legend.spacing.y = unit(2, "pt"),
+    legend.text = element_text(family="CM", size=textSize),
     legend.text.align = 0,
     axis.line = element_line(color="darkgrey"),
     axis.ticks = element_line(color="darkgrey"),
-    axis.text.x = element_text(family = "CM", size=16, color="darkgrey"),
-    axis.text.y = element_text(family = "CM", size=16, color="darkgrey")
-  )
+    axis.text.x = element_text(family = "CM", size=textSize, color="darkgrey"),
+    axis.text.y = element_text(family = "CM", size=textSize, color="darkgrey"),
+    plot.margin = margin(t=10, r=10, b=5, l=5, unit = "pt")
+  )+
+  guides(color = guide_legend(byrow = TRUE))
 
-supplyFunctionTheta
-ggsave(supplyFunctionTheta, file = "supplyFunctionTheta.png", height=8, width=16, bg='white')
+supplyFunctionLambda
+ggsave(supplyFunctionLambda, file = "supplyFunctionLambda.png", height=3, width=6, bg='white', dpi=700)
 
-# plot supply effect function for different lambda with constant kmin and theta
-supplyFunctionLambda<-ggplot()+
+# plot supply effect function for different gamma with constant kmin and lambda
+supplyFunctionGamma<-ggplot()+
   stat_function(fun=supplyFunction,
-                args = list(kmin = kmin, theta = theta, lambda = lambda+kmin),
+                args = list(kmin = kmin, lambda = lambda, gamma = gamma+kmin),
                 aes(color="first"),
                 xlim = c(0,xmax)
   )+
   stat_function(fun=supplyFunction,
-                args = list(kmin = kmin, theta = theta, lambda = lambda),
+                args = list(kmin = kmin, lambda = lambda, gamma = gamma),
                 aes(color="second"), 
                 xlim = c(0,xmax)
   )+
   stat_function(fun=supplyFunction,
-                args = list(kmin = kmin, theta = theta, lambda = lambda-kmin),
+                args = list(kmin = kmin, lambda = lambda, gamma = gamma-kmin),
                 aes(color="third"),
                 xlim = c(0,xmax)
   )+
   stat_function(fun=supplyFunction,
-                args = list(kmin = kmin, theta = theta, lambda = lambda-5*kmin),
+                args = list(kmin = kmin, lambda = lambda, gamma = gamma-5*kmin),
                 aes(color="fourth"),
                 xlim = c(0,xmax)
   )+
@@ -126,17 +141,17 @@ supplyFunctionLambda<-ggplot()+
     breaks = c("first", "second", "third", "fourth"),
     values = colors,
     labels = c(
-      expression(paste(lambda,'='*+k[min])),
-      expression(paste(lambda,'=0')),
-      expression(paste(lambda,'='*-k[min])),
-      expression(paste(lambda,'=-5'*k[min]))
+      expression(paste(gamma,'='*k[min])),
+      expression(paste(gamma,'=0')),
+      expression(paste(gamma,'=-'*k[min])),
+      expression(paste(gamma,'=-5'*k[min]))
     )
   )+
   scale_x_continuous(expand = c(0,0),
                      breaks = c(kmin),
                      labels = expression(k[min]))+
   scale_y_continuous(expand = c(0,0),
-                     limits = c(0, 10.5),
+                     limits = c(0, 10),
                      breaks = seq(0,10,1))+
   theme_minimal()+
   labs(
@@ -148,20 +163,26 @@ supplyFunctionLambda<-ggplot()+
     panel.grid.major.x  = element_blank(),
     panel.grid.major.y = element_blank(),
     plot.title = element_text(hjust = 0.5),
-    axis.title.x = element_text(family = "CM", size=20, margin=margin(10,0,0,0)),
-    axis.title.y = element_text(family = "CM", size=20, margin=margin(0,10,0,0)),
+    axis.title.x = element_text(family = "CM", size=titleSize, margin=margin(7,0,0,0)),
+    axis.title.y = element_text(family = "CM", size=titleSize, margin=margin(0,7,0,0)),
     legend.title = element_blank(),
-    legend.position = c(0.95, 0.9),
-    legend.text = element_text(family="CM", size=20),
+    legend.justification = c(1,1),
+    legend.position = c(1, 1),
+    legend.key.size = unit(5, "pt"),
+    legend.key.width = unit(10, "pt"),
+    legend.spacing.y = unit(2, "pt"),
+    legend.text = element_text(family="CM", size=textSize),
     legend.text.align = 0,
     axis.line = element_line(color="darkgrey"),
     axis.ticks = element_line(color="darkgrey"),
-    axis.text.x = element_text(family = "CM", size=16, color="darkgrey"),
-    axis.text.y = element_text(family = "CM", size=16, color="darkgrey")
-  )
+    axis.text.x = element_text(family = "CM", size=textSize, color="darkgrey"),
+    axis.text.y = element_text(family = "CM", size=textSize, color="darkgrey"),
+    plot.margin = margin(t=10, r=10, b=5, l=5, unit = "pt")
+  )+
+  guides(color = guide_legend(byrow = TRUE))
 
-supplyFunctionLambda
-ggsave(supplyFunctionLambda, file = "supplyFunctionLambda.png", height=8, width=16, bg='white')
+supplyFunctionGamma
+ggsave(supplyFunctionGamma, file = "supplyFunctionGamma.png", height=3, width=6, bg='white', dpi=700)
 
 
 # solve equation system for illustrative plot with epsilon 2 and 4
@@ -177,29 +198,31 @@ supplyFunctionEpsilon<-ggplot()+
   
   # curve and marks with epsilon = 4
   stat_function(fun=supplyFunction,
-                args = list(kmin = kmin, theta = parameters2$theta, lambda = parameters2$lambda),
+                args = list(kmin = kmin, lambda = parameters2$lambda, gamma = parameters2$gamma),
                 xlim = c(kmin, 5*k0),
+                size = 0.5,
                 aes(color="epsilon2")
   )+
-  geom_point(aes(x=parameters2$epsilon*k0, y=0.5, color="epsilon2"))+
-  geom_segment(aes(x=parameters2$epsilon*k0, xend=parameters2$epsilon*k0, y=0, yend=0.5, color="epsilon2"), linetype = 3)+
-  geom_segment(aes(x=parameters1$epsilon*k0, xend=parameters2$epsilon*k0, y=0.5, yend=0.5, color="epsilon2"), linetype = 3)+
+  geom_point(aes(x=parameters2$epsilon*k0, y=0.5, color="epsilon2"), size=1)+
+  geom_segment(aes(x=parameters2$epsilon*k0, xend=parameters2$epsilon*k0, y=0, yend=0.5, color="epsilon2"), linetype = 3, size = 0.5,)+
+  geom_segment(aes(x=parameters1$epsilon*k0, xend=parameters2$epsilon*k0, y=0.5, yend=0.5, color="epsilon2"), linetype = 3, size = 0.5,)+
   
   # curve and marks with epsilon = 2
   stat_function(fun=supplyFunction,
-                args = list(kmin = kmin, theta = parameters1$theta, lambda = parameters1$lambda),
+                args = list(kmin = kmin, lambda = parameters1$lambda, gamma = parameters1$gamma),
                 xlim = c(kmin, 5*k0),
+                size = 0.5,
                 aes(color="epsilon1")
   )+
-  geom_point(aes(x=parameters1$epsilon*k0, y=0.5, color="epsilon1"))+
-  geom_segment(aes(x=parameters1$epsilon*k0, xend=parameters1$epsilon*k0, y=0, yend=0.5, color="epsilon1"), linetype = 3)+
-  geom_segment(aes(x=0, xend=parameters1$epsilon*k0, y=0.5, yend=0.5, color="epsilon1"), linetype = 3)+
+  geom_point(aes(x=parameters1$epsilon*k0, y=0.5, color="epsilon1"), size=1)+
+  geom_segment(aes(x=parameters1$epsilon*k0, xend=parameters1$epsilon*k0, y=0, yend=0.5, color="epsilon1"), linetype = 3, size = 0.5,)+
+  geom_segment(aes(x=0, xend=parameters1$epsilon*k0, y=0.5, yend=0.5, color="epsilon1"), linetype = 3, size = 0.5,)+
   
 
   # marks at k0
-  geom_point(aes(x=k0, y=1), color="black")+
-  geom_segment(aes(x=k0, xend=k0, y=0, yend=1), color="black", linetype = 3)+
-  geom_segment(aes(x=0, xend=k0, y=1, yend=1), color="black", linetype = 3)+
+  geom_point(aes(x=k0, y=1), color="black", size=1)+
+  geom_segment(aes(x=k0, xend=k0, y=0, yend=1), color="black", linetype = 3, size = 0.5,)+
+  geom_segment(aes(x=0, xend=k0, y=1, yend=1), color="black", linetype = 3, size = 0.5,)+
   
   # cosmetics
   scale_x_continuous(expand = c(0,0),
@@ -211,8 +234,8 @@ supplyFunctionEpsilon<-ggplot()+
                                 )
                      )+
   scale_y_continuous(expand = c(0,0),
-                     limits = c(0,1.6),
-                     breaks = seq(0,2,0.5)
+                     limits = c(0,1.75),
+                     breaks = seq(0,2,0.25)
                      )+
   scale_color_manual(
     breaks = c("epsilon1", "epsilon2"),
@@ -232,21 +255,27 @@ supplyFunctionEpsilon<-ggplot()+
     panel.grid.major.x  = element_blank(),
     panel.grid.major.y = element_blank(),
     plot.title = element_text(hjust = 0.5),
-    axis.title.x = element_text(family = "CM", size=20, margin=margin(10,0,0,0)),
-    axis.title.y = element_text(family = "CM", size=20, margin=margin(0,10,0,0)),
+    axis.title.x = element_text(family = "CM", size=titleSize, margin=margin(7,0,0,0)),
+    axis.title.y = element_text(family = "CM", size=titleSize, margin=margin(0,7,0,0)),
     legend.title = element_blank(),
-    legend.position = c(0.95, 0.95),
-    legend.text = element_text(family="CM", size=20),
+    legend.justification = c(1,1),
+    legend.position = c(1, 1),
+    legend.key.size = unit(5, "pt"),
+    legend.key.width = unit(10, "pt"),
+    legend.spacing.y = unit(2, "pt"),
+    legend.text = element_text(family="CM", size=textSize),
     legend.text.align = 0,
     axis.line = element_line(color="darkgrey"),
     axis.ticks.y = element_line(color="darkgrey"),
     axis.ticks.x = element_line(color=c("darkgrey", "black", colors[1], colors[2])),
-    axis.text.x = element_text(family = "CM", size=16, color=c("darkgrey", "black", colors[1], colors[2])),
-    axis.text.y = element_text(family = "CM", size=16, color = "darkgrey")
-  )
+    axis.text.x = element_text(family = "CM", size=textSize, color=c("darkgrey", "black", colors[1], colors[2])),
+    axis.text.y = element_text(family = "CM", size=textSize, color = "darkgrey"),
+    plot.margin = margin(t=10, r=10, b=5, l=5, unit = "pt")
+  )+
+  guides(color = guide_legend(byrow = TRUE))
 
 supplyFunctionEpsilon
-ggsave(supplyFunctionEpsilon, file = "supplyFunctionEpsilon.png", height=8, width=16, bg='white')
+ggsave(supplyFunctionEpsilon, file = "supplyFunctionEpsilon.png", height=3, width=6, bg='white', dpi=700)
 
 
 # plots based on real data ####
@@ -263,9 +292,10 @@ supplyFunctionReal<-ggplot()+
   
   # curve and marks with epsilon = 4
   stat_function(fun=supplyFunction,
-                args = list(kmin = kmin, theta = parameters$theta, lambda = parameters$lambda),
+                args = list(kmin = kmin, lambda = parameters$lambda, gamma = parameters$gamma),
                 color="black",
-                xlim=c(kmin, 2100)
+                xlim=c(kmin, 2100), 
+                size=0.5
   )+ 
   
   # cosmetics
@@ -274,7 +304,7 @@ supplyFunctionReal<-ggplot()+
                      limits = c(0, 2100)
   )+
   scale_y_continuous(expand = c(0,0),
-                     limits = c(0,1.6),
+                     limits = c(0,1.5),
                      breaks = seq(0,2,0.5)
   )+
   theme_minimal()+
@@ -287,19 +317,19 @@ supplyFunctionReal<-ggplot()+
     panel.grid.major.x  = element_blank(),
     panel.grid.major.y = element_blank(),
     plot.title = element_text(hjust = 0.5),
-    axis.title.x = element_text(family = "CM", size=20, margin=margin(10,0,0,0)),
-    axis.title.y = element_text(family = "CM", size=20, margin=margin(0,10,0,0)),
+    axis.title.x = element_text(family = "CM", size=titleSize, margin=margin(7,0,0,0)),
+    axis.title.y = element_text(family = "CM", size=titleSize, margin=margin(0,7,0,0)),
     legend.title = element_blank(),
-    legend.position = c(0.95, 0.95),
-    legend.text = element_text(family="CM", size=20),
+    legend.text = element_text(family="CM", size=textSize),
     legend.text.align = 0,
     axis.line = element_line(color="darkgrey"),
     axis.ticks = element_line(color="darkgrey"),
-    axis.text.x = element_text(family = "CM", size=16, color=c("darkgrey")),
-    axis.text.y = element_text(family = "CM", size=16, color = "darkgrey")
+    axis.text.x = element_text(family = "CM", size=textSize, color=c("darkgrey")),
+    axis.text.y = element_text(family = "CM", size=textSize, color = "darkgrey"),
+    plot.margin = margin(t=10, r=10, b=5, l=5, unit = "pt")
   )
 
 supplyFunctionReal
-ggsave(supplyFunctionReal, file = "supplyFunctionReal.png", height=8, width=16, bg='white')
+ggsave(supplyFunctionReal, file = "supplyFunctionReal.png", height=3, width=6, bg='white', dpi=700)
 
 
