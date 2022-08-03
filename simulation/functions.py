@@ -30,17 +30,18 @@ def supply_effect(playerPoolSize):
         return parameters.pLambda / (playerPoolSize - parameters.pGamma)
 
 
-def skill_maximization(playerPool, teamBudget):
+def skill_maximization(playerPool, teamBudget, teamSize):
     """
     Description:
     Function which allows team to select players while maximizing skill given a team size and budget constraint
 
     Input:
-    playerPool (PlayerPool): A player pool of object PlayerPool
+    playerPool (PlayerPool): A player pool of either object DomesticPlayerPool or ForeignPlayerPool
     teamBudget (int): The budget constraint for a particular team used to optimize skill
+    teamSize (int): The number of players to be selected as condition
 
     Returns:
-    selectedPlayers (pandas dataframe): A pandas dataframe which includes data about selected players by team
+    selectedPlayers (pandas dataframe): A pandas dataframe which includes data about selected domestic players by team
     """
 
     # initialize variables
@@ -49,7 +50,7 @@ def skill_maximization(playerPool, teamBudget):
     skills = playerPool.get_all_player_skills()  # get skill levels of all players as list
     salaries = playerPool.get_all_player_salaries()  # get salaries of all players as list
     binaries = [pl.LpVariable(  # initialise list of binary variables, one for each player
-        "d_" + str(players[i]),  # name the variables: d_player
+        players[i],  # name the variables: d_player
         cat="Binary") for i in range(len(players))]  # iterate through all players
 
     # initialize problem
@@ -59,7 +60,7 @@ def skill_maximization(playerPool, teamBudget):
     prob += pl.lpSum(binaries[i] * skills[i] for i in range(len(players)))  # maximize skill
 
     # define the constraints
-    prob += pl.lpSum(binaries[i] for i in range(len(players))) == parameters.teamSize  # team size constraint
+    prob += pl.lpSum(binaries[i] for i in range(len(players))) == teamSize  # team size constraint
     prob += pl.lpSum(binaries[i] * salaries[i] for i in range(len(players))) <= teamBudget  # budget constraint
 
     # solve problem to obtain the optimal solution (best team)
@@ -86,15 +87,16 @@ def skill_maximization(playerPool, teamBudget):
     solutionDF = solutionDF[solutionDF['Optimal Value'] == 1]  # filter selected players
     selectedPlayers = playerData.loc[  # create data frame with information about selected players
         playerData['player'].isin(  # filter players in array
-            np.array(
-                solutionDF.Variable.str.split('_').tolist()  # extract player player from variable name
-            )[:, 1].astype(int)  # select column with player and define them as integer
+            solutionDF['Variable'].tolist()  # select column with player and define them as integer
         )
     ]
 
     # assert that constraints hold since the solver does not throw an error when not converging to a solution
-    assert len(selectedPlayers) == parameters.teamSize
+    assert len(selectedPlayers) == teamSize
     assert selectedPlayers.salary.sum() <= teamBudget
+
+    print(selectedPlayers.salary.sum())
+    print(teamBudget)
 
     # return selected team
     return selectedPlayers
@@ -259,15 +261,15 @@ def player_chooses_team(interestedTeams):
     return decision
 
 
-def teams_choose_replacement(player, team, playerPool, leagueObject):
+def teams_choose_replacement(player, team, domesticPlayerPool, leagueObject):
     """
     Description:
-    Function representing the replacement decision by teams which were not picked by a player they considered optimal
+    Function representing the replacement decision by teams which were not picked by a domestic player they considered optimal
 
     Input:
-    player (int): The player who did not join the team and thus needs to be replaced
-    team (str): The team which has to decide which player to choose now for replacement
-    playerPool (PlayerPool): The initialised player pool object
+    player (int): The domestic player who did not join the team and thus needs to be replaced
+    team (str): The team which has to decide which domestic player to choose now for replacement
+    domesticPlayerPool (PlayerPool): The initialised domestic player pool object
     leagueObject (League): The initialised league object of class League
 
     Returns:
@@ -277,8 +279,8 @@ def teams_choose_replacement(player, team, playerPool, leagueObject):
     teamData = leagueObject.teamData
 
     # get required player information
-    allPlayersData = playerPool.allPlayersData
-    availablePlayersData = playerPool.availablePlayersData.copy()
+    allPlayersData = domesticPlayerPool.allPlayersData
+    availablePlayersData = domesticPlayerPool.availablePlayersData.copy()
 
     # filter player skill from player to be replaced
     playerSkill = allPlayersData.loc[allPlayersData['player'] == player, 'skill'].values[0]
@@ -302,7 +304,7 @@ def teams_choose_replacement(player, team, playerPool, leagueObject):
     while index < len(availablePlayersData):
 
         # identify a replacement player in increasing order of skill gab
-        replacementPlayerInfo = availablePlayersData.iloc[index,]
+        replacementPlayerInfo = availablePlayersData.iloc[index, ]
 
         # identify salary of replacement player
         replacementPlayerSalary = replacementPlayerInfo['salary']
@@ -325,7 +327,7 @@ def teams_choose_replacement(player, team, playerPool, leagueObject):
         else:
 
             # identify replacement player by player number
-            replacementPlayer = int(replacementPlayerInfo['player'])
+            replacementPlayer = replacementPlayerInfo['player']
 
             # break loop
             break

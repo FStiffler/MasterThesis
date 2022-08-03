@@ -6,8 +6,8 @@ simulationTeamResults = pd.DataFrame()
 simulationPlayerResults = pd.DataFrame()
 
 # simulation parameters
-allowedImports = 4  # the number of allowed import players per team, references 'zeta' in thesis
-seasons = 5  # the number of consecutive seasons to simulate, references 't' in thesis
+allowedImports = 4  # the number of allowed import players per team, references 'rho' in thesis
+seasons = 1  # the number of consecutive seasons to simulate, references 't' in thesis
 
 # simulate consecutive seasons
 simulationTeamResults, simulationPlayerResults = simulationModules.simulate_consecutive_seasons(simulationTeamResults, simulationPlayerResults, allowedImports, seasons)

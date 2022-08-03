@@ -5,27 +5,35 @@ import random as ra
 import numpy as np
 
 
-# define player pool as class
-class PlayerPool(object):
+# define domestic player pool as class
+class DomesticPlayerPool(object):
     def __init__(self, season=1, maximalBudget=max(parameters.initialTeamBudget), allowedImports=4):
         """
         Description:
-        Initializes the player pool object. The object is fully initialised based on parameters and variables
+        Initializes the domestic player pool object. The object is fully initialised based on parameters and variables
 
         Input:
         season (int): the index of season currently played, default is 1
-        maximalBudget: the highest team budget, default is defined highest initial team budget
+        maximalBudget (int): the highest team budget, default is defined highest initial team budget
+        allowedImports (int): the number of allowed import players per team in the league, default is 4
 
-        A player pool object has the following attributes:
-        self.size (int): Determines pool size (number of available players)
+        A domestic player pool object has the following attributes:
+        self.domesticTeamSize (int): determines the number of domestic players on team
+        self.domesticSize (int): determines pool size of domestic player pool (number of available players)
+        self.totalSize (int): determines the total size of player pool faced by teams
+        self.allPlayers (list): list with player ids of the form d_id
+        self.allPlayerSkills (array): array with all player skills
+        self.allPlayerSkills (array): array with all player skills
         self.allPlayersData (dataframe): A dataframe with information about all initialised players, infos are to be found in parameter file
         self.availablePlayersData (dataframe): A dataframe with information about available players not yet picked by a team, initialised with all players
         """
+        self.domesticTeamSize = parameters.teamSize - allowedImports  # domestic players of team, references 'h_domestic' in thesis
+        self.domesticSize = round(parameters.initialSwissPlayers * (1 + parameters.naturalPlayerBaseGrowth) ** season)  # domestic player pool size, references 'k_domestic' in thesis
+        self.totalSize = self.domesticSize + allowedImports  # total player pool size faced by teams, references 'k_t' in thesis
         self.maximalSalary = round(parameters.bestPlayerRevenueShare * maximalBudget)  # maximal salary for best available player, references 'w_max' in thesis
-        self.size = round(parameters.initialSwissPlayers * (1 + parameters.naturalPlayerBaseGrowth) ** season + allowedImports * parameters.leagueSize)  # new player pool size, references 'k_t' in thesis
-        self.allPlayers = np.arange(start=1, stop=self.size + 1)  # create players with numbers from 1 to player pool size to create all players in player pool, references 'p' in thesis
-        self.allPlayerSkills = np.round(np.random.beta(a=parameters.alpha, b=parameters.beta, size=self.size), 2)  # draw skill from beta distribution to create all skill levels of players in player pool, references 'S_p' in thesis
-        self.allPlayerSalaries = np.round(self.maximalSalary * self.allPlayerSkills * functions.supply_effect(self.size))  # calculate player salaries to create all salaries in the player pool, references 'W_p' in thesis
+        self.allPlayers = ['d'+str(p) for p in range(1, self.domesticSize+1)]  # create players with numbers from 1 to domestic player pool size to create all players in player pool, references 'p_domestic' in thesis
+        self.allPlayerSkills = np.round(np.random.beta(a=parameters.alpha, b=parameters.beta, size=self.domesticSize), 2)  # draw skill from beta distribution to create all skill levels of players in player pool, references 'S_p' in thesis
+        self.allPlayerSalaries = np.round(self.maximalSalary * self.allPlayerSkills * functions.supply_effect(self.totalSize))  # calculate player salaries to create all salaries in the player pool, references 'W_p' in thesis
         self.allPlayersData = self.get_all_player_data()
         self.availablePlayersData = self.get_all_player_data()
 
@@ -37,14 +45,28 @@ class PlayerPool(object):
         Returns:
         allPlayersData (dataframe): Dataframe with information about all players
         """
+
         allPlayersData = pd.DataFrame(
-            data=np.column_stack((self.allPlayers, self.allPlayerSkills, self.allPlayerSalaries)),
-            # arrays as columns
-            columns=["player", "skill", "salary"]
+            {
+                "player": self.allPlayers,
+                "skill": self.allPlayerSkills.tolist(),
+                "salary": self.allPlayerSalaries.tolist()
+            }
         )
-        allPlayersData = allPlayersData.astype({"player": int, 'salary': int})  # change player to integer
+        allPlayersData = allPlayersData.astype({"player": str, "salary": int})  # change player to integer
 
         return allPlayersData
+
+    def get_domestic_team_size(self):
+        """
+        Description:
+        Get the number of required domestic players per team
+
+        Returns:
+        domesticTeamSize (int): Number of domestic players
+        """
+
+        return self.domesticTeamSize
 
     def get_all_players(self):
         """
@@ -154,6 +176,54 @@ class PlayerPool(object):
 
         return seasonPlayerResults
 
+
+# define foreign player pool as class
+class ForeignPlayerPool(object):
+    def __init__(self, season=1, maximalBudget=max(parameters.initialTeamBudget), allowedImports=4):
+        """
+        Description:
+        Initializes the foreign player pool object. The object is fully initialised based on parameters and variables
+
+        Input:
+        season (int): the index of season currently played, default is 1
+        maximalBudget (int): the highest team budget, default is defined highest initial team budget
+        allowedImports (int): the number of allowed import players per team in the league, default is 4
+
+        A foreign player pool object has the following attributes:
+        self.domesticSize (int): determines pool size of domestic player pool (number of available players)
+        self.totalSize (int): determines the total size of player pool faced by a team
+        self.allPlayers (list): list with player ids of the form f_id
+        self.allPlayerSkills (array): array with all player skills
+        self.allPlayerSkills (array): array with all player skills
+        self.allPlayersData (dataframe): A dataframe with information about all initialised players, infos are to be found in parameter file
+        self.availablePlayersData (dataframe): A dataframe with information about available players not yet picked by a team, initialised with all players
+        """
+        self.domesticSize = round(parameters.initialSwissPlayers * (1 + parameters.naturalPlayerBaseGrowth) ** season)  # domestic player pool size, references 'k_domestic' in thesis
+        self.totalSize = self.domesticSize + allowedImports  # total player pool size faced by teams, references 'k_t' in thesis
+        self.maximalSalary = round(parameters.bestPlayerRevenueShare * maximalBudget)  # maximal salary for best available player, references 'w_max' in thesis
+        self.allPlayers = ['f'+str(p) for p in range(1, allowedImports * 100+1)]  # create players with numbers from 1 to size of foreign player pool which is infinity but is approximated by the number of possible player skills multiplied by the number of allowed imports , references 'p_foreign' in thesis
+        self.allPlayerSkills = np.round(np.repeat(np.arange(start=0, stop=1, step=0.01), allowedImports), 2)  # create all possible skill levels from 0 to 1 repeated as many times as there are allowed imports, references 'S_p' in thesis
+        self.allPlayerSalaries = np.round(self.maximalSalary * self.allPlayerSkills * functions.supply_effect(self.totalSize))  # calculate player salaries to create all salaries in the player pool, references 'W_p' in thesis
+        self.allPlayersData = self.get_all_player_data()
+
+    def get_all_player_data(self):
+        """
+        Description:
+        Create data frame with all player information
+
+        Returns:
+        allPlayersData (dataframe): Dataframe with information about all players
+        """
+        allPlayersData = pd.DataFrame(
+            {
+                "player": self.allPlayers,
+                "skill": self.allPlayerSkills.tolist(),
+                "salary": self.allPlayerSalaries.tolist()
+            }
+        )
+        allPlayersData = allPlayersData.astype({"player": str, "salary": int})  # change player to integer
+
+        return allPlayersData
 
 
 # define league as class
@@ -288,9 +358,12 @@ class League(object):
         # for each team
         for team in teams:
             # update team data
-            teamData.loc[teamData['team'] == team, 'wins'] = regularSeasonRanking.loc[regularSeasonRanking['team'] == team, 'wins'].values[0]
-            teamData.loc[teamData['team'] == team, 'games'] = regularSeasonRanking.loc[regularSeasonRanking['team'] == team, 'games'].values[0]
-            teamData.loc[teamData['team'] == team, 'rank'] = regularSeasonRanking.loc[regularSeasonRanking['team'] == team, 'rank'].values[0]
+            teamData.loc[teamData['team'] == team, 'wins'] = \
+                regularSeasonRanking.loc[regularSeasonRanking['team'] == team, 'wins'].values[0]
+            teamData.loc[teamData['team'] == team, 'games'] = \
+                regularSeasonRanking.loc[regularSeasonRanking['team'] == team, 'games'].values[0]
+            teamData.loc[teamData['team'] == team, 'rank'] = \
+                regularSeasonRanking.loc[regularSeasonRanking['team'] == team, 'rank'].values[0]
 
         # label eliminated teams in regular season
         teamData['eliminatedRS'] = teamData['rank'].map(lambda x: 1 if x in [11, 12, 13, 14] else 0)
@@ -320,18 +393,18 @@ class League(object):
             # print
             print('Team: {}, Total: {}, Set: {}'.format(team, len(intersection), intersection))
 
-    def select_optimal_players(self, playerPool):
+    def select_optimal_domestic_players(self, domesticPlayerPool):
         """
         Description:
-        Let each team solve the maximization problem of player selection
+        Let each team solve the maximization problem of player selection for domestic players
 
         Input:
-        playerPool (PlayerPool): The initialised player pool of object PlayerPool
+        domesticPlayerPool (PlayerPool): The initialised domestic player pool of object PlayerPool
 
         Updates:
-        self.optimalPlayers (dict): updates the dictionary with the selected optimal players by each team
-        self.optimalPlayersSet (set): updates the set with all unique players selected over all teams
-        self.optimalPlayersData (set): updates the dataframe with the information about the optimal players
+        self.optimalPlayers (dict): updates the dictionary with the selected optimal domestic players by each team
+        self.optimalPlayersSet (set): updates the set with all unique domestic players selected over all teams
+        self.optimalPlayersData (set): updates the dataframe with the information about the optimal domestic players
         """
 
         # initialise new empty dictionary for player selection
@@ -340,11 +413,12 @@ class League(object):
         # get required team information
         teams = self.get_teams()
         teamBudgets = self.get_team_budgets()
+        domesticTeamSize = domesticPlayerPool.get_domestic_team_size()
 
         # for each team in the league
         for team in range(len(teams)):
             # select optimal players based on skill maximization
-            selectedPlayers = functions.skill_maximization(playerPool, teamBudgets[team])
+            selectedPlayers = functions.skill_maximization(domesticPlayerPool, teamBudgets[team], domesticTeamSize)
 
             # add team as key and the list of selected players as value do the dictionary
             optimalPlayers[teams[team]] = selectedPlayers.player.tolist()
@@ -359,12 +433,12 @@ class League(object):
         self.optimalPlayersSet = optimalPlayersSet
 
         # import data of all players
-        allPlayersData = playerPool.allPlayersData
+        allPlayersData = domesticPlayerPool.allPlayersData
 
         # extract data from selected players and assign it
         self.optimalPlayersData = allPlayersData.loc[allPlayersData['player'].isin(self.optimalPlayersSet)]
 
-    def resolve_player_conflicts(self, playerPool):
+    def resolve_player_conflicts(self, domesticPlayerPool):
         """
         Description:
         Assign players which are only picked by one team to that team,
@@ -373,7 +447,7 @@ class League(object):
         a similarly skilled replacement player
 
         Input:
-        playerPool (PlayerPool): An object of class PlayerPool
+        domesticPlayerPool (PlayerPool): An object of class DomesticPlayerPool
 
         Updates:
         playerPool (PlayerPool): The selected replacement players are removed from available players in player pool
@@ -401,7 +475,7 @@ class League(object):
             self.finalPlayerSelection = functions.assign_player(self, player, team)
 
         # update data for all teams
-        self.teamData = functions.update_team_info(self, playerPool.allPlayersData)
+        self.teamData = functions.update_team_info(self, domesticPlayerPool.allPlayersData)
 
         # for each player with conflict
         for player in shuffledConflicts:
@@ -421,7 +495,7 @@ class League(object):
             ra.shuffle(interestedTeams)
 
         # update team data after all players have chosen their team
-        self.teamData = functions.update_team_info(self, playerPool.allPlayersData)
+        self.teamData = functions.update_team_info(self, domesticPlayerPool.allPlayersData)
 
         # for every player which now needs to be replaced by the remaining teams in each conflict
         for player in shuffledConflicts:
@@ -432,23 +506,68 @@ class League(object):
             # for each remaining team among the remaining teams in one conflict
             for remainingTeam in remainingTeams:
                 # a replacement player for initial player is defined
-                replacementPlayer = functions.teams_choose_replacement(player, remainingTeam, playerPool, self)
+                replacementPlayer = functions.teams_choose_replacement(player, remainingTeam, domesticPlayerPool, self)
 
                 # add replacement player to the remaining team which has selected the player
                 self.finalPlayerSelection = functions.assign_player(self, replacementPlayer, remainingTeam)
 
                 # remove replacement player from available players in player pool
-                playerPool.remove_player_from_available(replacementPlayer)
+                domesticPlayerPool.remove_player_from_available(replacementPlayer)
 
             # update team data after each conflict so that it is up to date when resolving next conflict
-            self.teamData = functions.update_team_info(self, playerPool.allPlayersData)
+            self.teamData = functions.update_team_info(self, domesticPlayerPool.allPlayersData)
 
         # assert that constraints also hold in final player selection
-        assert all(list({team: len(players) == parameters.teamSize for (team, players) in
+        assert all(list({team: len(players) == domesticPlayerPool.domesticTeamSize for (team, players) in
                          self.finalPlayerSelection.items()}.values()))  # all teams have the defined number of players
         assert all([True if self.teamData.loc[x, 'budget'] - self.teamData.loc[x, 'payroll'] > 0 else False for x in
                     range(len(self.teamData))])  # payroll below budget
         assert functions.no_duplicates(self.finalPlayerSelection)
+
+    def select_optimal_import_players(self, domesticPlayerPool):
+        """
+        Description:
+        Let each team solve the maximization problem of player selection for domestic players
+
+        Input:
+        domesticPlayerPool (PlayerPool): The initialised domestic player pool of object PlayerPool
+
+        Updates:
+        self.optimalPlayers (dict): updates the dictionary with the selected optimal domestic players by each team
+        self.optimalPlayersSet (set): updates the set with all unique domestic players selected over all teams
+        self.optimalPlayersData (set): updates the dataframe with the information about the optimal domestic players
+        """
+
+        # initialise new empty dictionary for player selection
+        optimalPlayers = {}
+
+        # get required team information
+        teams = self.get_teams()
+        teamBudgets = self.get_team_budgets()
+        domesticTeamSize = domesticPlayerPool.get_domestic_team_size()
+
+        # for each team in the league
+        for team in range(len(teams)):
+            # select optimal players based on skill maximization
+            selectedPlayers = functions.skill_maximization(domesticPlayerPool, teamBudgets[team], domesticTeamSize)
+
+            # add team as key and the list of selected players as value do the dictionary
+            optimalPlayers[teams[team]] = selectedPlayers.player.tolist()
+
+        # overwrite old dictionary with new dictionary
+        self.optimalPlayers = optimalPlayers
+
+        # create set of optimal players selected by all teams based on dictionary
+        optimalPlayersSet = set().union(*list(self.optimalPlayers.values()))
+
+        # overwrite old set with new set, each selected player appears exactly once
+        self.optimalPlayersSet = optimalPlayersSet
+
+        # import data of all players
+        allPlayersData = domesticPlayerPool.allPlayersData
+
+        # extract data from selected players and assign it
+        self.optimalPlayersData = allPlayersData.loc[allPlayersData['player'].isin(self.optimalPlayersSet)]
 
     def calculate_game_revenue(self, homeTeam, winPercentageHome, seasonPhase):
         """
@@ -580,5 +699,3 @@ class League(object):
         self.optimalPlayersData = pd.DataFrame()
         self.finalPlayerSelection = {}
         self.regularSeasonRanking = pd.DataFrame()
-
-

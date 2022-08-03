@@ -20,17 +20,21 @@ def simulate_one_season(league, allowedImports, season):
     # get maximal budget
     maximalBudget = max(league.get_team_budgets())
 
-    # initialise player pool
-    playerPool = classes.PlayerPool(season, maximalBudget, allowedImports)
+    # initialise player pools
+    domesticPlayerPool = classes.DomesticPlayerPool(season, maximalBudget, allowedImports)
+    foreignPlayerPool = classes.ForeignPlayerPool(season, maximalBudget, allowedImports)
 
-    # solve skill maximization problem for each team
-    league.select_optimal_players(playerPool)
+    # solve skill maximization problem for each team on domestic players
+    league.select_optimal_domestic_players(domesticPlayerPool)
 
-    # remove all selected players from the pool
-    playerPool.update_player_pool_after_maximization(league.optimalPlayersSet)
+    # remove all selected players from the pool of domestic players
+    domesticPlayerPool.update_player_pool_after_maximization(league.optimalPlayersSet)
 
-    # resolve conflict of player assignment
-    league.resolve_player_conflicts(playerPool)
+    # resolve conflict of domestic player assignment
+    league.resolve_player_conflicts(domesticPlayerPool)
+
+    # select import players
+    league.select_optimal_import_players(foreignPlayerPool)
 
     # simulate season
     league.simulate_season()
