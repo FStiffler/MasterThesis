@@ -280,11 +280,11 @@ ggsave(supplyFunctionEpsilon, file = "supplyFunctionEpsilon.png", height=3, widt
 
 # plots based on real data ####
 
-# real initial player pool size (from table playerPoolSize)
-k0 = 356
+# real initial player pool size faced by team 
+k0 = 304
 
 # real kmin 
-kmin = 308
+kmin = 168
 
 # solve equation system for illustrative plot with epsilon 2 as assumption
 parameters<-findParameters(k0, 2)
