@@ -28,13 +28,13 @@ def simulate_one_season(league, allowedImports, season):
     league.select_optimal_domestic_players(domesticPlayerPool)
 
     # remove all selected players from the pool of domestic players
-    domesticPlayerPool.update_player_pool_after_maximization(league.optimalPlayersSet)
+    domesticPlayerPool.update_player_pool_after_maximization(league.optimalDomesticPlayersSet)
 
     # resolve conflict of domestic player assignment
     league.resolve_player_conflicts(domesticPlayerPool)
 
     # select import players
-    league.select_optimal_import_players(foreignPlayerPool)
+    league.select_optimal_import_players(foreignPlayerPool, domesticPlayerPool, allowedImports)
 
     # simulate season
     league.simulate_season()
@@ -48,8 +48,11 @@ def simulate_one_season(league, allowedImports, season):
     # add column for season
     seasonTeamResults.insert(loc=0, column='Season', value=[season]*parameters.leagueSize)
 
+    # combine player data of both player pools for player statistics
+    combinedPlayersData = pd.concat([domesticPlayerPool.allPlayersData, foreignPlayerPool.allPlayersData], ignore_index=True)
+
     # extract player stats
-    seasonPlayerResults = playerPool.get_player_stats()
+    seasonPlayerResults = league.get_player_stats(combinedPlayersData)
 
     # add column for season
     seasonPlayerResults.insert(loc=0, column='Season', value=season)

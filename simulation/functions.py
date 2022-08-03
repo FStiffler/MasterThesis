@@ -30,7 +30,7 @@ def supply_effect(playerPoolSize):
         return parameters.pLambda / (playerPoolSize - parameters.pGamma)
 
 
-def skill_maximization(playerPool, teamBudget, teamSize):
+def skill_maximization(playerPool, teamBudget, selectionSize):
     """
     Description:
     Function which allows team to select players while maximizing skill given a team size and budget constraint
@@ -38,7 +38,7 @@ def skill_maximization(playerPool, teamBudget, teamSize):
     Input:
     playerPool (PlayerPool): A player pool of either object DomesticPlayerPool or ForeignPlayerPool
     teamBudget (int): The budget constraint for a particular team used to optimize skill
-    teamSize (int): The number of players to be selected as condition
+    selectionSize (int): The number of players to be selected as condition
 
     Returns:
     selectedPlayers (pandas dataframe): A pandas dataframe which includes data about selected domestic players by team
@@ -60,7 +60,7 @@ def skill_maximization(playerPool, teamBudget, teamSize):
     prob += pl.lpSum(binaries[i] * skills[i] for i in range(len(players)))  # maximize skill
 
     # define the constraints
-    prob += pl.lpSum(binaries[i] for i in range(len(players))) == teamSize  # team size constraint
+    prob += pl.lpSum(binaries[i] for i in range(len(players))) == selectionSize  # team size constraint
     prob += pl.lpSum(binaries[i] * salaries[i] for i in range(len(players))) <= teamBudget  # budget constraint
 
     # solve problem to obtain the optimal solution (best team)
@@ -92,11 +92,8 @@ def skill_maximization(playerPool, teamBudget, teamSize):
     ]
 
     # assert that constraints hold since the solver does not throw an error when not converging to a solution
-    assert len(selectedPlayers) == teamSize
+    assert len(selectedPlayers) == selectionSize
     assert selectedPlayers.salary.sum() <= teamBudget
-
-    print(selectedPlayers.salary.sum())
-    print(teamBudget)
 
     # return selected team
     return selectedPlayers
@@ -115,15 +112,15 @@ def identify_conflicts(leagueObject):
     noConflicts (dict): A dictionary showing the non-conflicting player as key and the interested team as value in a list
     """
     # get required team information
-    optimalPlayers = leagueObject.optimalPlayers
-    optimalPlayersSet = leagueObject.optimalPlayersSet
+    optimalDomesticPlayers = leagueObject.optimalDomesticPlayers
+    optimalDomesticPlayersSet = leagueObject.optimalDomesticPlayersSet
 
     # create a data frame from dictionary
-    optimalPlayersDF = pd.DataFrame(optimalPlayers)
+    optimalDomesticPlayersDF = pd.DataFrame(optimalDomesticPlayers)
 
     # pivot to long format
-    optimalPlayersDF = pd.melt(optimalPlayersDF,
-                               value_vars=optimalPlayersDF.columns,
+    optimalDomesticPlayersDF = pd.melt(optimalDomesticPlayersDF,
+                               value_vars=optimalDomesticPlayersDF.columns,
                                var_name='team',
                                value_name='player')
 
@@ -132,10 +129,10 @@ def identify_conflicts(leagueObject):
     noConflicts = {}
 
     # loop over all players to identify conflicts
-    for player in optimalPlayersSet:
+    for player in optimalDomesticPlayersSet:
 
         # extract all teams interested in the same player
-        interestedTeams = optimalPlayersDF.loc[optimalPlayersDF['player'] == player]
+        interestedTeams = optimalDomesticPlayersDF.loc[optimalDomesticPlayersDF['player'] == player]
 
         # if more than one team are interested in one player
         if len(interestedTeams) > 1:
