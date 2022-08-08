@@ -60,7 +60,7 @@ def skill_maximization(playerPool, teamBudget, selectionSize):
     prob += pl.lpSum(binaries[i] * skills[i] for i in range(len(players)))  # maximize skill
 
     # define the constraints
-    prob += pl.lpSum(binaries[i] for i in range(len(players))) == selectionSize  # team size constraint
+    prob += pl.lpSum(binaries[i] for i in range(len(players))) <= selectionSize  # team size constraint
     prob += pl.lpSum(binaries[i] * salaries[i] for i in range(len(players))) <= teamBudget  # budget constraint
 
     # solve problem to obtain the optimal solution (best team)
@@ -92,7 +92,7 @@ def skill_maximization(playerPool, teamBudget, selectionSize):
     ]
 
     # assert that constraints hold since the solver does not throw an error when not converging to a solution
-    assert len(selectedPlayers) == selectionSize
+    assert len(selectedPlayers) <= selectionSize
     assert selectedPlayers.salary.sum() <= teamBudget
 
     # return selected team
@@ -116,13 +116,7 @@ def identify_conflicts(leagueObject):
     optimalDomesticPlayersSet = leagueObject.optimalDomesticPlayersSet
 
     # create a data frame from dictionary
-    optimalDomesticPlayersDF = pd.DataFrame(optimalDomesticPlayers)
-
-    # pivot to long format
-    optimalDomesticPlayersDF = pd.melt(optimalDomesticPlayersDF,
-                               value_vars=optimalDomesticPlayersDF.columns,
-                               var_name='team',
-                               value_name='player')
+    optimalDomesticPlayersDF = pd.concat(pd.DataFrame({'team': k, 'player': v}) for k, v in optimalDomesticPlayers.items())
 
     # initialise empty dictionaries to be filled with observed conflicts and non conflicts
     conflicts = {}

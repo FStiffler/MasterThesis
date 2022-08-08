@@ -27,7 +27,7 @@ class DomesticPlayerPool(object):
         self.allPlayersData (dataframe): A dataframe with information about all initialised players, infos are to be found in parameter file
         self.availablePlayersData (dataframe): A dataframe with information about available players not yet picked by a team, initialised with all players
         """
-        self.domesticTeamSize = parameters.teamSize - allowedImports  # domestic players of team, references 'h_domestic' in thesis
+        self.domesticTeamSize = parameters.teamSizeMax - allowedImports  # domestic players of team, references 'h_domestic' in thesis
         self.domesticSize = round(parameters.initialSwissPlayers * (1 + parameters.naturalPlayerBaseGrowth) ** season)  # domestic player pool size, references 'k_domestic' in thesis
         self.totalSize = self.domesticSize + allowedImports  # total player pool size faced by teams, references 'k_t' in thesis
         self.maximalSalary = round(parameters.bestPlayerRevenueShare * maximalBudget)  # maximal salary for best available player, references 'w_max' in thesis
@@ -548,11 +548,6 @@ class League(object):
             # update team data after each conflict so that it is up to date when resolving next conflict
             self.teamData = functions.update_team_info(self, domesticPlayerPool.allPlayersData)
 
-        # assert that constraints also hold in final player selection
-        assert all(list({team: len(players) == domesticPlayerPool.domesticTeamSize for (team, players) in
-                         self.finalPlayerSelection.items()}.values()))  # all teams have the defined number of players
-        assert all([True if self.teamData.loc[x, 'budget'] - self.teamData.loc[x, 'payroll'] > 0 else False for x in
-                    range(len(self.teamData))])  # payroll below budget
         assert functions.no_duplicates(self.finalPlayerSelection)
 
     def select_optimal_import_players(self, foreignPlayerPool, domesticPlayerPool, allowedImports):
@@ -605,8 +600,10 @@ class League(object):
         self.teamData = functions.update_team_info(self, combinedPlayersData)
 
         # assert that constraints also hold in final player selection
-        assert all(list({team: len(players) == parameters.teamSize for (team, players) in
-                         self.finalPlayerSelection.items()}.values()))  # all teams have the defined number of players
+        assert all(list({team: len(players) <= parameters.teamSizeMax for (team, players) in
+                         self.finalPlayerSelection.items()}.values()))  # all teams have below maximal allowed number of players
+        assert all(list({team: len(players) >= parameters.teamSizeMin for (team, players) in
+                         self.finalPlayerSelection.items()}.values()))  # all teams have have at least minimum amount of players
         assert all([True if self.teamData.loc[x, 'budget'] - self.teamData.loc[x, 'payroll'] > 0 else False for x in
                     range(len(self.teamData))])  # payroll below budget
 
