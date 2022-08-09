@@ -260,6 +260,8 @@ class League(object):
         self.regularSeasonRanking (dataframe): Dataframe which contains regular season ranking, is initialised empty
         """
         self.teamData = pd.DataFrame({'team': parameters.teams,
+                                      'domestics': [0] * parameters.leagueSize,  # the number of domestic players
+                                      'imports': [0] * parameters.leagueSize,  # the number of import players
                                       'budget': parameters.initialTeamBudget,  # create variable team budgets, references 'R_tot_it-1',
                                       'payroll': [0] * parameters.leagueSize,  # create variable team payrolls, references 'sum(W_p * d_p)' in thesis
                                       'totalSkill': [0] * parameters.leagueSize,  # create variable team skills, references 'S_i' in thesis
@@ -743,7 +745,9 @@ class League(object):
 
         # update teamData
         self.teamData = pd.DataFrame({'team': parameters.teams,
-                                      'budget': budgets,
+                                      'domestics': [0] * parameters.leagueSize,  # the number of domestic players
+                                      'imports': [0] * parameters.leagueSize,  # the number of import players
+                                      'budget': parameters.initialTeamBudget,  # create variable team budgets, references 'R_tot_it-1',
                                       'payroll': [0] * parameters.leagueSize,  # create variable team payrolls, references 'sum(W_p * d_p)' in thesis
                                       'totalSkill': [0] * parameters.leagueSize,  # create variable team skills, references 'S_i' in thesis
                                       'revenue': [0] * parameters.leagueSize,  # create variable revenue, references 'R_tot_it' in thesis

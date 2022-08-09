@@ -116,7 +116,8 @@ def identify_conflicts(leagueObject):
     optimalDomesticPlayersSet = leagueObject.optimalDomesticPlayersSet
 
     # create a data frame from dictionary
-    optimalDomesticPlayersDF = pd.concat(pd.DataFrame({'team': k, 'player': v}) for k, v in optimalDomesticPlayers.items())
+    optimalDomesticPlayersDF = pd.concat(
+        pd.DataFrame({'team': k, 'player': v}) for k, v in optimalDomesticPlayers.items())
 
     # initialise empty dictionaries to be filled with observed conflicts and non conflicts
     conflicts = {}
@@ -209,9 +210,10 @@ def update_team_info(leagueObject, allPlayersData):
     finalPlayerSelection = leagueObject.finalPlayerSelection
     teamData = leagueObject.teamData
 
-    # define variables to obtain and summarize
+    # define numeric variables to obtain and summarize
     variableName = ['salary', 'skill']
 
+    # summarize variables and add to data
     for variable in variableName:
         # obtain defined variable values for every selected player
         variableDict = {team: allPlayersData.loc[allPlayersData['player'].isin(players), variable].values.tolist() for
@@ -228,6 +230,32 @@ def update_team_info(leagueObject, allPlayersData):
         if variable == 'skill':
             # append a list of all team salaries to the column 'totalSkill'
             teamData['totalSkill'] = list(variableSumDict.values())
+
+    # list of all players
+    playerList = [player for teamList in finalPlayerSelection.values() for player in teamList]
+
+    # if teams are final (foreign players are selected so that players with 'f' in player id exist in list of selected players)
+    if any([('f' in player) for player in playerList]):
+
+        # create empty dictionaries
+        domesticPlayers = {}
+        importPlayers = {}
+
+        # for each team
+        for team in finalPlayerSelection.keys():
+            # calculate number of domestic players
+            domestics = sum(['d' in player for player in finalPlayerSelection[team]])
+
+            # calculate number of import players
+            imports = sum(['f' in player for player in finalPlayerSelection[team]])
+
+            # append dictionary
+            domesticPlayers[team] = domestics
+            importPlayers[team] = imports
+
+        # add player numbers to team data
+        teamData['domestics'] = list(domesticPlayers.values())
+        teamData['imports'] = list(importPlayers.values())
 
     # return
     return teamData
@@ -295,7 +323,7 @@ def teams_choose_replacement(player, team, domesticPlayerPool, leagueObject):
     while index < len(availablePlayersData):
 
         # identify a replacement player in increasing order of skill gab
-        replacementPlayerInfo = availablePlayersData.iloc[index, ]
+        replacementPlayerInfo = availablePlayersData.iloc[index,]
 
         # identify salary of replacement player
         replacementPlayerSalary = replacementPlayerInfo['salary']
