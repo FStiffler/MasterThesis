@@ -1,9 +1,10 @@
 import pandas as pd
 import classes
+import functions
 import parameters
 
 
-def simulate_one_season(league, allowedImports, season):
+def simulate_one_season(league, allowedImports, season, salaryCap):
     """
     Description:
     Module to simulate one single season
@@ -12,13 +13,14 @@ def simulate_one_season(league, allowedImports, season):
     league (League): A league of object League
     season (int): An integer the number of allowed import players per team
     season (int): An integer indicating the season
+    salaryCap (bool): boolean parameter indicating presence of salary cap
 
     Returns:
     seasonTeamResults (data frame): A data frame with all relevant team results from the season simulation
     seasonPlayerResults (data frame): A data frame with all relevant player results from the season simulation
     """
-    # get maximal budget
-    maximalBudget = max(league.get_team_budgets())
+    # calculate maximal budget
+    maximalBudget = functions.calculate_maximal_budget(league, salaryCap)
 
     # initialise player pools
     domesticPlayerPool = classes.DomesticPlayerPool(season, maximalBudget, allowedImports)
@@ -61,7 +63,7 @@ def simulate_one_season(league, allowedImports, season):
     return seasonTeamResults, seasonPlayerResults
 
 
-def simulate_consecutive_seasons(simulationTeamResults, simulationPlayerResults, allowedImports, seasons):
+def simulate_consecutive_seasons(simulationTeamResults, simulationPlayerResults, allowedImports, seasons, salaryCap):
     """
     Description:
     Module to simulate consecutive seasons
@@ -71,6 +73,7 @@ def simulate_consecutive_seasons(simulationTeamResults, simulationPlayerResults,
     simulationPlayerResults (data frame): data frame containing all the simulation player results
     allowedImports (int): the number of allowed import players per team
     seasons (int): the number of consecutive seasons to simulate
+    salaryCap (bool): boolean parameter indicating presence of salary cap
 
     Returns:
     simulationTeamResults (data frame): data frame containing the updated simulation team results
@@ -83,7 +86,7 @@ def simulate_consecutive_seasons(simulationTeamResults, simulationPlayerResults,
             league = classes.League()
 
         # simulate season and get results
-        seasonTeamResults, seasonPlayerResults = simulate_one_season(league, allowedImports, season)
+        seasonTeamResults, seasonPlayerResults = simulate_one_season(league, allowedImports, season, salaryCap)
 
         # add season team result to simulation results
         simulationTeamResults = pd.concat([simulationTeamResults, seasonTeamResults], ignore_index=True)

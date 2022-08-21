@@ -314,7 +314,7 @@ def teams_choose_replacement(player, team, domesticPlayerPool, leagueObject):
     teamPayroll = teamData.loc[teamData['team'] == team, 'payroll'].values[0]
 
     # identify team budget
-    teamBudget = teamData.loc[teamData['team'] == team, 'budget'].values[0]
+    teamBudget = teamData.loc[teamData['team'] == team, 'effectiveBudget'].values[0]
 
     # initialise index for loop
     index = 0
@@ -1057,3 +1057,50 @@ def simulate_playoffs(leagueObject):
 
     # return champion
     return champion[0]
+
+
+def calculate_maximal_budget(league, salaryCap):
+    """
+    Description:
+    Function to calculate maximal budget of any team in the league
+
+    Input:
+    league (League): object of class League
+    salaryCap (bool): boolean parameter indicating presence of salary cap
+
+    Returns:
+    maximalBudget (int): maximal budget a team has to spend for the upcoming season
+
+    Updates:
+    teamData (dataFrame): Updates the columns 'salaryCap' and 'effectiveBudget' of teams
+    """
+    # if a salary cap exists
+    if salaryCap:
+
+        # get a list of all hockey related revenues
+        hockeyRevenues = league.get_hockey_related_revenues()
+
+        # calculate upper limit salary cap
+        maximalBudget = int(((sum(hockeyRevenues))/parameters.leagueSize)*parameters.salaryCapFactor)
+
+        # update information about salary cap in team data
+        league.teamData['salaryCap'] = [maximalBudget] * parameters.leagueSize
+
+        # calculate allowed budget for teams to spend
+        league.teamData['effectiveBudget'] = list(map(min, zip(league.get_team_budgets(), league.get_salary_cap())))
+
+    # if no salary cap exists
+    else:
+        # calculate maximal budget based on maximal team budget
+        maximalBudget = max(league.get_team_budgets())
+
+        # calculate allowed budget for teams to spend
+        league.teamData['effectiveBudget'] = league.get_team_budgets()
+
+    # return maximal salary
+    return maximalBudget
+
+
+
+
+

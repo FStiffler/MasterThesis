@@ -263,9 +263,12 @@ class League(object):
                                       'domestics': [0] * parameters.leagueSize,  # the number of domestic players
                                       'imports': [0] * parameters.leagueSize,  # the number of import players
                                       'budget': parameters.initialTeamBudget,  # create variable team budgets, references 'R_tot_it-1',
+                                      'salaryCap': [False] * parameters.leagueSize,  # create variable salary cap, references 'R_cap'
+                                      'effectiveBudget': [0] * parameters.leagueSize,  # create variable for the budget teams can actually spend
                                       'payroll': [0] * parameters.leagueSize,  # create variable team payrolls, references 'sum(W_p * d_p)' in thesis
                                       'totalSkill': [0] * parameters.leagueSize,  # create variable team skills, references 'S_i' in thesis
                                       'revenue': [0] * parameters.leagueSize,  # create variable revenue, references 'R_tot_it' in thesis
+                                      'hockeyRevenue': parameters.initialTeamBudget,  # create variable hockey related revenue, is initialised with initial team budgets
                                       'wins': [0] * parameters.leagueSize,  # create variable for win count
                                       'games': [0] * parameters.leagueSize,  # create variable for game count
                                       'rank': [0] * parameters.leagueSize,  # create variable for final regular season rank
@@ -309,6 +312,30 @@ class League(object):
         teamBudgetsList = self.teamData['budget'].tolist()
 
         return teamBudgetsList
+
+    def get_salary_cap(self):
+        """
+        Description:
+        Get list of salary caps repeated once for every team
+
+        Returns:
+        salaryCapList (list): List of salary cap figure repeated 'leagueSize'-times
+        """
+        salaryCapList = self.teamData['salaryCap'].tolist()
+
+        return salaryCapList
+
+    def get_effective_team_budgets(self):
+        """
+        Description:
+        Get all team budgets which the teams are effectively able to spend
+
+        Returns:
+        effectiveTeamBudgetsList (list): List of all team budgets which teams are effectively able to spend
+        """
+        effectiveTeamBudgetsList = self.teamData['effectiveBudget'].tolist()
+
+        return effectiveTeamBudgetsList
 
     def get_team_payrolls(self):
         """
@@ -357,6 +384,19 @@ class League(object):
             teamRevenuesList = self.teamData.loc[self.teamData['team'].isin(teams), 'revenue'].tolist()
 
         return teamRevenuesList
+
+    def get_hockey_related_revenues(self):
+        """
+        Description:
+        Get a list of all hockey related team revenues
+
+        Returns:
+        hockeyRevenues (list): List with all hockey related team revenues
+        """
+        # return all revenues
+        hockeyRevenues = self.teamData['hockeyRevenue'].tolist()
+
+        return hockeyRevenues
 
     def get_skill_dictionary(self):
         """
@@ -445,7 +485,7 @@ class League(object):
 
         # get required team information
         teams = self.get_teams()
-        teamBudgets = self.get_team_budgets()
+        teamBudgets = self.get_effective_team_budgets()
         domesticTeamSize = domesticPlayerPool.get_domestic_team_size()
 
         # for each team in the league
@@ -570,7 +610,7 @@ class League(object):
 
         # get required team information
         teams = self.get_teams()
-        teamBudgets = self.get_team_budgets()
+        teamBudgets = self.get_effective_team_budgets()
         teamPayrolls = self.get_team_payrolls()
 
         # for each team in the league
@@ -686,18 +726,20 @@ class League(object):
         Update:
         self.teamData (dataframe): The dataframe containing team information is updated with final revenue data
         """
-        # add remaining budget to revenue
-        self.teamData['revenue'] += self.teamData['budget'] - self.teamData['payroll']
-
         # calculate broadcasting revenue for this season
         currentBroadcastingRevenue = parameters.initialBroadcastingRevenue * (
                 1 + parameters.broadcastingRevenueGrowth) ** season
 
-        # add broadcasting revenue to revenue
+        # calculate hockey related seasonal revenue
         self.teamData['revenue'] += currentBroadcastingRevenue
+        self.teamData['hockeyRevenue'] = self.teamData['revenue']
+
+        # add remaining budget to revenue
+        self.teamData['revenue'] += self.teamData['budget'] - self.teamData['payroll']
 
         # round values
         self.teamData['revenue'] = self.teamData['revenue'].round().astype(int)
+        self.teamData['hockeyRevenue'] = self.teamData['hockeyRevenue'].round().astype(int)
 
     def get_player_stats(self, combinedPlayersData):
         """
@@ -742,15 +784,19 @@ class League(object):
         """
         # extract new team budgets which is revenue of previous season
         budgets = self.teamData['revenue'].tolist()
+        hockeyRevenues = self.teamData['hockeyRevenue'].tolist()
 
         # update teamData
         self.teamData = pd.DataFrame({'team': parameters.teams,
                                       'domestics': [0] * parameters.leagueSize,  # the number of domestic players
                                       'imports': [0] * parameters.leagueSize,  # the number of import players
-                                      'budget': parameters.initialTeamBudget,  # create variable team budgets, references 'R_tot_it-1',
+                                      'budget': budgets,  # team budgets based on previous season revenues, references 'R_tot_it-1',
+                                      'salaryCap': [False] * parameters.leagueSize,  # create variable salary cap, references 'R_cap'
+                                      'effectiveBudget': [0] * parameters.leagueSize,  # create variable for the budget teams are allowed to spend
                                       'payroll': [0] * parameters.leagueSize,  # create variable team payrolls, references 'sum(W_p * d_p)' in thesis
                                       'totalSkill': [0] * parameters.leagueSize,  # create variable team skills, references 'S_i' in thesis
                                       'revenue': [0] * parameters.leagueSize,  # create variable revenue, references 'R_tot_it' in thesis
+                                      'hockeyRevenue': hockeyRevenues,  # update hockey related revenues
                                       'wins': [0] * parameters.leagueSize,  # create variable for win count
                                       'games': [0] * parameters.leagueSize,  # create variable for game count
                                       'rank': [0] * parameters.leagueSize,  # create variable for final regular season rank

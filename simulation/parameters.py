@@ -26,3 +26,4 @@ broadcastingRevenueGrowth = 0.031  # factor by which the revenue of teams from b
 regularSeason = 0  # parameter indicating regular season
 prePlayoff = 1  # parameter indicating prePlayoffs which means best of five series
 playoffs = 2  # parameter indicating Playoffs which means best of seven series
+salaryCapFactor = 1.05*1.15  # parameter indicating salary cap scale parameter, references 'tau' in thesis
