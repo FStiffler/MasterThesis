@@ -334,13 +334,10 @@ def teams_choose_replacement(player, team, domesticPlayerPool, leagueObject):
             # increase index by one to try next player in order
             index += 1
 
-            # raise exception if there is no other player left and the budget constraint is violated
+            # if there is no other player left and the budget constraint is violated
             if index == len(availablePlayersData):
-                raise Exception("""
-                Problem finding replacement player -
-                All the available players serving as potential replacements have salaries violating budget 
-                constraint when added to the team
-                """)
+                # team does not choose any replacement player
+                replacementPlayer = None
 
         # if there is no violation
         else:
@@ -536,7 +533,7 @@ def solve_ranking_conflicts(ranking, record, leagueObject):
             # calculate the direct wins by each team
             directWins = [len(directRecord.loc[directRecord['winner'] == team]) for team in equalTeams]
 
-            # if all teams have the exact same number of direct against each other
+            # if all teams have the exact same number of direct wins against each other
             if len(set(directWins)) == 1:
 
                 # play placement games

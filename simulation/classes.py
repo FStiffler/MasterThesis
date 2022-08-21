@@ -581,6 +581,12 @@ class League(object):
                 # a replacement player for initial player is defined
                 replacementPlayer = functions.teams_choose_replacement(player, remainingTeam, domesticPlayerPool, self)
 
+                # if no replacement player can be found because of budget violation
+                if replacementPlayer is None:
+
+                    # start next iteration
+                    continue
+
                 # add replacement player to the remaining team which has selected the player
                 self.finalPlayerSelection = functions.assign_player(self, replacementPlayer, remainingTeam)
 
