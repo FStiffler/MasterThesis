@@ -42,6 +42,29 @@ def simulate_one_season(league, allowedImports, season, salaryCap):
     print("Teams solve sub-problem 3: Selection of import players")
     league.select_optimal_import_players(foreignPlayerPool, domesticPlayerPool, allowedImports)
 
+    # if a team went bankrupt
+    if league.leagueCondition == "bankruptcy":
+        # create season results
+        seasonTeamResults = league.teamData.iloc[:, :-4]
+
+        # add column for season
+        seasonTeamResults.insert(loc=0, column='validSimulation', value=[False] * parameters.leagueSize)
+        seasonTeamResults.insert(loc=0, column='season', value=[season] * parameters.leagueSize)
+
+        # combine player data of both player pools for player statistics
+        combinedPlayersData = pd.concat([domesticPlayerPool.allPlayersData, foreignPlayerPool.allPlayersData],
+                                        ignore_index=True)
+
+        # extract player stats
+        seasonPlayerResults = league.get_player_stats(combinedPlayersData)
+
+        # add column for season
+        seasonPlayerResults.insert(loc=0, column='validSimulation', value=False)
+        seasonPlayerResults.insert(loc=0, column='season', value=season)
+
+        # return seasonResults
+        return seasonTeamResults, seasonPlayerResults
+
     # simulate season
     league.simulate_season()
 
@@ -53,16 +76,19 @@ def simulate_one_season(league, allowedImports, season, salaryCap):
     seasonTeamResults = league.teamData.iloc[:, :-4]
 
     # add column for season
-    seasonTeamResults.insert(loc=0, column='Season', value=[season]*parameters.leagueSize)
+    seasonTeamResults.insert(loc=0, column='validSimulation', value=[True] * parameters.leagueSize)
+    seasonTeamResults.insert(loc=0, column='season', value=[season] * parameters.leagueSize)
 
     # combine player data of both player pools for player statistics
-    combinedPlayersData = pd.concat([domesticPlayerPool.allPlayersData, foreignPlayerPool.allPlayersData], ignore_index=True)
+    combinedPlayersData = pd.concat([domesticPlayerPool.allPlayersData, foreignPlayerPool.allPlayersData],
+                                    ignore_index=True)
 
     # extract player stats
     seasonPlayerResults = league.get_player_stats(combinedPlayersData)
 
     # add column for season
-    seasonPlayerResults.insert(loc=0, column='Season', value=season)
+    seasonPlayerResults.insert(loc=0, column='validSimulation', value=True)
+    seasonPlayerResults.insert(loc=0, column='season', value=season)
 
     # return seasonResults
     return seasonTeamResults, seasonPlayerResults
@@ -84,7 +110,7 @@ def simulate_consecutive_seasons(simulationTeamResults, simulationPlayerResults,
     simulationTeamResults (data frame): data frame containing the updated simulation team results
     simulationPlayerResults (data frame): data frame containing the updated simulation player results
     """
-    for season in range(1, seasons+1):
+    for season in range(1, seasons + 1):
         # if it is the first season
         if season == 1:
             # initialise the league
@@ -93,6 +119,18 @@ def simulate_consecutive_seasons(simulationTeamResults, simulationPlayerResults,
 
         # simulate season and get results
         seasonTeamResults, seasonPlayerResults = simulate_one_season(league, allowedImports, season, salaryCap)
+
+        # if the simulation came to a break condition
+        if not seasonTeamResults['validSimulation'][0]:
+            # add season team result to simulation results
+            simulationTeamResults = pd.concat([simulationTeamResults, seasonTeamResults], ignore_index=True)
+
+            # add season player result to simulation results
+            simulationPlayerResults = pd.concat([simulationPlayerResults, seasonPlayerResults], ignore_index=True)
+
+            # break simulation
+            print("Simulation is terminated and termination condition is noted")
+            return simulationTeamResults, simulationPlayerResults
 
         # add season team result to simulation results
         simulationTeamResults = pd.concat([simulationTeamResults, seasonTeamResults], ignore_index=True)

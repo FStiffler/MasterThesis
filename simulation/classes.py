@@ -258,6 +258,7 @@ class League(object):
         self.optimalDomesticPlayers (dict): Dictionary with each team as key and a list of optimal import players selected by the team in maximization process, is initialised empty
         self.finalPlayerSelection (dict): Dictionary with each team as key and a list of the final players selected by the team in replacement process, is initialised empty
         self.regularSeasonRanking (dataframe): Dataframe which contains regular season ranking, is initialised empty
+        self.leagueCondition (str): String inidicating if a simulation breaking condition occures, is initialised with None
         """
         self.teamData = pd.DataFrame({'team': parameters.teams,
                                       'domestics': [0] * parameters.leagueSize,  # the number of domestic players
@@ -278,6 +279,7 @@ class League(object):
                                       'eliminatedPR2': [0] * parameters.leagueSize,  # create binary variable indicating playoffs round 2 elimination
                                       'eliminatedPR3': [0] * parameters.leagueSize,  # create binary variable indicating playoffs round 3 elimination
                                       'champion': [0] * parameters.leagueSize,  # create binary variable indicating league champion
+                                      'wentBankrupt': [0] * parameters.leagueSize,  # create binary variable indicating if a team went bankrupt
                                       'monetaryFactor': parameters.monetaryFactor,
                                       'marketSize': parameters.marketSize,
                                       'seasonPhaseFactor': parameters.seasonPhaseFactor,
@@ -288,6 +290,7 @@ class League(object):
         self.optimalImportPlayers = {}
         self.finalPlayerSelection = {}
         self.regularSeasonRanking = pd.DataFrame()
+        self.leagueCondition = None
 
     def get_teams(self):
         """
@@ -647,11 +650,28 @@ class League(object):
         # update team data after teams are fully stacked
         self.teamData = functions.update_team_info(self, combinedPlayersData)
 
-        # assert that constraints also hold in final player selection
+        # capture potential simulation break conditions:
+        # if at least one team does not have have at least minimum amount of players
+        if not all(list({team: len(players) >= parameters.teamSizeMin for (team, players) in
+                         self.finalPlayerSelection.items()}.values())):
+
+            # warning message
+            print("Warning!\nAt least one team has not enough budget to assemble a fully stacked team")
+
+            # extract teams which has not enough budget
+            bankruptTeams = list({team: value for (team, value) in {team: len(players) >= parameters.teamSizeMin for (team, players) in
+                  self.finalPlayerSelection.items()}.items() if value is False}.keys())
+
+            # report bankrupt teams and break condition
+            self.teamData.loc[self.teamData['team'].isin(bankruptTeams), 'wentBankrupt'] = 1
+
+            # define condition and return
+            self.leagueCondition = "bankruptcy"
+
+        # Assertions
         assert all(list({team: len(players) <= parameters.teamSizeMax for (team, players) in
-                         self.finalPlayerSelection.items()}.values()))  # all teams have below maximal allowed number of players
-        assert all(list({team: len(players) >= parameters.teamSizeMin for (team, players) in
-                         self.finalPlayerSelection.items()}.values()))  # all teams have have at least minimum amount of players
+                             self.finalPlayerSelection.items()}.values()))  # violation of budget
+
         assert all([True if self.teamData.loc[x, 'budget'] - self.teamData.loc[x, 'payroll'] > 0 else False for x in
                     range(len(self.teamData))])  # payroll below budget
 
@@ -814,6 +834,7 @@ class League(object):
                                       'eliminatedPR2': [0] * parameters.leagueSize,  # create binary variable indicating playoffs round 2 elimination
                                       'eliminatedPR3': [0] * parameters.leagueSize,  # create binary variable indicating playoffs round 3 elimination
                                       'champion': [0] * parameters.leagueSize,  # create binary variable indicating league champion
+                                      'wentBankrupt': [0] * parameters.leagueSize,  # create binary variable indicating if a team went bankrupt
                                       'monetaryFactor': parameters.monetaryFactor,
                                       'marketSize': parameters.marketSize,
                                       'seasonPhaseFactor': parameters.seasonPhaseFactor,
@@ -824,3 +845,4 @@ class League(object):
         self.optimalImportPlayers = {}
         self.finalPlayerSelection = {}
         self.regularSeasonRanking = pd.DataFrame()
+        self.leagueCondition = None
