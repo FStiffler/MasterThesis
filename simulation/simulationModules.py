@@ -111,11 +111,15 @@ def simulate_consecutive_seasons(simulationTeamResults, simulationPlayerResults,
     simulationPlayerResults (data frame): data frame containing the updated simulation player results
     """
     for season in range(1, seasons + 1):
+
         # if it is the first season
         if season == 1:
             # initialise the league
             league = classes.League()
-            print("League is initialised")
+            print("One-time initialization of league")
+
+        # print season
+        print("\n\nSeason {}/{}:\n".format(season, seasons))
 
         # simulate season and get results
         seasonTeamResults, seasonPlayerResults = simulate_one_season(league, allowedImports, season, salaryCap)
