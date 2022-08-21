@@ -705,15 +705,17 @@ class League(object):
         The name of the champion is printed out
         """
         # simulate regular season to obtain ranking
+        print("Simulation of regular season")
         self.regularSeasonRanking = functions.simulate_regular_season(self)
 
         # update team data based on regular season ranking
         self.update_team_data_post_regular_season()
 
         # simulate playoffs
+        print("Simulation of playoffs")
         champion = functions.simulate_playoffs(self)
 
-        print(champion)
+        print("Champion: ", champion)
 
     def calculate_season_revenue(self, season):
         """

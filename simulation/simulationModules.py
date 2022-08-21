@@ -23,25 +23,30 @@ def simulate_one_season(league, allowedImports, season, salaryCap):
     maximalBudget = functions.calculate_maximal_budget(league, salaryCap)
 
     # initialise player pools
+    print("Player pools are initialised")
     domesticPlayerPool = classes.DomesticPlayerPool(season, maximalBudget, allowedImports)
     foreignPlayerPool = classes.ForeignPlayerPool(season, maximalBudget, allowedImports)
 
     # solve skill maximization problem for each team on domestic players
+    print("Teams solve sub-problem 1: Selection of domestic players")
     league.select_optimal_domestic_players(domesticPlayerPool)
 
     # remove all selected players from the pool of domestic players
     domesticPlayerPool.update_player_pool_after_maximization(league.optimalDomesticPlayersSet)
 
     # resolve conflict of domestic player assignment
+    print("Teams solve sub-problem 1: Conflicting domestic player selection")
     league.resolve_player_conflicts(domesticPlayerPool)
 
     # select import players
+    print("Teams solve sub-problem 3: Selection of import players")
     league.select_optimal_import_players(foreignPlayerPool, domesticPlayerPool, allowedImports)
 
     # simulate season
     league.simulate_season()
 
     # calculate final team revenue
+    print("Final revenues are calculated")
     league.calculate_season_revenue(season)
 
     # create season results
@@ -84,6 +89,7 @@ def simulate_consecutive_seasons(simulationTeamResults, simulationPlayerResults,
         if season == 1:
             # initialise the league
             league = classes.League()
+            print("League is initialised")
 
         # simulate season and get results
         seasonTeamResults, seasonPlayerResults = simulate_one_season(league, allowedImports, season, salaryCap)
@@ -95,6 +101,7 @@ def simulate_consecutive_seasons(simulationTeamResults, simulationPlayerResults,
         simulationPlayerResults = pd.concat([simulationPlayerResults, seasonPlayerResults], ignore_index=True)
 
         # prepare data for following season
+        print("League ist reset for next season simulation")
         league.reset_for_new_season()
 
     # return simulation result
