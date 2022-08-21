@@ -485,7 +485,7 @@ def placement_games(equalTeams, leagueObject):
             placementGamesRecord = pd.concat([placementGamesRecord, newRecord], ignore_index=True)
 
         # recursively call solve_ranking_conflicts
-        finalPlacementRanking = solve_ranking_conflicts(placementRanking, placementGamesRecord, skillDictionary)
+        finalPlacementRanking = solve_ranking_conflicts(placementRanking, placementGamesRecord, leagueObject)
 
         # if ranking is resolved
         if len(set(finalPlacementRanking['rank'].tolist())) == len(equalTeams):
