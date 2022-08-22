@@ -18,7 +18,7 @@ def simulate_one_season(league, allowedImports, salaryCap, season, simulationIte
 
     Returns:
     seasonTeamResults (data frame): A data frame with all relevant team results from the season simulation
-    seasonPlayerResults (data frame): A data frame with all relevant player results from the season simulation
+    seasonPlayerResults (data frame): A data frame with all relevant player salary results from the season simulation
     """
     # calculate maximal budget
     maximalBudget = functions.calculate_maximal_budget(league, salaryCap)
@@ -110,7 +110,7 @@ def simulate_consecutive_seasons(simulationTeamResults, simulationPlayerResults,
 
     Returns:
     simulationTeamResults (data frame): data frame containing the updated simulation team results for one simulation
-    simulationPlayerResults (data frame): data frame containing the updated simulation player results for one simulation
+    simulationPlayerResults (data frame): data frame containing the updated simulation player salary results for one simulation
     """
     # for each season in the range of seasons
     for season in range(1, seasons + 1):
@@ -183,7 +183,7 @@ def simulation(allowedImports, salaryCap, seasons, simulationNumber):
 
     Returns:
     combinedSimulationTeamResults (data frame): data frame containing the updated simulation team results for all simulations
-    combinedSimulationPlayerResults (data frame): data frame containing the updated simulation player results for all simulations
+    combinedSimulationPlayerResults (data frame): data frame containing the updated simulation player salary results for all simulations
     """
     # initialize empty data frames to log results of all simulations
     combinedSimulationTeamResults = pd.DataFrame()
