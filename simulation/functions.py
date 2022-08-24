@@ -64,7 +64,7 @@ def skill_maximization(playerPool, teamBudget, selectionSize):
     prob += pl.lpSum(binaries[i] * salaries[i] for i in range(len(players))) <= teamBudget  # budget constraint
 
     # solve problem to obtain the optimal solution (best team)
-    prob.solve(solver=PULP_CBC_CMD(msg=False))
+    prob.solve(solver=PULP_CBC_CMD(msg=False, timeLimit=30))
 
     # initialize empty lists for the variable names and solution values
     variables = []
