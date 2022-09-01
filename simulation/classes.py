@@ -672,7 +672,7 @@ class League(object):
         assert all(list({team: len(players) <= parameters.teamSizeMax for (team, players) in
                              self.finalPlayerSelection.items()}.values()))  # violation of budget
 
-        assert all([True if self.teamData.loc[x, 'budget'] - self.teamData.loc[x, 'payroll'] > 0 else False for x in
+        assert all([True if self.teamData.loc[x, 'budget'] - self.teamData.loc[x, 'payroll'] >= 0 else False for x in
                     range(len(self.teamData))])  # payroll below budget
 
     def calculate_game_revenue(self, homeTeam, winPercentageHome, seasonPhase):
