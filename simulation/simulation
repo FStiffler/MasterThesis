@@ -2,10 +2,10 @@ import os
 import simulationModules
 
 # simulation parameters
-allowedImports = 4  # the number of allowed import players per team, references 'rho' in thesis
-salaryCap = False  # boolean indicator if salary cap is to be simulated or not, references 'R_cap' in thesis
-seasons = 1  # the number of consecutive seasons to simulate in one simulation, references 't' in thesis
-simulationNumber = 1  # the number of times the simulation shall be repeated
+allowedImports = 10  # the number of allowed import players per team, references 'rho' in thesis
+salaryCap = True  # boolean indicator if salary cap is to be simulated or not, references 'R_cap' in thesis
+seasons = 10  # the number of consecutive seasons to simulate in one simulation, references 't' in thesis
+simulationNumber = 1000  # the number of times the simulation shall be repeated
 
 # run simulation with defined parameters to obtain results on teams and player salaries
 combinedSimulationTeamResults, combinedSimulationPlayerResults = simulationModules.simulation(allowedImports, salaryCap, seasons, simulationNumber)
