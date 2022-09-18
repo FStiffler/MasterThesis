@@ -33,7 +33,7 @@ attDev<-attendance%>%
   scale_x_discrete(expand = c(0,0))+
   labs(
     x="Season",
-    y="Share of average league game attendance"
+    y="Relative market size"
   )+
   theme(
     panel.grid.minor = element_blank(),
@@ -57,4 +57,20 @@ attDev<-attendance%>%
   guides(fill = guide_legend(byrow = TRUE))
 attDev
 ggsave(attDev, file = "attendanceDevelopment.png", height=3, width=6, bg="white", dpi=700)
+
+# National League Attendance Development
+attDevTable<-attendance%>%
+  pivot_longer(cols = -1, 
+               names_pattern = "(\\D{2})(.+)",
+               names_to = c("type", "season"),
+               values_to = 'averageAttendance'
+               )%>%
+  pivot_wider(names_from = type,
+              values_from = averageAttendance)%>%
+  mutate(gr=round(gr, 2))%>%
+  rename(Team = team, Season = season, `Regular Season`=rs, `Playoffs`=po, `Growth Factor`=gr)
+
+# write table
+write_delim(attDevTable, delim = ",", file = "attendanceDevelopmentTable.csv", na="")
+  
 
