@@ -26,8 +26,8 @@ font_add(family="CM",
 showtext_auto()
 
 # font sizes
-titleSize <- 60
-textSize <- 55
+titleSize <- 80
+textSize <- 75
 
 # function to find parameters lambda and gamma based on solution to equation system:
 #   lambda/(k0+gamma)=1
@@ -303,7 +303,7 @@ supplyFunctionReal<-ggplot()+
   
   # cosmetics
   scale_x_continuous(expand = c(0,0),
-                     breaks = seq(0,2000,100),
+                     breaks = seq(0,2000,200),
                      limits = c(0, 2100)
   )+
   scale_y_continuous(expand = c(0,0),

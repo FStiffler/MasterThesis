@@ -13,8 +13,8 @@ font_add(family="CM",
 showtext_auto()
 
 # font sizes
-titleSize <- 50
-textSize <- 45
+titleSize <- 70
+textSize <- 65
 
 # National League Attendance Development
 attDev<-attendance%>%
@@ -50,8 +50,8 @@ attDev<-attendance%>%
     legend.text = element_text(family="CM", size=textSize),
     axis.line = element_blank(),
     axis.ticks = element_line(color="darkgrey"),
-    axis.text.x = element_text(family = "CM", size=textSize, margin = margin(7,0,0,0)),
-    axis.text.y = element_text(family = "CM", size=textSize, margin = margin(0,7,0,0)),
+    axis.text.x = element_text(family = "CM", size=textSize-20, margin = margin(7,0,0,0)),
+    axis.text.y = element_text(family = "CM", size=textSize-20, margin = margin(0,7,0,0)),
     plot.margin = margin(t=10, r=0, b=5, l=5, unit = "pt")
   )+
   guides(fill = guide_legend(byrow = TRUE))

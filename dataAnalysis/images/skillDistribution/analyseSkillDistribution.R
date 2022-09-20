@@ -10,8 +10,8 @@ font_add(family="CM",
 showtext_auto()
 
 # font sizes
-titleSize <- 60
-textSize <- 55
+titleSize <- 80
+textSize <- 75
 
 # plot different beta distributions as example
 betaDistributions<-ggplot()+

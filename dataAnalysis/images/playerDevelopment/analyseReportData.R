@@ -13,8 +13,8 @@ font_add(family="CM",
 showtext_auto()
 
 # font sizes
-titleSize <- 50
-textSize <- 45
+titleSize <- 70
+textSize <- 65
 
 # Swiss Player Development
 swissDev<-reportData%>%
@@ -24,7 +24,7 @@ swissDev<-reportData%>%
   ggplot(aes(Year, Count, color=Category))+
   geom_line(size=0.5)+
   geom_point(size=1)+
-  geom_text(aes(label=Count), vjust=-1.2, show.legend =F, size=textSize/.pt, family="CM")+
+  geom_text(aes(label=Count), vjust=-1.2, show.legend =F, size=(textSize-10)/.pt, family="CM")+
   theme_minimal()+
   scale_color_manual(values=c("black",Set3[4],Set3[5],Set3[6]),
                      labels=c("Registered (total)", "U20", "Senior", "Female"),
