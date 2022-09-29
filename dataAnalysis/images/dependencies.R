@@ -1,5 +1,5 @@
 ##### Set dependencies
-dependecies <- c("tidyverse", "RColorBrewer", "showtext", "wesanderson", "EnvStats")
+dependecies <- c("MASS", "tidyverse", "RColorBrewer", "showtext", "wesanderson", "EnvStats", "xtable", "broom", "margins")
 
 ##### Install and load packages
 missing <- dependecies[!(dependecies %in% installed.packages()[,"Package"])]
