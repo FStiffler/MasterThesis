@@ -163,7 +163,7 @@ fittedSkillDistribution<-ggplot()+
                      limits = c(0,2.5))+
   theme_minimal()+
   labs(
-    x="Normalized win shares per game",
+    x="Skill",
     y="Density"
   )+
   theme(
