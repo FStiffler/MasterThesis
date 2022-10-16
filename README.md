@@ -46,7 +46,7 @@ model in the master thesis.
 
 Introduces functions to run the simulation according to the defined model.
 
-**[simulationModuls.py](simulation/simulationModuls.py):**
+**[simulationModules.py](simulation/simulationModules.py):**
 
 Contains the basic elements of the simulation to be integrated.
 
