@@ -1,0 +1,893 @@
+\documentclass[12pt, a4paper]{article}
+
+%packages
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{setspace}
+\usepackage[natbibapa]{apacite}  % enable apa referecing 
+\usepackage[hyphens,spaces,obeyspaces]{url}  % make sure URL in reference is not too long
+\usepackage[nottoc, numbib]{tocbibind}  % package to number references chapter
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{array}
+\usepackage{booktabs} % create tables with with toprule, middlerule and bottomrule
+\usepackage{multirow} % create multirows
+\usepackage[labelfont=bf, format=hang]{caption}  % create bold table and figure caption labels
+\usepackage{longtable}
+\usepackage{lscape}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[capposition=top]{floatrow}
+\usepackage[hang]{footmisc}
+\usepackage{tikz}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{titlesec}
+
+%document parameters
+\onehalfspacing  % 1.5 line spacing
+\bibliographystyle{apacite}
+\DeclareMathOperator*{\argmax}{argmax} % declare the argmax function name
+\renewcommand{\doiprefix}{}  % remove DOI prefix
+\renewcommand{\url}{\textrm{}}  % url as normal text
+\setlength\bibsep{6pt}  % space between references
+\renewcommand*{\bibfont}{\raggedright}  % remove justification of bibliography stretching out content
+
+% start document
+\begin{document}
+
+\pagenumbering{roman}  %start with roman page numbers
+
+\input{titlepage}  % insert title page
+
+\section*{\centering Abstract}
+The observation of low championship variability and increasing player salaries in the Swiss National League has sparked    discussions about competitive balance and teams' financial stability. Demands for a league reform by implementation of a salary cap and an increase of the import player limit have been voiced. This study investigates how the mentioned measures might play out in reality by analysing previous literature on the matter, creating a stochastic model based on the retrieved theoretical foundation and embedding the model in a simulation framework enabling a simulation of the National League with league settings representing different manifestations of the measures. Based on the simulation results, various statistical methods to analyse the result variations differentiated by league settings are applied, finding that a salary cap is superior to an increase in the import player limit with respect to both, combating one-sided competition and combating raising salaries in the National League. Increasing the import player limit even shows to have a negative effect in terms of competitive balance. 
+
+\setcounter{page}{2}  % start counting pages on this page
+\newpage
+
+\tableofcontents  % insert table of contents
+
+\listoffigures
+\listoftables
+\listofalgorithms
+\newpage
+
+% Define title spacings
+\titlespacing*{\section}{0pt}{0pt}{-0.5cm}
+\titlespacing*{\subsection}{0pt}{0pt}{-0.5cm}
+\titlespacing*{\subsubsection}{0pt}{0pt}{-0.5cm}
+
+\section{Introduction}
+\pagenumbering{arabic}  % start counting again with arabic numbers
+
+\setlength{\parskip}{\baselineskip}  % set length of paragraphs
+
+\subsection{The state of Swiss professional ice hockey}
+
+In recent years, two major developments have been observed in the top tier Swiss ice hockey league, the National League (NL).Firstly, since the introduction of a playoff mode in the year 1986, only six different teams have won the championship trophy. Before Zug won the championship in 2021 and 2022, there were even only three different champions for thirteen years straight and that in a league of twelve teams\footnote{In the season 2021/22 the league was expanded by one team. An additional team joined the NL in season 2022/23 making for 14 teams currently playing in the NL}. Secondly, the NL has seen a steady and rapid increase of NL player salaries in past years \citep[see][]{germann_spielerlohne_2020,roth_zsc-boss_2018}. These developments sparked discussions about the level of competition and financial stability of the teams in the league. The discussion also started to revolve around the question of whether or not it is time for a league reform which would improve the status quo with respect to both these issues as many stakeholders do not consider the current state of affairs to be satisfactory. 
+
+\subsection{League reform measures}
+
+ Two key measures quickly emerged from the league reform discussion as the most promising in combating the observed developments. The first key measure proposed is to introduce a form of a salary cap which comes with an expenditure ceiling for player salaries as no such limit currently exists. Teams are free to spend as much money as they want on players. The second key measure proposed is to raise the import player limit. Up until season 2022/23, the NL only allowed four import players per team. The rest of the team had to be of Swiss nationality or in possession of a Swiss player license. Eventually, the NL teams released a joint statement in which they announced to put forward a league reform after all \citep[see][]{stettler_neu_2021}. While an increase of the import player limit up to six import players per team went into effect with the start of season 2022/23, the introduction of a salary cap is still an open issue \citep[see][]{germann_eishockeysaison_2021}. Despite these efforts by the league and the anticipated effects of the two measures in combating the observed developments, it is in fact still unclear what an increase of the import player limit and the introduction a salary cap actually can achieve to resolve the aformentioned problems the league is facing. At this point nobody really seems to be able to predict how these measures might play out in reality once implemented which also shows in the fact that the debate is still very much ongoing. 
+ 
+
+\subsection{Research question and paper structure}
+
+The ongoing debate about league reform measures among fans, journalists, team owners and players and the uncertainty about potential outcomes associated with the implementation of said measures highlights the need for a scientific confrontation of the topic. Therefore, in this paper, I analyse the reform measures from both, a theoretical and an analytical perspective, bearing in mind the following research questions: Does an increase of the allowed number of import players, the introduction of a salary cap or both together lead to a more balanced league in the long-term? How do these measures affect player salaries and the financial stability of teams? To answer these questions, in a first step, I present previous literature concerned with competitive balance and salary growth of players in order to classify the observed developments. After that, literature with respect to the two measures proposed and their effects on competitive balance and on financial stability of teams is presented. The idea of the literature research is to present relevant definitions related to the observed developments and proposed reform measures, to understand the mechanics and assumptions behind the developments and measures and to identify empirical findings which are relevant for analytical application in the following steps. In a second step, I apply the gained knowledge to create a theoretical model representing the league environment. The model consists of a statistical and mathematical foundation based on the identified findings and mechanics from the first step. In a last step, the model is embedded into a simulation framework to simulate an artificial form of the NL. The artificial NL is simulated with different league settings representing different manifestations of the two reform measures. The simulation results are then used to analyse the impact of the reform measures on competitiveness and financial stability of teams. I aim to identify potential advantages and disadvantages of introducing a salary cap and/or increasing the import player limit in the NL. The final goal is to make predictions on how the two measures might play out in reality when implemented at one point. 
+
+\section{Literature Review}
+
+\subsection{Competitive balance}
+\label{competitiveBalance}
+
+\subsubsection{Definition of competitive balance}
+\label{competitiveBalanceDefinition}
+
+As was pointed out in the introduction, the NL is likely to be suffering from one-sided competition as only a handful of teams have won league titles since the introduction of a playoff format. In scientific terms, one would also speak of poor competitive balance. Competitive balance in a sporting context can be understood as the extent of competition intensity \citep{walzel_teamsport_2019}. In a league with competitive balance, all teams have a roughly equal chance of winning against any other team \citep{szymanski_economic_2003}. According to \citet{sanderson_many_2002}, competitive balance can be decomposed in a within-season component and a within-team component. The within-season component refers to the uncertainty of outcome of games and championship titles while the within-team component refers to the performance of a team over time and measures long-term dominance. Slightly different but somewhat related, one can also differentiate between short-term, mid-term and long-term competitive balance, where short-term competitive balance refers to the uncertainty of game outcomes, the mid-term competitive balance refers to the uncertainty about the outcome of a season and the long-term competitive balance refers to the long-term distribution of championship titles \citep{walzel_teamsport_2019}. The former definition is selected as the relevant definition for competitive balance going forward in this paper. The lack of variation in NL champions since the introduction of playoffs can thus be described as a lack of within-team competitive balance. The question of as to why competitive balance is relevant and why the lack of it might become a problem for professional sports leagues is extensively discussed in previous research. The most relevant findings will be shortly presented in the following.
+
+\subsubsection{Importance of competitive balance}
+\label{competitiveBalanceImportance}
+
+Competitive balance is particularly relevant with respect to game attendance and thus indirectly related to team revenues as well. In 1956, \citeauthor{rottenberg_baseball_1956} introduces the uncertainty of outcome hypothesis by stating that game attendance is a negative function of the dispersion of winning-percentages. In other words, games with uncertain outcomes will attract more spectators than games with certain outcomes. The uncertainty of outcome hypothesis, however, is contested due to a lack of empirical evidence \citep[cf.][]{borland_demand_2003,szymanski_economic_2003}. Based on game data from the NHL, \citet{coates_game_2012} show that the uncertainty of outcome hypothesis fails at explaining game attendance when not extended with a consideration of fans' loss aversions as defined by prospect theory according to which expected losses are perceived differently than expected wins. They find that fans are actually more likely to attend games when they expect their team to win. Furthermore, fans prefer high scoring games but detest games with poor defensive play and highly penalized visiting teams. While complete uncertainty of outcome does not seem to be the optimal solution in terms of game attendance, neither is a purely dominant competition with 100\% certainty about the outcome. In their model,  \citet{el-hodiri_economic_1971} show that gate receipts fall substantially as soon as any team approaches winning percentages of 100\% and thus they conclude that it is not in the best interest of any team to become too superior. Considering demand for NBA games, \citet{rascher_fans_2007} come to the conclusion that fans do not want to see games were the outcome is 100\% certain and identify an optimal winning percentage of 70\% for the home team. Similarly, \citet{kesenne_optimal_2015} finds that the optimal winning percentage has to be between 50\% and 67\% depending on the relative number of neutral spectators on television, the winning preferences of team supporters and the size of the market in which the team operates. While the presented findings so far only relate to within-season competitive balance, other studies are more concerned with within-team competitive balance. In this matter, \citet{zimbalist_competitive_2002} presents ambivalent results. He shows evidence from the MLB and NBA, that dominance of one or a few teams over a stretched period of time can be harmful when it comes to game attendance. At the same time, he shows that fan interest increases, if the success of a team, dominating the league over multiple years, is considered legitimately gained as was the case for Manchester United between 1992 and 2000 in the English Premier League. Considering that game attendance in Europe and North America show similar growth patterns despite European sports leagues seeing more long-term dominance by a subset of teams compared to North American sports leagues, this might as well be an indication that within-team imbalance is not necessarily something to worry about \citep{szymanski_economic_2003}. The perception of balance and imbalance is also subject to the utilized measurement. In a working paper, \citet{goossens_competitive_2005} summarises different measurements for competitive balance attributed to within-team and within-season competitive balance likewise and concludes that the measurement selection matters when it comes to determining the level of competitive balance. The analysis to be conducted later in this paper accounts for that fact by using two different measures of competitive balance. However, in general it is difficult to classify the current state of championship title concentration in the NL as bad or good based on the presented literature as previous research does not seem to have definite answers on optimal levels of competition. But it is certain that pure dominance is as bad as pure balance.
+
+\subsubsection{Factors influencing competitive balance}
+
+Around the NL case there is a common assumption that financial resources are the main cause for the observed concentration of championship titles on a few teams. It is known that the dominating teams since beginning of the playoff-era are financially well-equipped and thus have a larger scope of action when it comes to signing players. Consequently, teams with lower budgets are at an disadvantage. But scientific studies extend the realm of possible influences beyond money. \citet{sanderson_many_2002} discusses factors affecting competitive balance in the context of various sports and identifies technological changes, sport integrity, performance enhancing drugs and environment as main, non-economic drivers of competitive balance. Technological changes over the years lead to improved sporting equipment, which, at least in short-term and until all contestants have adapted to the new technology, can lead to reduced competitive balance. Sport integrity addresses the assumption that the competition is not rigged in any way shape or form to provide an unfair advantage towards one contestant. A lack of sport integrity includes fraud in a legal sense but also a mismanagement of incentives to win. The former could manifest itself in form of fixing games while the latter is the case, if a team, for example, purposely starts to lose games in order to obtain a favourable position in the upcoming entry draft\footnote{An entry draft is a system in which young talents are picked in reverse order of the previous seasons’ league ranking by teams and serves the purpose of balancing team strengths \citep[see][]{szymanski_economic_2003}}. Performance enhancing drugs are reducing competitive balance for obvious reasons and are banned but repeated doping scandals underline their relevance for competition up until today. Finally, environmental factors summarise external influences which benefit or hurt athletes’ competitiveness starting from young age and are beyond their control. These factors include parental support, proximity to and quality of training facilities. In the same study, Sanderson, nevertheless, also describes the influence of economical factors such as the market size i.e., the popularity of a sport in a certain area and thus the potential to draw spectators, stadium amenities and lucrative local television contracts. \citet{pawlowski_top_2010} provide evidence of decreasing competitive balance in major soccer leagues in Europe caused by an increase in payouts to UEFA Champions League participants out of these leagues. Through the payments, participating teams gain a financial advantage compared to their non-participating opponents in the domestic league. The participating teams are able to sign more skilled players on the market, which in turn increases the probability that participating teams will dominate the league yet again and appear in the Champions League in consecutive years as well. Based on these findings, financial factors are very likely to play an important role in determining competitive balance in the NL as well, although the Champions Hockey League (CHL), the hockey counterpart to the UEFA Champions League, is no match in regards to prize money. In addition, a team's geographical location should not be disregarded. 
+
+
+\subsection{Salary growth}
+
+\subsubsection{Classification of observed salary growth}
+\label{salaryGrowthClassification}
+
+From an economic perspective, salary growth over time is a natural occurrence which is why it is important to understand if salary growth in professional sports is within the realms of ordinary growth behaviours or rather extraordinary. Looking at the historic context of player salaries allows this distinction. In 1960, the average family income in the United States was \$5'600 per year \citep{scammon_income_1962}. At the same time, the average salary of an MLB player was \$16'000 per year and thus almost three times a family's income \citep{haupert_economic_2007}. The same applies to NHL players who earned between \$10'000 and \$16'000 per year at that time \citep{hockey_central_original_nodate}. By 2020, the average US worker earned \$71'456 per year \citep{statista_research_departement_annual_2021} while an NHL player earned \$2'690'000 per year and an MLB player even earned \$4'030'000 per year on average \citep{gough_average_2022}. This results in ratios of approximately 38 to one and 57 to one respectively and visualizes the scope of salary growth in professional sports in the US compared to general income growth in the population. It is difficult to draw a similar comparison for professional ice hockey in Switzerland since the player salaries of NL players are not public. However, it is known that player salaries in 1960’s were limited to CHF 900 per year and a lot of players had to work in ordinary jobs next to their ice hockey career to earn a living wage \citep{koller_kanadier_2016}. Thus, hockey in Switzerland was far from professional back then. Today, according to experts and depending on the role of players in their respective teams, national league players might earn up to CHF 900'000 per year if they belong to the few superstars in the league and up to CHF 350'000 per year , if they belong to the group of average players \citep{allemann_sind_2020}. Comparing these values to the annual median wages of Swiss workers of CHF 82'900 per year \citep{bundesamt_fur_statistik_bruttoerwerbseinkommen_2021}, ratios of 11 to one and four to one are obtained. While the ratios are not comparable to the ones in North America, it is obvious that extraordinary salary growth is observed in Swiss ice hockey as well. 
+
+\subsubsection{Reasons for salary growth}
+\label{salaryGrowthReasons}
+
+There are different arguments as to why the salaries are increasing. According to team officials, the observed rise in salaries originates from a limited pool of Swiss players skilled enough to play at NL level which in turn equips the players with more bargaining power taking into the account the limited possibility to recruit import players \citep[see][]{noauthor_zu_2018}. Others argue that the player pool is not the problem but rather an artificially increased demand of teams as a result of financial success in recent years \citep[see][]{roth_wegen_2020}. In the following, the two arguments are considered in more detail. 
+
+\noindent
+The first argument puts the blame for increasing player salaries on the supply side of the player market. In general, \citet{szymanski_market_2000} indicates that in a competitive player market, a player's wage reflects his talent. Teams with more talent pay more for their players but are also more successful. This statement is proven by the demonstration of a significant correlation between success and talent, when regressing the average league rank of English professional soccer teams on their wage expenditures. \citet{celik_salary_2017} who analyse salary differences in Major League Soccer come to a similar conclusion, finding that the number of goals and the number of assists are among the most influential determinants for player salaries. Goals and assists are also the most important factors in determining the salaries in the NHL \citep{coates_returns_2017}. Based on this evidence, one could conclude that player salaries simply reflect the actual skill of a player and are a compensation (or fair salary) for output contribution. Players with lower output are paid less than players with higher output. Hence, every team would assess a player based on skill and should be willing to pay the same price for said player even when faced with a limited player pool. However, supply side market influences are not to be neglected when it comes to determining player salaries. \citet{bryson_all-star_2017} conduct a study with salary data from the NHL and find that the birth cohort in which a player is born is a deterministic factor for player salaries. Players born in large birth cohorts earn less over an average career lasting 4.5 years than players born in smaller birth cohorts although they outperform players from smaller cohorts in terms of points scored. Investigating possible causes for the salary difference between player cohorts, they identify the variables \emph{number of games played by season} and \emph{league expansion} as the most important factors. Players in larger cohorts tend to play more games per season on average, a fact the authors attribute to higher player quality and durability as a result of more intensive competition during junior training. At the same time, league expansions mean more roster spots to be filled with new players. Both factors give players in smaller birth cohorts a relative bargaining advantage as there are just so many players available to fill the missing spots. Thus, while player skill seems to be the main determinant for salaries, the supply situation also influences player compensation. The complaints of NL teams that a limited player pool is driving salary growth as a result of bargaining advantage by the players can thus not be dismissed out of hand. This, however, presupposes that Swiss hockey teams are actually faced with limited player supply. One possibility to check the limitation of player supply is by looking at the number of registered Swiss ice hockey players. Figure \ref{fig:playerBaseAbsolut} shows the development of the number of registered Swiss ice hockey players over the last ten years. 
+
+\vspace{0.5cm}
+\begin{figure}[!h]
+\centering
+\caption{Number of registered Swiss ice hockey players over time}
+\label{fig:playerBaseAbsolut}
+\includegraphics[width=\textwidth]{ {dataAnalysis/images/playerDevelopment/playerDevelopmentAbsolut} }
+\begin{flushleft}
+{\footnotesize \textit{Data Source: \cite{iihf_iihf_2022}}}
+\end{flushleft}
+\end{figure}
+
+\newpage
+\noindent
+Apart from a down tick in the year 2015, which most likely is a data-entry error on the side of the International Ice Hockey Federation (IIHF), there is a steady but slow trend towards an increasing player base which should also translate in a larger player supply on NL level. The annual growth rates of the male player base compared to the previous year are depicted in figure \ref{fig:playerBaseRelative}. 
+
+\vspace{0.5cm}
+\begin{figure}[!h]
+\centering
+\caption{Year-on-year growth rates of male player base in Switzerland}
+\includegraphics[width=\textwidth]{ {dataAnalysis/images/playerDevelopment/playerDevelopmentRelative} }
+\begin{flushleft}
+{\footnotesize \textit{Data Source: \cite{iihf_iihf_2022}}}
+\end{flushleft}
+\label{fig:playerBaseRelative}
+\end{figure}
+
+\noindent
+The male player base was growing except for three occurrences in the years 2014, 2015 and 2017. The average year-on-year growth rate is 2.1\% which implies that player supply on NL level is not completely static and thus renders the limited player pool argument only partially valid.
+
+\noindent
+The second argument puts the blame entirely on the teams and hereby on the demand side of the player market. \citet{andon_accounting_2019} argue that since 1960 a lot of money has entered professional sports coming from sources like corporate advertisement as well as the sale of broadcasting rights, tickets and merchandise. Especially the growth in valuation of sport broadcasting rights is a major source for new financial gains. They underline this assertion by comparing the prices which current and previous holders of broadcasting rights of nine reknown professional sports leagues around the world were willing to pay for said rights. In their analysis they find a broadcast valuation growth for each considered league with an average annual growth rate of 92\%. A similar pattern is also observed in Swiss ice hockey. A commercialisation of the sport was initiated by teams in the French speaking part of Switzerland in the 1950’s and 1960’s \citep{koller_kanadier_2016}. Additionally, in 2016, the NL\footnote{back then named ‘National Liga A’} announced a broadcasting deal with a large cable tv provider in Switzerland, almost tripling the league's broadcasting revenue compared to the previous contract \citep[see][]{germann_354_2016}. The sudden money influx from new broadcasting rights was also equivalent to additional revenues for teams \citep[see][]{noauthor_noch_2017}. This led to concerns that the teams would spend the money entirely on players for short-term success at the cost of investments in junior hockey and fuelling player salary growth even more \citep[see][]{germann_schweizer_2018,kuchta_schone_2017}. Evidence from professional soccer in Scotland shows that the professionalization and monetization of the sport gave rise to a reinvestment cycle where sport teams would tend to reinvest additional, success related revenues in better players and coaches in order to maintain or enhance the sportive success and in turn, to achieve even higher revenues while only maintaining marginally small profits or even losses \citep{cooper_insolvency_2013}. Similar observations are made in professional ice hockey as well. A study conducted by \citet{zimbalist_competitive_2002} finds a positive correlation between NHL teams' win-shares and their payroll from which he concludes that well performing teams make an effort to reinforce their roster by signing better players for further success. \citet{whitney_bidding_1993} describes this type of reinvestment pattern as destructive competition in which teams go all in on talented players and end up bankrupt when the marginal revenues attached to the success these talents bring to the team do not offset the investments. \citet{kesenne_impact_2000} even directly links team investment decisions to salary growth. He identifies the irrational behaviour of bidding up for highly skilled players as a main driver for salary growth. The findings of these studies imply that the NL teams are probably at least complicit in fuelling player salaries by artificially inflating demand. 
+
+
+\subsubsection{Problems arising from salary growth}
+\label{salaryGrowthProblems}
+
+Sport economic theory assumes that teams are either trying to maximize profits or wins whereby European sport teams often show win maximizing tendencies which includes spending newly obtained revenues entirely \citep{garcia-del-barrio_goal_2009}. Another viewpoint is that teams try to optimize a function weighting profits and and wins which allows them to trade-off the former for the latter \citep{dietl_competitive_2011}. In reality, NL teams are more on the win maximization side which resulted in repeated accounting losses for most teams \citep{hauptli_wie_2012}. This combination of win maximization behaviour and growing salaries is potentially harmful since teams invest a growing portion of their total revenue into player salaries while neglecting other areas of investment like the development of new young players. Consequently, the quality of domestic players might suffer. Furthermore, in accordance with \citet{whitney_bidding_1993}, teams are always in danger of going bankrupt. The fact that ten out of twelve NL teams had to go through a financial rehabilitation in recent past \citep[see][]{germann_kommentar_2021}, some teams just narrowly averted bankruptcy \citep[e.g.][]{ meile_unternehmer_2016} and the fact that teams heavily relied on federal money during the COVID pandemic \citep[see][]{noauthor_so_2021} are proof of financial mismanagement and thus of the potential danger laying in further salary growth. 
+
+\noindent
+Increasing salary growth is also likely to affect competitive balance in the league. Based on the findings on factors influencing competitive balance \citep[see][]{sanderson_many_2002, pawlowski_top_2010}, it is reasonable to assume that increasing salaries disproportionately benefits teams with larger revenues. While salary growth limits the ability of low-budget teams to invest in highly skilled players, high-budget teams still can afford these players because they can, to some degree, also set the price. It appears that the NL is the highest paying, non-American league behind the transnational but Russia-based Kontinental Hockey League, short KHL \citep{darryl_wolski_2112hockey_2020_2020}. The source has to be taken with a grain of salt, but it provides a good indication for player salaries in other leagues. When extending the geographic scope, the National Hockey League (NHL) is the only other ice hockey league where key players can earn a multiple of NL players\footnote{The website Cap Friendly provides a good overview over player salaries in the NHL: https://www.capfriendly.com}. Though, this is not necessarily true for players who have less important roles on their team when also considering salary deductions for taxes, agent fees and levies to the league \cite[see][]{noauthor_nhl_2016}. Going forward, based on economic theory on price elasticity, I assume that it is very well possible that NL teams with large budgets are price setters when it comes to player salaries of the best players in the league. As long as these players can not reasonably threaten to leave and play in the KHL or NHL for a higher net salary after deductions, they have to take the salary offered by the NL teams with large budgets.
+
+\subsection{Salary Cap}
+
+\subsubsection{Definition of salary cap}
+
+A salary cap is defined as ‘limit on the amount of money a team can spend on player salaries’ \citep[p. ~1]{dietl_effect_2009}. There are various design options for a salary cap. A salary cap can either be implemented on team level where the expenditures of a team for player salaries is limited or on player level where a maximal allowable salary for a single player is defined or as a combination of both \citep{lindholm_problem_2011}. Furthermore, a salary cap is normally defined as a fixed monetary value to be complied with by all teams and is calculated based on the revenue earned by the league \citep{dietl_effect_2009}. But it is also possible to define a relative salary cap depending on the teams’ revenues \citep{dietl_salary_2012}. A further distinction of salary caps follows from the depth of economic intervention and the allowed scope of action under the salary cap for the teams by differentiating between a hard cap, a soft cap and a luxury tax \citep[see][]{levine_hard_1995,lindholm_problem_2011}. A hard cap is a salary expenditure ceiling which must not be exceeded under any circumstances \citep{levine_hard_1995}. An example for a hard cap is the salary cap defined in the collective bargaining agreement (CBA) between the NHL and the National Hockey League Player Association (NHLPA) from 2012 \citep[see][]{nhl_collective_2012}. The agreement provides a salary cap calculation based on league revenue in the previous season and also defines punishments in case of a cap violation such as fines, loss of points, loss of draft picks or even suspension of employees. A soft cap also sets a salary ceiling but in contrast to the hard cap, teams are allowed to exceed the ceiling in certain situations \citep{levine_hard_1995}. An example for an exception rule under a soft cap is observed in the CBA between the National Basketball Association (NBA) and the National Basketball Player Association (NBPA) where teams are allowed to exceed the salary cap when they sign rookies to a specific rookie entry contract \citep[p. ~207]{nba_collective_2017}. Finally, a luxury tax can be defined as ‘a surcharge on the aggregate payroll of a sports team that exceeds a predetermined limit set by the corresponding sports league’ \citep[p. ~1]{dietl_effect_2010}. Thus, a luxury tax intends a cap limit which, however, can be exceeded at will, provided the teams pay the surcharge. The Major League Baseball (MLB) and the NBA, additionally to the soft cap system, both apply a luxury tax system in which teams have to pay a tax rate on every dollar spent above limit to the league which is then redistributed to weaker teams \citep{dietl_effect_2010}. In the year 1997 the cap limit in the MLB was \$51 million dollars and teams had to pay 35\% tax rate on each dollar above the limit \citep{staudohar_salary_1998}. Since then, the tax rates and limits have steadily changed \citep[cf.][]{dietl_effect_2010} but the mechanism stayed the same. In the context of the model to be defined in this study, only the effect of a hard cap is investigated with the core assumption that teams are not going to breach the cap ceiling. The model does not consider any form of financial redistribution.
+
+\subsubsection{Prevalence of salary caps}
+
+Salary Caps are common in North American and Australian sports leagues, apart from some English rugby leagues, however, not so much in Europe \citep{dietl_effect_2009}. In ice hockey, the KHL is the only partly European league with a salary cap in place \citep{noauthor_salary_2022}. \citet{lindholm_problem_2011} mentions conflicts with European law, the presence of regulation and promotion and the presence of international team tournaments as possible reasons for a lack of salary cap systems in Europe. From an antitrust perspective, legal hurdles also persist in Switzerland which might prevent the introduction of a salary cap in a classical sense \citep[see][]{wettbewerbskommission_weko_einfuhrung_2021}. Nevertheless, the legal perspective of a salary cap in the NL is not further discussed in this paper and is left for legal experts to analyse. This paper lays out a hypothetical scenario in which the league has no obligation to follow legal guidelines when implementing league reforms. In regard of the mentioned differences in league structures between European and North American leagues especially with respect to promotion and relegation, the NL represents no exception. The four major North American sports leagues are franchise-based and closed which means that the teams are licensed franchises in possession of a license owner and that new teams can only enter the league if the league decides to sell a new license \citep{cain_similar_2005}. The NL, on the other hand, consists of teams organised as independent economic entities and it has a relegation mode which allows teams from the lower tier Swiss League (SL) to be promoted. It is obvious that a league in the role of a franchise issuer has much more control over league regulations than a league consisting of independent economic entities. Finally, teams from North American sports leagues are not participating in international team tournaments which is why a salary cap could not hurt their international competitiveness. The relevance of this point from a NL perspective can be disputed. Although Swiss teams are participating in the CHL, competitiveness of Swiss teams in this contest probably would only play a minor role in deciding on whether or not to introduce a salary cap since the importance of the CHL is not as high as e.g. the UEFA Champions League in soccer.  
+
+\subsubsection{Effects of a salary cap}
+
+\citet{el-hodiri_economic_1971} are the first to develop a model representing a professional sports league. Before 1984 when the NBA introduced a salary cap followed by the NFL in 1994 and a luxury tax system implemented by the MLB in 1997 \citep[see][]{staudohar_salary_1998}, the leagues relied on antitrust exemptions which granted them the ability to bind players for the length of their careers\footnote{Commonly known as \emph{reserve clause}. Players would only switch teams when their contracts were sold.}, the ability to conduct an entry draft , the ability to control franchise allocation and the ability to negotiate broadcasting deals without the threat of anti-trust sanctions. These exemptions were granted since the teams argued that without them, competitive balance is at risk. Based on the mentioned model, the authors, however, conclude that a convergence to equal playing strength does not occur as long as teams have different revenue potentials deriving from team location, effectively saying that the mentioned antitrust exemptions are not sufficient in achieving the goal of competitive balance. The authors, however, do not explicitly refer to a salary cap as possible solution in this case. It is for \citet{fort_cross-subsidization_1995} to first argue that an acceptable level of competitive balance might be obtained by a cross-subsidizing system like a salary cap. They find that the introduction of a salary cap leads to both, more competitive balance and financial viability for teams in weaker markets through financial support by teams in stronger markets. Based on data from three Australian sports leagues, \citet{booth_comparing_2005} finds an increase in both, within-season and within-team competitive balance, in all three leagues between 1985 and 2004 and states that the introduction of a salary cap in all three leagues might be a likely reason for this observation. Other authors explicitly state that the motivation of implementing any form of salary cap is to prevent dominance of few teams over other competitors through financial superiority \citep{walzel_teamsport_2019,dietl_effect_2009}. Another motivation is to steer salary growth and maintain financial stability of teams \citep{dietl_effect_2009}. \citet{kesenne_impact_2000} argues, based on a two-team model, that a salary cap improves salary distributions in the league with lower salaries for highly skilled players and better profit margins for the teams which encourages investment in the industry. On the downside, he also mentions that the introduction of a salary cap might lead to a deviation from the pareto-optimal distribution of highly skilled players across weak and strong markets which leads to lower total league revenue. However, the pareto-optimal distribution does not take into account that financially strong teams hurt themselves by signing too much talent which diminishes competitive balance and thus imposes negative externalities on all teams. The salary cap might as well be a tool to abolish this externality by restricting demand for highly skilled players. Analysing salary caps more from a standpoint of social welfare, \citet{dietl_effect_2009} find that the impact of a salary cap on social welfare can either be positive or negative depending on fan preferences for competitive balance. In general, introducing a salary cap is basically a collusion of the demand side of the market and thus restricts market outcomes which one could assume does not lead to a social optimum. The authors find that the introduction of a salary cap in an already competitive league with fans preferring equal competition and aggregate talent decreases social welfare as a result of lower league quality resulting from lower aggregate talent. In an imbalanced league with fans preferring aggregate talent in the league, the salary cap, however, leads to an increase in social welfare since the marginal benefit of increased competition is able to offset the marginal loss caused by lower aggregate talent. In a study analysing the effect of a salary cap in conjunction with a revenue sharing system, \citet{dietl_combined_2011} conclude that revenue sharing alone does not affect the distribution of playing talent but rather leads to a profit increase of teams in small markets, a decrease in costs per unit of talent and a decrease in profits of teams in larger markets given the difference in market size between small and large markets is large. A salary cap alone leads to a rise in competitive balance and in profits of small market teams but goes hand in hand with reduced league revenues. In this case, playing talent is not put to the best productive use anymore meaning that teams with higher marginal product per unit of talent are limited in their investments in new units and thus the units are signed by teams with a lower marginal product. A combination of both measures eventually leads to an efficient allocation of talent, lower salaries for players and higher profits for teams. While the studies mentioned so far assume a hard salary cap, other studies also look deeper into different forms of salary caps. A percentage-of-revenue salary cap, where league revenues are redistributed to the teams based on market size and the teams are only allowed to spend a fraction of their revenue on player salaries leads to a more balanced league, lower player salaries but also to reduced aggregate talent in the league \citep{dietl_salary_2012}. Based on a luxury tax model where teams with payrolls above the average salary level must pay a luxury tax to be redistributed to teams below average, \citet{dietl_effect_2010} find that small market teams start paying higher player salaries while larger teams try to reduce player salaries which leads to more competitive balance but also to increased player salaries in total. The salary reduction attempts by large market teams are not enough to offset the higher salary payments induced by small market teams. Further the study finds a positive effect of a luxury tax on social welfare as a consequence of higher league quality given a fan preference for aggregate talent. Concerning the soft cap introduced by the NBA, \citet{szymanski_economic_2003} indicates that the system did not lead to improved competitive balance as a result of several exemption rules. He further argues that a salary cap system is only effective with respect to competitive balance, when teams in small markets are able to max out the spending limit. The findings, especially with respect to the hard cap to be pursued in this paper, imply that a salary cap might actually be a suitable measure to counter the observed developments in the NL. 
+
+\subsection{Import player limit}
+
+\subsubsection{Historic context of the import player limit in Switzerland}
+
+The question about the right number of allowed import players in Swiss ice hockey is not new. \citet{koller_kanadier_2016} provides a historic overview over Swiss ice hockey and how the import player question has divided Swiss ice hockey ever since. Already in the year 1956, teams in the predecessor of today’s NL debated about the number of allowed import players in the league. Bad performances in several consecutive tournaments by the Swiss ice hockey national team preceded the debate. Especially the teams from the French speaking part of Switzerland pushed for reforms which would have increased the number of allowed import players from one to two and requested a general professionalisation of hockey in Switzerland. Teams from the German speaking part of Switzerland, on the other hand, saw the responsibility for the bad performance by the national team in the Canadian player-coaches which would take away roster spots from young players. In 1958, the French speaking teams were overruled and import players were banned all together. This, however, did nothing to prevent a further decline in Swiss ice hockey compared to other countries. Only in 1970 were import players allowed back into the league again. Today the arguments in favour of and against more import players are the same as at that time. Proponents of more import players argue that the quality of the league will increase and that the player salaries will decrease. The opponents, on the other hand, argue that younger players will have an even harder time to prove themselves on NL level and that teams will sign more expensive import players instead of signing cheap imports which in turn would also negatively affect competitive balance.  In the following these arguments are examined in more detail. 
+
+\subsubsection{Effect of an import player limit}
+
+Again citing \citet{bryson_all-star_2017}, player salaries depend on the size of a player cohort. A smaller cohort of players has a better position at the negotiating table which results in higher salaries, even when the players are not more skilled than players from larger cohorts. In the case of the NL, these findings imply that an increase of the number of import players reduces bargaining power of domestic players as the player pool from which the teams can select from grows. This is also consistent with economic literature investigating the effects of immigration on domestic wages in a conventional labour market where a slight tendency towards a negative association between immigration and salaries is observed \citep[see][]{longhi_meta-analytic_2005,llull_effect_2018}. Although player salaries of domestic players are likely to come under pressure when the number of allowed import players is increased, it does not necessarily need to be true that overall team payrolls are reduced. Evidence from Major League Soccer shows that player salaries of players born in places where football is important and successful are higher than salaries of domestic players or players born in countries where football has not the same prestige \citep{celik_salary_2017}. This could be an indication that teams are willing to overcompensate lacking skill in the domestic player pool by signing very skilled but expensive import players. Teams would rather choose to sign good import players to gain a competitive advantage instead of signing affordable imports in order to put pressure on domestic player salaries. When looking at the number of top import players signed by NL teams for the season 2022/23, it becomes apparent that this is also what is happening in the NL \citep[see][]{burgler_geldprobleme_2022}. The assumption seems obvious, that teams with higher financial resources are also going to be the teams dominating the league and thus more imports might even have an adverse effect on competitive balance. There is no doubt, that these imports will also bring more quality to the league which is a favourable condition, if fans in the league prefer aggregate talent \citep[see][]{dietl_effect_2009,dietl_effect_2010}. But the ramifications for domestic player development are rather negative. A qualitative study by \citet{cachay_bosman-urteil_2001} investigates the effects of a court ruling by the European Court of Justice to prohibit import player restrictions on German professional sports. The authors find that the lifting of restrictions has led to an inflow of import players in all important German sports leagues at the cost of young player integration. After the ruling, the same behaviour was also observed in other leagues and the Union of European Football Association (UEFA) was even prompted to introduce a so-called home-grown quota for domestic players in order to continue fostering development of young players \citep{bullough_measuring_2019}. Given all these findings, it is at least questionable if increasing the import player limit is suitable to tackle the observed developments in the NL. 
+
+\section{Model} 
+\subsection{Playing skill}
+\label{playingSkill}
+
+Playing talent is an important factor in the models proposed by authors of previous research and is a determinant for team competitiveness but also for the scope of expenditures \citep[see e.g.][]{dietl_effect_2009,el-hodiri_economic_1971,fort_cross-subsidization_1995,kesenne_impact_2000,whitney_bidding_1993}. Before the model is introduced, it should be mentioned that these papers often use the term talent and skill interchangeably although talent and skill are not necessarily the same. In this study, I assume that different players have different skill levels and that the skill level of a player can increase over time due to training but also decrease as a result of aging. Talent on the other hand just impacts the maximal obtainable skill level in a player's career and thus the skill potential. Consequently, this model considers a player pool from a skill rather than talent perspective. In a stochastic model approach, let skill be a random variable $S\sim Beta(\alpha,\beta)$. The probability density function (pdf) is given by 
+
+\begin{equation}
+f_S(s)=\frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha)\Gamma(\beta)}s^{(\alpha-1)}(1-s)^{(\beta-1)}
+\end{equation}
+
+\noindent 
+where $0 \leq s \leq 1,\alpha > 0,\beta > 0$ and $\Gamma$ is the Gamma function ${\Gamma(x)=(x-1)!}$ This pdf has two desirable properties going forward. First of all, skill is normalized to a range between zero, i.e lowest available skill just sufficient for playing in the NL, and one, i.e. highest available skill which is also good enough to play in the NHL but not as key player. Second, the parameters $\alpha$ and $\beta$ determine the distribution shape which is useful as it allows for different assumptions about the distribution of skill in the domestic player pool. 
+
+\noindent
+One might assume that skill is uniformly distributed within the previously discussed range which implies that $\alpha = \beta = 1$. Under this assumption, an equal number of players at every skill level exists. Another possibility is to assume a normal distribution of skill which is approximated when $\alpha$ and $\beta$ are large and $\alpha\approx\beta$. Under this assumption, there is a concentration of mediocre players with extremely good and extremely bad players being rare. One can also assume that skill is distributed according to the power law which can be approximated when $\beta=l\ast\alpha$ given $\alpha \leq 1, \,\beta=\min(2,\ l\ast\alpha), \,l > 0$. Under this assumption, the vast majority of players have relatively low skill levels while with increasing skill level, the number of players approaches zero. Finally, playing skill could be right skewed distributed which is approximated when $\alpha>1$, $\beta>1$ and $\beta>\alpha$. In this distribution, playing skill is concentrated to the lower skill levels with a long tail in positive direction. Figure \ref{fig:betaDistribution} provides an overview of the described distributions by depicting example parametrisations of $\alpha$ and $\beta$. The distribution parameters $\alpha$ and $\beta$ can be estimated by maximum likelihood estimation (MLE) \citep[see][]{forbes_statistical_2010} based on NL player skill data. The goal is to obtain parameter values leading to a close approximation of actual skill distribution in the NL. The skill distribution forms the basis for the definition of player pools.
+
+\vspace{0.5cm}
+\begin{figure}[h]
+\centering
+\caption
+{Visualization of beta distribution}
+\label{fig:betaDistribution}
+\includegraphics[width=\textwidth]{ {dataAnalysis/images/skillDistribution/betaDistributions} }
+\end{figure}
+
+\vspace{0.5cm}
+\subsection{Player pool}
+
+A player pool $P$ is defined as a collection of $k=|P|$ individual players $p$ from which teams can be assembled. Each player $p \in P$ has a skill level $S_p$ so that $\forall p$, $S_p \in [0,1]$ and $S_p$ is independent and identical distributed. The model differentiates between two types of player pools namely a domestic player pool $P_{domestic}$ consisting of $k_{domestic}$ domestic, individual players and a foreign player pool $P_{foreign}$ consisting of $k_{foreign}$ foreign, individual players. In the NL case, the domestic player pool consists of all Swiss players or players with Swiss ice hockey licenses, while the foreign player pool constitutes the pool of potential import players. The two player pools are assumed to be different in key characteristics. First of all, $\forall p \in P_{foreign}, \, S_p \sim Beta(\alpha=1,\beta=1)$ and $\forall p \in P_{domestic}, \, S_p \sim Beta(\alpha=\hat{\alpha}_{MLE},\beta=\hat{\beta}_{MLE})$ i.e. skill of foreign players is drawn from an uniform distribution while the skill for domestic players is drawn from a distribution with parameters derived by MLE. Second of all, $k_{domestic}<\infty$ while $k_{foreign}=\infty$, i.e. the domestic player pool is limited while the foreign player pool is unlimited. Consolidated, both differences imply that whatever the distribution of domestic playing skill, for each domestic player exists an infinite amount of equally skilled foreign players. This assumption is crucial as it introduces player replaceability which is important for the definition of player wages and the selection of players by teams later on. It also implies that the overall distribution of domestic playing skill is constant, despite changes in skill of individual domestic players. In contrast, skill distribution across the league can change as depending on the selected import players. 
+
+\noindent
+Given $P_{domestic}$, $P_{foreign}$ and the number of allowed import players $\rho$, it is also possible to define the  player pool size $k$ faced by the teams. Since each team is only allowed to dress $\rho$ foreign players as imports and given that each team $i$ in a $n$-team league has the possibility to max out $\rho$ by signing an equal number of foreign players, $\exists P_{import} \subset P_{foreign} : k_{import}=\rho n$. Thus, the player pool size faced by the league as a whole is given by $k_{domestic}+k_{import}$ rather than $k_{domestic}+k_{foreign}$. Although the teams can choose any import player from the unlimited pool $P_{foreign}$, the number of players they can choose is limited and in combination with a limited pool of domestic players, the total player pool size has to be limited as well. From that it follows that the player pool size faced by a team in a particular season $t$ is given by
+
+\begin{equation}
+k_t=k_{domestic,t}+\rho
+\end{equation}
+
+\noindent
+which indicates that each team has to choose from $k_{domestic}$ domestic players and any $\rho$ import players to fill the team roster. The number of allowed import players is assumed to stay constant over the course of multiple seasons. However, as will be introduced later, the the model is simulated with different import player limits. Also, aligning with the findings of \citet[][]{bryson_all-star_2017} the player pool faced by a team rather than the player pool faced by the whole league is relevant because contracts are negotiated between teams and players and player bargaining power is only determined by the number of players potentially eligible for the same roster spot. The domestic player pool size is further defined by
+
+\begin{equation}
+k_{domestic,t}=k_{domestic,0}(1+\kappa)^t
+\end{equation}
+
+\noindent
+where $k_{domestic,0}$ is the initial number of domestic players in the player pool and $\kappa$ is a constant, natural growth rate of the domestic player pool. This definition allows the player pool of domestic players to grow over time.
+
+
+\subsection{Player salaries}
+\label{playerSalaries}
+
+As mentioned earlier, player salaries are a mere reflection of player skill which manifests itself in goals and assists on ice \citep[see][]{celik_salary_2017,coates_returns_2017,szymanski_market_2000}. Additionally, \citet{el-hodiri_economic_1971} model the price per unit of skill signed in a transaction to be a non-decreasing function of the number of playing units demanded. This implies that more skilled players demand higher salaries no matter the player's origin and that the salaries depend on demand from teams. Given this evidence, $\forall p \in P_{domestic}, P_{foreign}$ player salaries $W_p$ must follow the same distribution as playing skill and can be described as
+
+\begin{equation}
+\label{eq:salaries1}
+W_p=w_{max}\ast S_p
+\end{equation}
+
+\noindent
+where $w_{max}$ is the maximal salary, any team is willing to pay for the hypothetically best possible player $S_{max}=1$. Thus, $w_{max}$ serves as reference salary determining the salaries of all players in the league which are simply a fraction of the maximal salary. Furthermore,
+
+\begin{equation}
+w_{max}=w_{max}\left(D\right),\ \ \frac{\partial w_{max}}{\partial D}>0
+\end{equation}
+
+\noindent
+i.e. the maximal salary is a function of demand $D$ for players so that an increase in demand also leads to higher player salaries. The definition of demand follows. Apart from demand effects, an annual growth of the player pool or opening the player market to foreign players by lifting the import player limit is equivalent to an increase of player supply which, as mentioned earlier, was found to have significant impact on salaries as well \citep[see][]{bryson_all-star_2017,longhi_meta-analytic_2005,llull_effect_2018}. To incorporate this supply dependency, equation \ref{eq:salaries1} is further expanded. Let 
+
+\begin{equation}\label{eq:salaries2}
+W_{p,t}=w_{max,t}S_{p,t}f(k_t)
+\end{equation}
+
+
+\noindent
+indicating that the salary of a player $W_p$ in season $t$ additionally depends on the player supply effect $f(k_t)$ which in turn depends on the previously defined player pool size $k_t$ faced by teams. The supply effect is defined as
+
+
+\begin{equation}
+f(k_t) =
+\begin{cases}
+undefined & \quad \text{if } 0 < k_t < k_{min} \\
+\frac{\lambda}{k_t+\gamma} & \quad \text{if } k_t \geq k_{min} 
+\end{cases}
+\end{equation}
+
+
+\noindent
+and has, ceteris paribus, several implications for player salaries. First of all, $\lim_{x\to\infty}f(k_t) = 0$, i.e. player salaries approach zero when the player pool grows infinitely. Second of all, player salaries are not defined when the number of players drops below a certain threshold $k_{min}$. Finally, $\frac{\partial f(k_t)}{\partial k_t}<0 \,|\, k_t \geq k_{min}$ and $\frac{\partial^2 f(k_t)}{\partial k_t^2}>0 \,|\, k_t \geq k_{min}$, i.e given that the player pool size is at least minimal, the marginal effect of supply on player salaries is negative and non-linear indicating every additional player entering the player pool diminishes the player salaries of all players by a decreasing amount. Intuitively the implications make sense. First of all, an increase in the number of players causes a decrease in player salaries, but the salaries can never drop below zero even when an infinite number of players for the teams to choose from exist. For the same reason, the functional form can't be linear. Second of all, the number of existing players must not drop below a certain threshold. The absence of a sufficient number of players would make it impossible to play a normal season which means there are no contract negotiations, hence undefined player salaries. The functional form of the supply effect is determined by the parameters $\lambda$ and $\gamma$. Figures \ref{fig:supplyFunctionLambda} and \ref{fig:supplyFunctionGamma} in the Appendix visualize how $\lambda$ and $\gamma$ affect the supply effect respectively. Both parameters can be determined analytically by solving the following system of equations
+
+\begin{equation}
+\label{eq:solvingSupplyEffect}
+\begin{array}{ccccc}
+f(k_0) & = &\frac{\lambda}{k_0+\gamma}& = & 1 \\
+\\
+f(\epsilon k_0) & = &\frac{\lambda}{\epsilon k_0+\gamma}& = & 0.5 \\
+\end{array}
+\end{equation}
+
+\noindent
+ The solution are parameter values so that the supply effect is 1 at the initial player pool size $k_0$ faced by teams and 0.5 at some multiple $\epsilon>0$ of $k_o$. When the model is first initialised based on real world values, the observed player wages must be a result of the observed player pool size upon initialisation which is why the observed player pool is defined as reference size with neutral supply effect $f(k_0)=1$. Based on this reference size, there exists a value $\epsilon k_o$ where the supply effect and hereby also player wages are halved. The determination of $\epsilon$ can either be done empirically or by imposing an assumption. The functional form of the supply effect depending on $\epsilon$ is depicted in Appendix figure \ref{fig:supplyFunctionEpsilon}. 
+
+\noindent
+The final modelling decision of $W_p$ in equation \ref{eq:salaries2} is based on several assumptions as well. Players (or their agents) and teams negotiate salaries relative to the hypothetical best possible player's salary based on skill. Teams can only choose to sign a player for the defined salary or forgoe on the player completely. Additionally, the market is free of information asymmetry. Both, the teams and the player agents have full information about a player's skill and know the exact market value of the player depending on demand and supply. Finally, the market is, apart from import player restrictions, free from any trade barriers and any premiums for insurance or agent fees are already included in the salary.
+
+\subsection{Team skill and success}
+The most fundamental assumption of many models from previous research is that teams have a certain skill stack which determines the success of a team and competitive balance in the league over all \citep[see][]{dietl_effect_2009,dietl_effect_2010,dietl_salary_2012,dietl_competitive_2011,dietl_combined_2011,el-hodiri_economic_1971,fort_cross-subsidization_1995,kesenne_impact_2000,kesenne_optimal_2015,whitney_bidding_1993}. Therefore, let the league consist of a set of teams $N$ with size $n=|N|$ so that in accordance with the aforementioned models, the skill stack of team $i \in N$ can be defined as 
+
+\begin{equation}
+S_i=\sum_{p}^{k}S_pd_p
+\end{equation}
+
+\noindent
+with $d_p \in \{0,1\}:\forall p \in i, \, d_p=1 \, $ being a binary variable indicating whether player $p$ is signed by team $i$. The skill stack of a team $S_i$ is the simple sum of skill of all players on the team and accordingly $\sum_{i=1}^{n}S_i$ is the total amount of skill in the league. Based on the teams' skill stacks, it is possible derive a function of team success depending on the winning percentage of team $i$ over team $j$ given by 
+
+\begin{equation}
+\label{eq:gameWinningPercentage}
+\omega_{i,j}=\frac{S_i}{S_i+S_j},\ \ i\neq j,\ \ \omega_{i,j}\in[0,1]
+\end{equation}
+
+\noindent
+where $\omega_{i,j}>0.5$ indicates that team $i$ is more likely to win in a game against team $j$ \citep[see][]{dietl_competitive_2011,dietl_combined_2011,fort_cross-subsidization_1995,kesenne_optimal_2015,rocaboy_performance_2020,whitney_bidding_1993}.
+
+\subsection{Demand for players}
+
+Demand for players predominantly depends on the revenue a team is generating. The more a team earns per season, the more it can spend on players. \citet{dietl_competitive_2011} propose a revenue function for teams based on team winning percentages $\omega_{i,j}$ which, for the purpose of this study, is slightly adjusted to
+
+\begin{equation}
+\label{eq:gameRevenue}
+R_{i,j,g,t}=z_ir_{i,g}(m_i\omega_{i,j,t}-\frac{b_i}{2}\omega_{i,j,t}^2)
+\end{equation}
+
+\noindent
+where $R_{i,j,g,t\ }$ is the revenue generated by team $i$ in a home game $g$ against team $j$ at a certain point in the season $t$, $z_i$ is a fixed monetary multiplier for each team which assigns the revenue a real monetary value, $r_{i,g}$ is a multilevel factor introducing different revenue effects based on the phase of the season, i.e regular season, pre-playoffs or playoffs, in which home game $g$ takes place, $m_i$ is an indicator for market size faced by team $i$ i.e the potential for a team to attract spectators to its games and $b_i$ is the effect of competitive balance on revenues of team $i$. Note that $\omega_{i,j,t}$ is constant over one season and only depends on the opposing team since the model assumes constant skill over the duration of one season. There are no mid-season trades or signings. The variables $z_i$, $m_i$ and $b_i$ only depend on the team itself and are constant over all seasons. The variable $r_{i,g}$ depends on the team and is constant over all seasons as well but depends on the season phase. The function's implication is that supporters prefer a competitive team which does not get outperformed or does outperform other teams since $\frac{\partial R_{i,j,g,t}}{\partial\omega_{i,j,t}}>0$ for ${0\le\omega_{i,j,t}<\omega}^\ast$ and $\frac{\partial R_{i,j,g,t}}{\partial\omega_{i,j,t}}<0$ for $1\geq{\omega_{i,j,t}>\omega}^\ast$ given $argmax_{\omega_{i, j ,t}}  R_{i,j,g,t} = \omega^\ast$. This functional form aligns with the studies introduced in section \ref{competitiveBalanceImportance} discussing the optimal level of winning percentages. Neither case, a perfectly competitive league or a completely one-sided league is to be preferred by the teams. Thus the revenue function of all teams must have an optimum at some point between winning percentages of 0.5 and 1. Given this optimal winning percentage $\omega^\ast$, a market size $m_i$ and a season factor $r_{g,t}$, the following condition must be fulfilled:
+
+\begin{equation}
+\exists b_i>0 \ \ : \ \ \frac{\partial R_{i,j,g,t}\left(\omega^\ast\right)}{\partial\omega_{i,j,t}}=0
+\end{equation}
+
+\noindent
+Fulfilling the condition indicates that the revenue function has a maximum at $\omega^\ast$ and it is possible to calculate $b_i$ by solving the equation 
+
+\begin{equation}
+\label{eq:competitiveBalanceEffect}
+\frac{\partial R_{i,j,g,t}\left(\omega^\ast\right)}{\partial\omega_{i,j,t}}=z_ir_{g,t}(m_i-b_i\omega^\ast)=0\Rightarrow\ b_i=\frac{m_i}{\omega^\ast}\ 
+\end{equation}
+
+\noindent
+Once $b_i$ is determined for every team, the revenue gained by each team over a season $t$ with $G$ home games can be calculated as $\sum_{g=1}^{G}R_{i,j,g,t}$. Referring to the discussions in section \ref{salaryGrowthReasons}, teams gain revenue through the sale of broadcasting rights, merchandise, tickets and from corporate advertisement. In this model, it is assumed that the sales of tickets, the sales of merchandise and the amount of corporate advertisement is already implicitly reflected in $R_{i,j,g,t}$ since these factors also highly depend on team success and most likely follow the same functional form. The value of broadcasting rights, however, is not yet taken into account since broadcasting values are negotiated on league level. Another factor yet to be included are financial reserves originating from a difference between team budgets and team payrolls. To reflect those two factors, the total seasonal revenue of a team must thus be given by
+
+\begin{equation}
+\label{eq:seasonalRevenue}
+{R_{tot}}_{i,t}=V_{i,t}+B_0(1+\pi)^t+\sum_{g=1}^{G}R_{i,j,g,t}
+\end{equation}
+
+\noindent
+where $V_{i,t}$ are financial reserves $V$ created by team $i$ in season $t$ as result of a difference between the team's budget and the team's payroll, $B_0>0$ is the initial broadcasting value of the league and $\pi>0$ is a constant growth rate of the broadcasting value.
+
+\noindent
+Eventually, based on this definition of a team's seasonal revenue, it is possible to arrive at demand for players in order to determine $w_{max}$. Following the findings laid out in \ref{salaryGrowthReasons} that teams tend to reinvest additional revenue in players, it is assumed that teams select their roster based on what they can spend given last year's seasonal revenue. Teams are generally willing to spend all revenue on their roster although, factor $V_{i,t}$ in seasonal revenue equation \ref{eq:seasonalRevenue} already implies that this might not be possible. More on that is to follow. For simplicity reasons, the fact that teams also incur costs from operating the team and facilities is neglected. These assumptions implicate that teams are willing to spend a maximum of ${R_{tot}}_{i,t}$ in season $t+1$ and thus ${R_{tot}}_{i,t}$ is the budget constraint faced by a team when assembling a fully stacked team of $h_{min} \leq h \leq h_{max}$ players where $h_{min}$ and $h_{max}$ are the minimal required and maximal allowed number of players a team must field in a game. To determine $w_{max}$, I assume that the team with the highest revenue is also the team with the highest willingness to pay for a hypothetical player with skill $S_{max}=1$. In combination with the price setter assumption introduced in section \ref{salaryGrowthProblems}, this team can outbid any other team in salary negotiations and unless a player with $S_{max}$ can not threaten to leave for the KHL or NHL where he will earn a higher net salary, his salary is limited to what the team is willing to pay. Thus, let team $i_{max}$ be the team with highest budget ${R_{tot}}_{i_{max},t}$ in season $t+1$ so that the reservation salary for the best possible player $w_{max_{t+1}}$ is a fraction $\mu$ of the team's budget defined by
+
+\begin{equation}
+{w_{max_{t+1}}=\mu{R_{tot}}_{i_{max},t},\ \ \frac{{R_{tot}}_{i,t}\ }{h}<\mu{R_{tot}}_{i_{max},t}<{R_{tot}}_{i_{max},t}}
+\end{equation}
+
+\noindent
+If $\mu$ is too small, the budget is not fully maxed out. If $\mu$ is too large, the team lacks money to sign other players. A empirical determination of $\mu$ is possible.  
+
+\noindent
+The logic of revenue based team budgets also enables a salary cap logic. Let ${R_{cap}}_{t+1}$ be the expenditure ceiling in season $t+1$ so that $\forall i \in N$, $\max({R_{tot}}_{i,t}, {R_{cap}}_{t+1})$ is the amount teams are allowed to spend. The definition for salary cap is inspired by article 50.5.b.i in the NHL CBA \citep[][]{nhl_collective_2012} and is simplified to
+
+\begin{equation} 
+{R_{cap}}_{t+1} = \frac{\sum_{i}^{n}{R_{tot}}_{i,t}}{n}\tau
+\end{equation}
+
+\noindent
+where $\tau$ is a scale parameter adjusting for expected revenue growth and considering the correct expenditure ceiling given average team revenues. 
+
+\subsection{Selection of players}
+\label{selectionOfPlayers}
+The selection of domestic and import players in season $t+1$ by a team $i$ is a skill maximization problem subject to team size constraints $h_{max}$ and $h_{min}$ and to the team budget constraint ${R_{tot}}_{i,t}$. Since teams are assumed to be fully informed about playing skill, it is assumed that they are actually capable of assembling a team which maximizes team skill under the mentioned constraints. Assuming a simple case where only one player pool $P$ exists and teams could only choose players from $P$, the maximization problem can thus be described as
+
+\begin{equation}
+\label{eq:maxProblemTot}
+\begin{aligned} 
+\textrm{Maximization:} & \hspace{1cm} \argmax_{d_p, \, \forall p \in P} S_{i, t+1} \\
+\textrm{Constraint 1:} & \hspace{1cm} \sum_{p}^{k}{W_{p,t+1}d_{p,t+1}}\le{R_{tot}}_{i,t}\\ 
+\textrm{Constraint 2:} & \hspace{1cm} \sum_{p}^{k}d_{p, t+1} \leq h_{max}\\ 
+\textrm{Constraint 3:} & \hspace{1cm} \sum_{p}^{k}d_{p, t+1} \geq h_{min}
+\end{aligned}
+\end{equation}
+
+\noindent
+where $\sum_{p}^{k}{W_{p,t+1}d_{p,t+1}}$ is the team's payroll, i.e. the sum of all player salaries of players on the team's roster and $\sum_{p}^{k}d_{p, t+1}$ is the total number of players on the roster. The goal is to maximize team skill (\emph{Maximization}) restricted to the team payroll not being allowed to exceed team budget (\emph{Constraint 1}) and the team size not being allowed to neither undercut (\emph{Constraint 2}) nor exceed  (\emph{Constraint 3}) predefined levels. The linear characteristics of this problem allow it to be solved with a binary linear programming algorithm. Unfortunately, the existence of two player pools $P_{domestic}$ and $P_{foreign}$ ads an extra level of complexity to the model which is why the maximization problem is separated in sub-problems which are to be maximized consecutively. Solving the sub-problems in consecutive order intends to mimic a simplified selection and replacement process as it might as well be observed in reality. 
+
+\subsubsection{Sub-problem 1: Selection of domestic players}
+\label{subProblem1}
+
+It is assumed that teams browse the domestic player market first as a result of its limited size and because of  restricted access to the unlimited foreign player market. In doing that, teams have to solve the sub-problem given by
+
+\begin{equation}
+\label{eq:subProblme1}
+\begin{aligned}
+\textrm{Maximization:} & \hspace{1cm} \argmax_{d_p, \, \forall p \in P_{domestic}} S_{i, t+1} \\
+\textrm{Constraint 1:} & \hspace{1cm} \sum_{p \in P_{domestic}}^{k_{domestic}}{W_{p,t+1}d_{p,t+1}}\le{R_{tot}}_{i,t}\\
+\textrm{Constraint 2:} & \hspace{1cm} \sum_{p \in P_{domestic}}^{k_{domestic}}d_{p, t+1} \leq h_{max}-\rho_{t+1} 
+\end{aligned}
+\end{equation}
+
+\noindent
+Similar to the maximization problem in \ref{eq:maxProblemTot}, teams maximize team skill while faced with a budget and team size range restriction but there are additional considerations to be made. First of all, the teams maximize skill only based on players from the domestic player pool. Second of all, the teams already put their complete budget on the line to sign domestic players although the number of domestic players they are maximally willing to obtain is $h_{max}-\rho$, i.e. the number of allowed import players subtracted from maximal allowed number of players per team. Teams already try to become as competitive as possible by signing domestic players which is why they are willing to spend all of their budget on them while at the same time retaining the possibility of signing $\rho$ foreign players to make up for missing skill later on if there is some remaining budget. The underlying consideration of teams here is that they expect not to be able to actually sign all desired domestic players and that they will be able to replace the missing skill on the foreign player market. It also reflects actual observations of NL teams maxing out the import player limit \cite[see][]{burgler_geldprobleme_2022} Note that despite \emph{Constraint 2} allowing for a domestic player number below $h_{max}-\rho$, the optimal solution for a team normally is to sign $h_{max}-\rho$ domestic players as long as the budget allows it. Depending on the budget and player salaries it is, however, conceivable that cases exist in which it is actually preferable to select any number of players $\in [h_{min},h_{max}-\rho]$ over $h_{max}-\rho$ players. The solution of this problem is a list of desired players per team which initialises the next sub-problem to solve.
+
+\subsubsection{Sub-problem 2: Conflicting domestic players}
+\label{subProblem2}
+
+The team lists of desired domestic players will likely have redundant entries. This leads to the situation that multiple teams have the intention to sign a certain player although only one team is able to do so. This requires a decision rule to be introduced which unambiguously assigns players to the team rosters. The decision rule represents a player's choice to sign with either one of the teams showing interest in the player. Unfortunately, it is difficult to arrive at a reasonable decision rule without doing an in-depth analysis of decision patterns observed from NL players in the past. For simplicity reasons and because such an analysis would go beyond the scope of this paper, I argue that motives to sign with a team are heterogeneous and depend on personal player preferences. This assumption is backed up with a superficial analysis of potential player motives to join a particular team. Potential motives are family considerations \citep[see e.g.][]{rocchinotti_leonardo_2018}, desire to play a more important role \citep[see e.g.][]{vandenbrouck_so_2020}, desire of being on a team with a chance of winning the championship title \citep[see e.g.][]{roth_scb_2016} or personal attachment to a particular team \citep[see e.g.][]{noauthor_corvi_2018}. Thus, if the motives are as heterogeneous as they appear to be, on aggregate level, there is just an equal chance of a player signing with any team showing interest in him. The decision rule to be implemented, therefore, follows a simple discrete probability distribution. Given the set of teams $N$, then $I \subset N$ is a random subset of teams interested in player $p \in P_{domestic}$ following the selection process in the first sub-problem so that the probability that player $p$ chooses a team $i$ is given by
+
+\begin{equation}
+Prob_p(I=i) =
+\begin{cases}
+\frac{1}{|I|} & \quad  \forall i \in I \\
+0 & \quad  \forall i \notin I 
+\end{cases}
+\end{equation}
+
+\noindent
+After all the player decisions, the teams which were not able to sign a desired domestic player $p$ are forced to search for an equivalent or close domestic replacement player in order to prevent their roster size to drop below $h_{min}$ and to stay in proximity of the optimal selection. Therefore, teams search for a replacement player $q \in P_{domestic}, \, q \notin i,j$:$|S_p-S_q| = \min |\Delta S| = |\Delta S|_{(1)}$, i.e. teams make a replacement decision to fill the missing spot with any other player that was not yet selected by any team and who is minimizing the emerged skill gap. Note, with this definition, it is possible that a team selects a slightly more skilled player as it has initially planned to do which is fine as long as this does not violate the budget constraint. Especially towards the end of the replacement process, it might occur that a team is violating the budget constraint when a player with skill $S_q > S_p$ is considered although the team has no budget beyond $W_p$. Therefore, the budget constraint must be checked after each replacement decision. If the budget constraint is violated, the team has to choose the next best replacement player $q' \neq q$ so that $|S_p-S_{q'}| = |\Delta S|_{(x)} > |\Delta S|_{(1)}$ until the budget constraint is no longer violated for any $x>1$. The intuition behind this procedure is the following. The skill gap $|\Delta S|_{(x)}$ is in absolute terms and increasing in $x$. However, in non absolute terms $\Delta S_{(x)} > 0$ if $S_q < S_p$ and $\Delta S_{(x)} < 0$ if $S_q > S_p$. By increasing $x$, eventually a gab $\Delta S_{(x)} > 0$ is obtained for which $W_q < W_p$ and thus a violation of the team budget is prevented. The described replacement process in this sub-problem resembles an informed and complete decision by the teams on the lack of skill they need to replace.
+
+\par
+\noindent
+Both, the decision of players which team to join and the replacement decision for these players by other interested but ignored teams must be randomized twice. On the one hand, players choose the teams in random order thus constituting the first randomization. On the other hand, although the conflicts where multiple teams have interest in the same player are considered in the same order as the players have chosen a team, the replacement decision by the ignored teams within one conflict is randomized thus constituting the second randomization. This randomization procedure is important because it guarantees equal treatment of teams without any structural advantage. 
+
+\subsubsection{Sub-problem 3: Selection of import players}
+\label{subProblem3}
+
+The laid out process to sub-problems one and two implies that teams are not likely to end up with their preferred stack of domestic players which, as mentioned before, they are assumed to be fully aware of beforehand. After all, the teams are in a competition for domestic players, a scarce resource, in a market that is not solely driven by monetary factors but also players' personal preferences. Teams are also fully aware of the remaining budget and the skill level they lack compared to the optimal solution after they have signed domestic players. Therefore, teams are, in a next step, assumed to find the optimal import players from the foreign player pool $P_{foreign}$ to maximize skill further and hereby compensate skill losses on the domestic player market. Hence, the final sub-problem teams have to solve is given by
+
+\begin{equation}
+\label{eq:subProblem3}
+\begin{aligned}
+\textrm{Maximization:} & \hspace{1cm} \argmax_{d_p, \, \forall p \in P_{foreign}} S_{i, t+1} \\
+\textrm{Constraint 1:} & \hspace{1cm} \sum_{p \in P_{foreign}}^{k_{foreign}}{W_{p,t+1}d_{p,t+1}}\le{R_{tot}}_{i,t}-\sum_{p \in P_{domestic}}^{k_{domestic}}{W_{p,t+1}d_{p,t+1}}\\
+\textrm{Constraint 2:} & \hspace{1cm} \sum_{p \in P_{foreign}}^{k_{foreign}}d_{p, t+1} \leq \rho_{t+1} 
+\end{aligned}
+\end{equation}
+
+\noindent
+Teams can only sign players to the extend of the remaining budget which is the total budget less payroll of domestic players. They can sign a maximum of $\rho$ import players as long as the budget allows it. The notion that teams might sign a number of import players below threshold as described in sub-problem one is applicable here as well. 
+
+\section{Simulation}
+
+In order to run simulations on the theorized model described in the previous section, a simulation framework is created which is going to be discussed next. 
+
+\subsection{Simulation framework}
+\label{simulationFramework}
+
+The simulation framework contains the theoretical model at it's heart and puts it to practical use\footnote{All code and source files related to the framework is available via public Github repository: https://github.com/FStiffler/MasterThesis}. It serves four main purposes. The first purpose is to embed the theoretical model introduced in the previous section into a simulation of the NL by integrating all the separate mathematical definitions. Thus, the framework is expected to represent an artificial instance of the NL which can be simulated. The second purpose is to provide means to configure the integrated model in a way that the NL can be simulated with different league settings. As stated in the introduction, the framework should allow for a simulation of the NL with league settings representing the discussed measures of introducing a salary cap and increasing the import player limit. The framework enables this by letting the user choose with what import player limit the league shall be simulated and if the league is to be simulated with or without a salary cap. These two input parameters are consequently passed on to the model for consideration in the calculations. The third purpose is to provide means to configure the scope of a simulation. This is implemented by letting the user choose how many consecutive seasons are to be simulated in one simulation iteration of the NL and how many simulation iterations are to be executed per simulation. Thus any simulation consists of a predefined number of simulation iterations each of which in turn consists of a predefined number of consecutive seasons. This allows the user to simulate the league with fixed league settings several times in a row all the while obtaining results for every iteration and season. The simulation results are also the last purpose of the simulation framework. The framework logs results on season level. This is valuable because the stochastic nature of the model leads to result variability. Applying statistical methods, the result variability of simulations with different fixed league settings can ultimately be compared to reach conclusive answers about the league reform measures' effectiveness with respect to combating one-sided competition and increasing player salaries. 
+
+\noindent
+At the very core of the simulation framework is a definition of all the necessary model parameters introduced in the previous section which is why they are discussed next.
+
+\subsection{Model parameters}
+
+In order to obtain a realistic simulation of the NL, model parameters are inferred from real world information on the NL. Therefore, in the following, the model parameters and the process of parameter inference are briefly introduced. I differentiate between general model parameters affecting the league as a whole and team specific parameters only affecting a specific team. Detailed information on these parameters like the actual parameter values, the source for the parameter values and notes to the recorded values are depicted in the Appendix tables \ref{table:params} and \ref{table:teamParams}, showcasing the general and team parameters respectively. 
+
+\subsubsection{General model parameters}
+
+The league is simulated with 14 teams ($n$=14) to represent NL size as of season 2022/23. The maximal team size $h_{max}=22$ is directly determined in accordance with the official IIHF rule book. The minimal team size $h_{min}=12$ is partially derived from the official IIHF rule book. The minimal number according to the rule book is enriched with assumptions concerning the minimal number of players a team is supposed to field in each game to be remotely competitive and to omit the risk of injuries and disciplinary penalties. As stated in section \ref{playingSkill}, the parameters $\alpha$ and $\beta$ of the skill distribution are estimated by MLE\footnote{The \emph{ebeta} function of the R package \emph{EnvStats} is applied to conduct MLE. The package implements MLE for beta distributions according to \citet{forbes_statistical_2010} cited in the mentioned section. Package link: https://cran.r-project.org/web/packages/EnvStats/index.html}. MLE is applied to NL data of player win-shares per game (or per 60 minutes) from season 2021/22\footnote{The data was provided to me by the authors of the website NL Ice Data: https://nlicedata.com}. Win-shares per game measure, as the name suggest, the contribution of a player to a team win in 60 minutes play time \citep[see][]{nl_ice_data_assessing_2021}. This metric is used as proxy for skill since win contribution is expected to be strongly, positively correlated with it. Figures \ref{fig:skillDistribution} and \ref{fig:fittedSkillDistribution} in the Appendix additionally show the the distribution of observed win-shares per game in the NL and a comparison of fitted and actual skill distribution respectively. The initial player pool size $k_0$ faced by the teams in reference season $t=0$ and thus the initial number of player skill values to be drawn from the aforementioned distribution at the beginning of every simulation iteration depends on the initial player pool size of domestic players $k_{domestic,0}$, the natural growth rate of the domestic player base $\kappa$ and the number of allowed import players $\rho_0$ in reference season. The previous 2021/22 NL season serves as reference season in this case. The determination of $\rho_0$ is straight forward given the reference season. The parameter $k_{domestic,0}$ is obtained by counting the number of Swiss players or players with Swiss license having played at least ten games during that season. Table \ref{table:playerCount} in the Appendix provides an overview of the results per team. The parameter $\kappa$ is determined to be the average annual growth rate of the Swiss male player base introduced in section \ref{salaryGrowthReasons}. With known $k_0$, the minimum player pool size $k_{min}$ is to be determined next in order to enable the calculation of the supply effect. Based on the definition of $h_{min}=12$, it follows that $k_{min}$ has to be the exact size where every team can exactly sign twelve players. Given $k_0$ and $k_{min}$, the supply effect is determined by solving equation system \ref{eq:solvingSupplyEffect} for parameters $\lambda$ and $\gamma$, plugging in $\epsilon=2$ which implies the assumption that, ceteris paribus, player salaries are halved when the player pool size doubles. The final supply effect is depicted in figure \ref{fig:supplyFunctionReal} in the Appendix. The optimal winning percentage $\omega^*$ to be used to calculate the teams' competitive balance effect $b_i$ later on is determined based on values mentioned in literature. The initial broadcasting value $B_0$ is obtained based on information about the current NL TV broadcasting contract. In line with the initial definition in equation \ref{eq:seasonalRevenue}, the value is assumed to be the same for all teams and to be increasing over time by a constant growth rate $\pi$. The latter is calculated based on the same contract information. The fraction $\mu$ with which the highest observed revenue of any team is multiplied to obtain the maximal possible salary $w_{max}$ is determined by considering a source on estimated player salaries in the NL and the highest initial team budget ${R_{tot}}_{i_{max},0}$ to be defined in more detail in the upcoming section. Finally, as the last of the general parameters, $\tau$ is determined analogous to the NHL CBA. 
+
+
+\subsubsection{Team parameters}
+
+To determine team parameter values, the fourteen teams to be simulated are based on the teams playing in the NL in season 2022/23. The initial team budgets at the start of every simulation iteration ${R_{tot}}_{i,0}$ are obtained by news reports either specifically detailing a team's budget or at least the teams' overall financial situation. An alternative source are team expenditures disclosed in the teams' income statements. Team budgets are retrieved based on financial information from the pre-COVID season 2018/19 to avoid the inclusion of the financial fallout caused by the pandemic into the model and to prevent the exclusion of financial statements as potential source\footnote{The disclosed team expenditures in financial statements of season 2019/20 are already impacted by the COVID pandemic}. Unfortunately, information from that season is not always readily available which prompts a pivot to information from a different season. Furthermore, some budgets are obtained via heuristic rules. The market size $m_i$ per team is determined based on the team's median of average regular season game attendance in the NL since start of recording in season 2008/09. The season 2020/21 is not considered due to pandemic rules. Intuitively, a team located in a strong market is going to draw more spectators to a game than a team in a small market which is why the aforementioned metric is utilized as proxy for market size. By taking the median based on longitudinal data on regular season game attendance, other factors influencing attendance like team success or changes of stadium capacity are eliminated. The development of relative market size per team over time is depicted in Appendix figure \ref{fig:attendanceDevelopment}. An overview of average NL regular season game attendance per season and team is depicted in Appendix table \ref{table:attendanceDevelopment}. The season phase factor $r_{i,g}$ relies on game attendance as well. Independent of team, $r_{g}=1$ for all home games taking place during regular season. The teams' playoff factors are defined based on the median attendance growth factor compared to the regular season. In more detail, for each team and every season the average playoff to average regular season game attendance ratio is calculated, that is, if a team qualified for playoffs. Aggregated on team level, the median value of these ratios is eventually determined to be the teams' playoff factors. The growth factors per team and per season are depicted in Appendix table \ref{table:attendanceDevelopment}. The competitive balance effect $b_i$ is calculated based on equation \ref{eq:competitiveBalanceEffect} for each team. As for the monetary factor $z_i$, it would make sense to take the teams' average per game revenues into account. Unfortunately, this information is not publicly available. Therefore, I approximate $z_i$ by rearranging equation \ref{eq:gameRevenue}:
+
+\begin{equation}
+\label{eq:monetaryFactor}
+\hat{z_i}= \frac{\hat{\bar{R}}_{i,g,0}}{m_i\bar{\omega}_{i,0}-\frac{b_i}{2}\bar{\omega}_{i,0}^2}
+\end{equation}
+\par
+\noindent
+where 
+
+\begin{equation}
+\label{eq:averageGameRevenue}
+\hat{\bar{R}}_{i,g,0} = ({R_{tot}}_{i,0} - B_0)/ G_{i,0}
+\end{equation}
+\par
+\noindent
+is the estimated, average home game revenue per game earned by team $i$ in reference season $t=0$ during $G$ home games and where 
+
+\begin{equation}
+\label{eq:averageWinPercentag}
+\bar{\omega}_{i,0}=\frac{\textrm{victories\textsubscript{i,0}}}{\textrm{games\textsubscript{i,0}}}
+\end{equation}
+\par
+\noindent
+is the average winning percentage of team $i$ over all home and away games during the reference season. This approximation enables the calculation of an approximated monetary factor $\hat{z_i}$ per team based on the already introduced values of $B_0$, ${R_{tot}}_{i,0}$, $m_i$ and $b_i$ as well as on the additional values $G_{i,0}$ and $\bar{\omega}_{i,0}$. The latter two are obtained by looking at actual NL game data in the reference season $t=0$ which happens to be, in this case, the season preceding the season based on information from which the initial team budgets were determined\footnote{Remember that the budget of one season is assumed to be the previous seasons revenue. Applied to the inferred initial team budgets, it is assumed that these are the result of previous seasons revenue as well. Therefore, the budget at beginning of season $t=1$ is the revenue ${R_{tot}}_{i,0}$ generated in reference season $t=0$.}. The exact calculation of $\hat{z_i}$ per team is depicted in Appendix table \ref{table:calcMonetaryFactor}. 
+
+\noindent
+With the understanding of the simulation framework and the model parameters at heart, next up, the simulation logic can be discussed.
+
+\subsection{Simulation logic}
+
+As mentioned in section \ref{simulationFramework}, the simulation framework allows for the configuration of league settings via the mentioned input parameters and the simulation scope via the mentioned meta parameters. The underlying simulation logic, however, is always the same and only depends on the meta parameters. A representation of the simulation logic is depicted below.
+
+\vspace{0.5cm}
+\begin{algorithm}
+\caption{Simulation logic}\label{alg:simulation}
+\begin{algorithmic}
+\State $\textrm{number of simulation iterations} \gets x$ 
+\State $\textrm{number of seasons per simulation iteration} \gets y$ 
+\For{simulation iteration $\in [1,x]$}
+    \For{season $\in [1,y]$}
+        \If{first season}
+            \State $\textrm{initialize league object}$
+        \EndIf
+    \State $\textrm{initialize player pool objects}$
+    \State $\textrm{teams select domestic player (sub-problem 1)}$
+    \State $\textrm{player conflicts are solved (sub-problem 2)}$
+    \State $\textrm{teams select import players (sub-problem 3)}$
+    \If{team went bankrupt}
+            \State $\textrm{Record bankrupcty and proceed with next iteration}$
+        \EndIf
+    \State $\textrm{simulate regular season}$
+    \State $\textrm{simulate playoffs}$
+    \State $\textrm{calculate season revenues}$
+    \State $\textrm{reset league object and relevant parameters for next season}$
+    \EndFor
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+\vspace{0.5cm}
+
+\noindent
+Once the meta parameters are set, the simulation can start with the first iteration. It is to say that every simulation iteration is initialized with the exact same model parameters as introduced before. However, within one iteration, as defined and intended by the model, there are cross-seasonal effects where subsequent seasons depend on each other by simply updating the according model parameters. But even with cross-seasonal effects, the basic simulation logic for one season stays, apart from two exceptions, always the same. First, at the beginning of every simulation iteration, the league object is only initialized once and is simply updated at the end of every season thereafter. This object contains all the team relevant information and calculation methods according to the defined model. Second, a simulation iteration is terminated if a team goes bankrupt which occurs when a team can no longer sign a team of minimal required size. In this case, the bankruptcy is recorded in the results and the next iteration is started. Apart from these exceptions, all the other steps are executed every season. After the league object is initialized, two player pool objects representing the domestic and foreign player pool are initialized next. Similar to the league object, these objects contain information on domestic and foreign players respectively and also all player relevant calculation methods according to the defined model. Based on the players defined by the player pool objects, the teams defined by the league object are then solving the three sub-problems introduced in section \ref{selectionOfPlayers}. The sub-problems one and three are solved with the help of the COIN-OR branch and cut (CBC) solver \citep[][]{forrest_coin-orcbc_2022}, a binary linear programming algorithm. After that, the actual simulation of the league starts with the simulation of the regular season. Every team plays four games against each opponent, two at home and two away. A game has only two outcomes, victory or loss. This allows a game to be simulated by Bernoulli trial with the probability of home team victory defined by equation \ref{eq:gameWinningPercentage}. At the end of the season, the final ranking is created based on the number of wins (winning percentage). If at least two teams have an equal number of wins, the number of wins in the direct encounter is relevant for these teams. If the direct encounter rule can not break the tie, ranking games between even teams are simulated. That is due to the lack of further tie breaker measures compared to reality. The ranking games, in a purely practical approach to break ties, do only affect the final ranking of teams but have no effect on the regular season win count. After the regular season, pre-playoffs but no playouts are simulated. There is also no relegation. The teams on rank seven to ten are seeded against each other in a best-of-three format where the seventh-placed team plays against the team in tenth position and the two teams in between against each other, as it is the case in reality as well. The higher classified team is playing two games at home. The two winning teams of this pre-playoff series qualify for the playoffs with the top six being already qualified. Teams are reseeded according to their rank so that the best ranked team plays against the worst ranked team, the second ranked against the second to worst ranked team and so on. The higher ranked teams again have home advantage. The playoff consists of three rounds (quaterfinal, semifinal, final) each of which is played in a best-of-seven format. At the end of the playoffs simulation, a team is going to be the champion. In the last two steps of each season, the total seasonal revenues according to equation \ref{eq:seasonalRevenue} are calculated and the cross-seasonal model parameters are recalibrated for the next season. 
+
+\noindent
+After the introduction of all relevant simulation information, I proceed by discussing the actual simulation process conducted to obtain results to be analysed. 
+
+\subsection{Simulation process}
+
+The NL is simulated a total of six times, each time with different league settings but always with the same simulation scope. An overview of the conducted simulations is provided in table \ref{table:leagueSettings} below.
+
+\vspace{0.5cm}
+\begin{table}[h!]
+    \centering
+    \caption{League settings of simulations}
+    \label{table:leagueSettings}
+    \begin{tabular}{clccc}
+        \toprule
+        Simulation & Salary Cap & Import Player Limit & Iterations & Seasons \\
+        \midrule
+        1 & Does Not Exist & 4 & \multirow{6}{*}{1000} & \multirow{6}{*}{10} \\
+        2 & Exists & 4 & \\
+        3 & Does Not Exist & 6 & \\
+        4 & Exists & 6 & \\
+        5 & Does Not Exist & 10 & \\
+        6 & Exists & 10 & \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+\vspace{0.5cm}
+
+\noindent
+Simulation \textit{1} represents status quo before any reform measures were introduced in season 2022/23. It is the benchmark simulation as if no reforms were introduced. Simulation \textit{2} explores what would have happened, had the teams decided to only introduce a salary cap without modifying the import player limit. Simulation \textit{3} represent the status quo as of season 2022/23 with six import players but no salary cap. Simulation \textit{4} assumes that additionally to the status quo, a salary cap exists. Simulation \textit{6} explores a hypothetical setting with ten imports and a salary cap which was actually once planned by NL teams but had to be retracted due to public push back by fans \citep[][]{noauthor_fan-aufstand_2020}. Finally, simulation \textit{5} explores the same setting but without a salary cap. The simulations are executed one by one all the while collecting simulation data.
+
+\subsection{Simulation data}
+
+For each of the simulations \textit{1} to \textit{6}, two different types of data sets are obtained resulting in twelve data sets in total. The first data set type contains team information, specifically the number of games and wins by teams over the whole season, including playoffs as well as if and when a team went bankrupt. The second data set type contains information on player count in the league and different salary metrics like the mean or median salary of players. Both types of data sets record data per simulation iteration and season as mentioned at the beginning of this section. 
+
+\noindent
+The data sets form the basis for the application of statistical methods to analyse the effects of the league reform measures on competitive balance and financial stability of teams.  
+
+\section{Methods}
+
+\subsection{Analysis of competitive balance}
+
+For the analysis of the league reform measures on competitive balance, I investigate the competitive balance ratio (CBR) introduced by Humphreys \citep[][]{humphreys_alternative_2002}. Compared to many one dimensional metrics only considering the within-league competitive balance, this metric additionally takes into account within-team competitive balance as introduced in section \ref{competitiveBalanceDefinition}. The metric also fits the simulation framework as there is no relegation which is a necessary pre-condition for its application \citep[see][]{goossens_competitive_2005}. In detail, CBR is the ratio of average within-team variation and average within-season variation given by
+
+\begin{equation}
+CBR = \frac{\hat{\sigma}_T}{\hat{\sigma}_N}\in [0,1]
+\end{equation}
+
+\noindent
+with average withing-team variation being the average standard deviation of teams' winning percentage over the stretch of multiple season
+
+\begin{equation}
+\hat{\sigma}_T = \frac{\sum_{i=1}^N(\sqrt{\frac{\sum_{t=1}^T{(\hat{\omega}_{i,t}-\bar{\omega}_{i})^2}}{T}})}{N}
+\end{equation}
+
+\noindent
+and the within-season variation being the average standard deviation of winning-percentages from perfect competitive balance ($\omega=0.5$) observed in a league over multiple seasons
+
+\begin{equation}
+\hat{\sigma}_N = \frac{\sum_{i=t}^T(\sqrt{\frac{\sum_{i=1}^N{(\hat{\omega}_{i,t}-0.5)^2}}{N}})}{T}
+\end{equation}
+
+\noindent
+If, over the stretch of multiple seasons, teams winning percentages do not change, within-team variation is zero and thus CBR equals zero as well. If the performance gap between teams in the league is large over multiple seasons, the within-league variation is large as well which in turn again results in a CBR approaching zero. So a CBR closer to zero generally express the lack of competitive balance. A CBR approaching one, on the other hand, implies higher levels of competitive balance and thus more outcome uncertainty. The simulation framework enables the calculation of one CBR per simulation iteration. This yields different CBR distribution for all six simulations. Based on these distributions, I apply a one-way ANOVA to check if the league settings of the simulations lead to significantly different CBR mean values. In the case of a significant result, I specifically check which CBR mean values differ from each other by applying Tukey Honest Significant Differences (Tukey HSD), a multi pairwise comparison method, to detect differences between particular pairs of CBR mean values. 
+
+\noindent
+Although CBR is a reasonable score to analyse overall competitive balance of different league settings given the simulation framework, there is one disadvantage. The within-team variation of CBR is a measure of team dominance over time. If the within-team variation was to be zero for all teams, this would inevitably mean that the final ranking was the same every single season because teams would always win the same amount of games. But this is not necessarily true when playoffs are involved. Playoffs impose some degree of championship uncertainty in which the champion is partly determined based on luck. Thus, the average within-team competitive balance could be zero despite having many different champions. To reflect this championship uncertainty, a second metric is analysed, namely the number of different champions per simulation iteration. The calculation of the number of unique champions per simulation iteration results in a discrete distribution. To guarantee cross-simulation comparability, I only analyse simulation iterations which have not been terminated due to team bankruptcy. The number of unique champions follows an ordinal scale from one to ten and thus constitutes an ordinal outcome $Y$ with $C=10$ categories so that the cumulative probability for the observation of a specific number of unique champions being less or equal to a certain category $c = [1, C-1]$ is given by $p = P\{Y \leq c\}$. On this foundation, the following ordinal logistic regression model is formulated
+
+\begin{equation}
+\label{eq:averageGrowthRate}
+logit(p) = \beta_{c,0} + \sum_{x=2}^6\beta_{x-1}simulation_x
+\end{equation}
+
+\noindent
+The model allows the calculation of odds ratios given by 
+
+\begin{equation}
+\label{eq:averageGrowthRate}
+\frac{P\{Y > c\ | x != 1\}/P\{Y \leq c\ | x != 1\}}{P\{Y > c\ | x = 1\}/P\{Y \leq c\ | x = 1\}}
+\end{equation}
+
+\noindent
+expressing the odds of observing more than $c$ unique champions versus observing $c$ unique champions at maximum in any simulation other than simulation \textit{1} relative to the same odds configuration for simulation \textit{1}. Therefore, it is possible to analyse how likely it is to observe a specific number of unique champions relative simulation \textit{1}.  
+
+\subsection{Analysis of financial stability}
+
+To assess financial stability arising from particular league settings, I make use of two different metrics both of which serve different purposes.
+
+\noindent
+The first metric to be analysed is the rate of bankruptcy in each simulation, i.e. the number of simulations terminated by the occurrence of at least one team bankruptcy divided by the total number of simulation iterations. This metric accounts for the destructiveness of competition argument brought up by \cite{whitney_bidding_1993}. A more destructive league setting is expected to be associated with more team bankruptcies. To analyse differences between the simulation bankruptcy rates, I apply a logistic regression model of the form 
+
+\begin{equation}
+\label{eq:averageGrowthRate}
+logit(p) = \beta_0 + \sum_{x=2}^6\beta_{x-1}simulation_x, \ \ p=P\{bankruptcy=1\}
+\end{equation}
+
+\noindent
+where the bankruptcy rates of simulations \textit{2} to \textit{6} are compared to the rate observed in the base simulation \textit{1} by calculating the average marginal effect (AME) of each simulation. Thanks to the model setup, the calculated AME for each simulation just constitutes the difference in bankruptcy rates compared to the base simulation. However, in addition to a simple rate comparison, the results of the logistic regression also allow a statement about statistical significance of these rate differences. 
+
+\noindent
+The second metric to be considered is the average seasonal growth rate (ASGR) of the median player salary, an adaptation of the average annual growth rate applied in finance to track the annual growth of asset values. The reasoning for the use of ASGR on the median player salary as metric is two folded. First, it serves the identification of league settings which specifically fuel the growth of player salaries. Second, by considering the growth of the median player salary, the general price level of the league is investigated and the results are not distortet by extreme salary outliers. The ASGR of median salary is calculated over the stretch of one simulation iteration and is given by
+
+\begin{equation}
+ASGR = \frac{\sum_{t=2}^T(\frac{\omega_{median, t}}{\omega_{median, t-1}}-1)}{T-1}
+\end{equation}
+
+\noindent
+In the same way as CBR, one ASGR distribution per simulation is obtained and the distributions are thereafter analysed by one-way ANOVA and Tukey HSD.
+
+\section{Results}
+
+\subsection{Effects of reform measures on competitive balance}
+
+Figure \ref{fig:cbrDistribution} shows the distribution of CBR for simulations \textit{1} - \textit{6} and based on the league settings of these simulations, the figure implies that higher import player limits are associated with lower CBR and that the existence of a salary cap is associated with a higher CBR. The figure further implies a significant difference between the simulation results.
+
+\vspace{0.5cm}
+\begin{figure}[h]
+\centering
+\caption{CBR distribution by simulation}
+\label{fig:cbrDistribution}
+\includegraphics[width=\textwidth]{ {dataAnalysis/images/simulationResultAnalysis/cbrDistribution} }
+\end{figure}
+
+\noindent
+This implication is confirmed by a one-way ANOVA, the results of which are depicted in table \ref{table:cbrANOVA}. The calculated F-value is significant on a level below 0.1\% which is prove that differences between the simulations in terms of CBR exist. 
+
+\vspace{0.5 cm}
+\begin{table}[!ht]
+    \centering
+    \begin{threeparttable}
+        \caption{Results of ANOVA on simulation CBR}
+        \label{table:cbrANOVA}
+        \begin{tabular}{lrrrrr}
+          \toprule
+         & Df & Sum Sq & Mean Sq & F-value & p-Value \\ 
+          \midrule
+        Simulation  & 5 & 163.96 & 32.79 & 17900.02 & 0.000*** \\ 
+          Residuals   & 5962 & 10.92 & 0.00 &  &  \\ 
+           \bottomrule
+        \end{tabular}
+        \begin{tablenotes}[flushleft]
+            \footnotesize
+            \item \textit{Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1}
+        \end{tablenotes}
+    \end{threeparttable}
+\end{table}
+\vspace{0.5 cm}
+
+\noindent
+The results of Tukey HSD depicted in table \ref{table:cbrTukeyHSD} indicate that every single simulation pairing significantly differs from each other in terms of CBR mean value. The results confirm the inferred implications of figure \ref{fig:cbrDistribution}. A simulation of the NL with a salary cap in place results in higher competitive balance compared to simulations without a salary cap. If the import player limit is increased, however, competitive balance decreases significantly. 
+
+\begin{table}[!ht]
+    \centering
+    \begin{threeparttable}
+        \caption{Results of Tuckey HSD on simulation CBR}
+        \label{table:cbrTukeyHSD}
+        \begin{tabular}{lrrrc}
+          \toprule
+          \multicolumn{2}{c}{Simulations} & \multicolumn{2}{c}{95\% Confidence Interval} &  \\
+          \cmidrule(lr){1-2} \cmidrule(lr){3-4}
+          Combinations & Difference\tnote{1} & Lower & Upper & Adjusted p-Value \\ 
+          \midrule
+          2 with 1 &  0.351 & 0.345 & 0.356 & 0.000*** \\ 
+          3 with 1 &  -0.029 & -0.034 & -0.023 & 0.000*** \\ 
+          4 with 1 &  0.312 & 0.307 & 0.318 & 0.000*** \\ 
+          5 with 1 &  -0.063 & -0.068 & -0.057 & 0.000*** \\ 
+          6 with 1 &  0.191 & 0.185 & 0.196 & 0.000*** \\ 
+          3 with 2 &  -0.380 & -0.385 & -0.374 & 0.000*** \\ 
+          4 with 2 &  -0.039 & -0.044 & -0.033 & 0.000*** \\ 
+          5 with 2 &  -0.414 & -0.419 & -0.408 & 0.000*** \\ 
+          6 with 2 &  -0.160 & -0.166 & -0.155 & 0.000*** \\ 
+          4 with 3 &  0.341 & 0.336 & 0.347 & 0.000*** \\ 
+          5 with 3 &  -0.034 & -0.039 & -0.028 & 0.000*** \\ 
+          6 with 3 &  0.220 & 0.214 & 0.225 & 0.000*** \\ 
+          5 with 4 &  -0.375 & -0.380 & -0.370 & 0.000*** \\ 
+          6 with 4 &  -0.122 & -0.127 & -0.116 & 0.000*** \\ 
+          6 with 5 &  0.253 & 0.248 & 0.259 & 0.000*** \\  
+          \bottomrule
+        \end{tabular}
+        \begin{tablenotes}[flushleft]
+            \footnotesize
+            \item \textit{Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1}
+            \item[1] \textit{Mean CBR of simulation mentioned first in combination minus mean CBR of simulation mentioned second in combination}
+        \end{tablenotes}
+    \end{threeparttable}
+\end{table} 
+\vspace{0.5 cm}
+
+\noindent
+To check for championship uncertainty, first figure \ref{fig:uniqueChampions}, showing the distribution of unique champions per simulation, is consulted. It seems that the distributions of the number of unique champions are shifted more rightwards for salary cap simulations. This would indicate that the number of unique champions, on average, is higher compared to simulations without salary cap. This statement is verified by the observed odds ratios in table \ref{table:uniqueChampions}. Compared to simulation \textit{1}, simulation \textit{2} presents 11.16 times larger odds of observing more than a specific number of unique champions versus observing fewer or exactly the same number of unique champions or in short: It is more likely to observe a higher number of unique champions in simulation \textit{2} than it is in simulation \textit{1}. The same is true for simulations \textit{4} and \textit{6} which implies that the salary cap actually increases championship uncertainty. Meanwhile, the observed odds ratios smaller than one for simulations \textit{3} and \textit{5} indicate that is is actually less likely to observe a high number of unique champions in these simulations compared to simulation \textit{1}. This is part of a general pattern where a decline in odds ratios is associated with a raise in import player limit, indicating that higher import player limits reduce championship uncertainty. All the odds ratios are significant on a 5\% significance level and thus the drawn conclusions are statistically valid.
+
+
+\begin{figure}[h]
+\centering
+\caption{Distribution of the number of unique champions by simulation}
+\label{fig:uniqueChampions}
+\includegraphics[width=\textwidth]{ {dataAnalysis/images/simulationResultAnalysis/uniqueChampionsPlot} }
+\end{figure}
+
+\vspace{1cm}
+
+\begin{table}[!ht]
+    \centering
+    \begin{threeparttable}
+        \caption{Results of ordinal logistic regression with respect to championship uncertainty}
+        \label{table:uniqueChampions}
+        \begin{tabular}{lrrrrr}
+          \toprule
+          \multicolumn{2}{c}{} & \multicolumn{2}{c}{95\% Confidence Interval} \\
+          Factor & Odds Ratio & Lower Bound & Upper Bound \\ 
+          \midrule
+          Simulation 2 & 11.16 & 9.23 & 13.50 \\ 
+          Simulation 3 & 0.69 & 0.57 & 0.83 \\ 
+          Simulation 4 & 8.74 & 7.24 & 10.57 \\ 
+          Simulation 5 & 0.57 & 0.46 & 0.69 \\ 
+          Simulation 6 & 5.43 & 4.51 & 6.54 \\ 
+           \bottomrule
+        \end{tabular}
+    \end{threeparttable}
+\end{table}
+\vspace{0.5 cm}
+
+\subsection{Effects of reform measures on teams' financial stability}
+
+Figure \ref{fig:bankruptcyRates} shows the bankruptcy rates for simulations \textit{1} - \textit{6}, clearly pointing out that no bankruptcies occur when the league is simulated with a salary cap. This is not true for simulations without salary cap. However, these simulations, on the other hand, suggest a sweet spot between four and ten allowed import players in terms of preventing bankruptcies. The results from logistic regression in table \ref{table:logisticRegression} confirm these findings. Not really astonishing, compared to simulation \textit{1}, simulations \textit{2}, \textit{4} and \textit{5} have an on a 1\% significance level statistically significant AME of -0.33 which happens to be exactly the bankruptcy rate observed in simulation \textit{1}, meaning that the observed bankruptcy rate is in fact zero for all of the three mentioned simulations and that the difference is pronounced. More interesting are the observed AME of simulations \textit{3} and \textit{5}. 
+
+\newpage
+
+\begin{figure}[h]
+\centering
+\caption{Bankruptcy rate by simulation}
+\label{fig:bankruptcyRates}
+\includegraphics[width=\textwidth]{ {dataAnalysis/images/simulationResultAnalysis/bankruptcyRatesPlot} }
+\end{figure}
+
+\vspace{1 cm}
+
+\begin{table}[ht]
+    \centering
+    \begin{threeparttable}
+        \caption{Results of logistic regression with respect to bankruptcy rates}
+        \label{table:logisticRegression}
+        \begin{tabular}{lrrrrr}
+              \toprule
+                Factor & AME & Standard Error & z-Value & p-Value \\ 
+                \midrule
+                Simulation 2 & -0.33 & 0.01 & -22.39 & 0.000***   \\ 
+                Simulation 3 & -0.10 & 0.02 & -5.04 & 0.000***   \\ 
+                Simulation 4 & -0.33 & 0.01 & -22.39 & 0.000***   \\ 
+                Simulation 5 & 0.07 & 0.02 & 3.07 & 0.002** \\ 
+                Simulation 6 & -0.33 & 0.01 & -22.39 & 0.000***   \\ 
+               \bottomrule
+        \end{tabular}
+        \begin{tablenotes}[flushleft]
+            \footnotesize
+            \item \textit{Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1}
+        \end{tablenotes}
+    \end{threeparttable}
+\end{table}
+\vspace{0.5 cm}
+
+\noindent
+Compared to simulation \textit{1}, simulation \textit{3} shows a statistically significant 10\%-points lower probability of bankruptcy while simulation \textit{5} shows a statistically significant 7\%-points higher probability of bankruptcy, albeit only on a 10\% significance level. 
+
+\noindent
+Figure \ref{fig:asgrDistribution} shows the distribution of ASGR for simulations \textit{1} - \textit{6} pointing out multiple patterns. The existence of a salary cap strictly limits both, the ASGR and the variation in ASGR. All observed ASGR in these particular simulations are closer to zero with a fraction of simulation iterations even having resulted in negative ASGR meaning that salaries actually decreased on average. The fraction of negative ASGR observations increases with the number of import players. For simulations without salary cap, exclusively positive ASGR are observed with many upward directed outliers. 
+
+\newpage
+
+\begin{figure}[h]
+\centering
+\caption{ASGR distribution by simulation}
+\label{fig:asgrDistribution}
+\includegraphics[width=\textwidth]{ {dataAnalysis/images/simulationResultAnalysis/asgrDistribution} }
+\end{figure}
+
+\noindent
+The difference between simulations with and without salary cap is further clarified by the fact that ASGR observations at the lower boxplot whiskers of simulations without salary cap at maximum overlap with upper outliers observed in simulations with salary cap. One-way ANOVA results depicted in table \ref{table:asgrANOVA} confirm simulation heterogeneity in terms of ASGR based on an F-value significant on a level below 0.1\%. 
+
+\vspace{0.5 cm}
+\begin{table}[!ht]
+    \centering
+    \begin{threeparttable}
+        \caption{Results of ANOVA on simulation ASGR}
+        \label{table:asgrANOVA}
+        \begin{tabular}{lrrrrr}
+          \toprule
+         & Df & Sum Sq & Mean Sq & F-value & p-Value \\ 
+          \midrule
+          Simulation  & 5 & 14.51 & 2.90 & 1773.89 & 0.000*** \\ 
+          Residuals   & 5862 & 9.59 & 0.00 &  &  \\ 
+           \bottomrule
+        \end{tabular}
+        \begin{tablenotes}[flushleft]
+            \footnotesize
+            \item \textit{Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1}
+        \end{tablenotes}
+    \end{threeparttable}
+\end{table}
+\vspace{0.5 cm}
+
+\noindent
+The multi pairwise comparison depicted in table \ref{table:asgrTukeyHSD} points to significant ASGR mean value differences between simulation pairings except for three pairings. The differences in ASGR mean values of simulations \textit{3} and \textit{2}, \textit{6} and \textit{2} and \textit{6} and \textit{4} are not significant at all. The implication of that observation is that different import player limits do not seem to significantly affect salary growth when a salary cap is in place. If, on the contrary, no salary cap exists, import player limits very well have a significant effect on player salaries. But as already assumed based on figure \ref{fig:asgrDistribution}, the statistical significant, negative differences between mean values of simulations without and with salary cap confirm that an import player limit increase is the much less effective measure to keep salary growth at check compared to the introduction of a salary cap. 
+
+\newpage
+
+\begin{table}[h]
+    \centering
+    \begin{threeparttable}
+        \caption{Results of Tuckey HSD on simulation ASGR}
+        \label{table:asgrTukeyHSD}
+        \begin{tabular}{lrrrc}
+          \toprule
+          \multicolumn{2}{c}{Simulations} & \multicolumn{2}{c}{95\% Confidence Interval} &  \\
+          \cmidrule(lr){1-2} \cmidrule(lr){3-4}
+          Combinations & Difference\tnote{1} & Lower & Upper & Adjusted p-Value \\ 
+          \midrule
+          2 with 1 & -0.115 & -0.120 & -0.110 & 0.000*** \\ 
+          3 with 1 & -0.024 & -0.029 & -0.019 & 0.000*** \\ 
+          4 with 1 & -0.118 & -0.123 & -0.113 & 0.000*** \\ 
+          5 with 1 & -0.039 & -0.044 & -0.034 & 0.000*** \\ 
+          6 with 1 & -0.120 & -0.125 & -0.115 & 0.000*** \\ 
+          3 with 2 & 0.091 & 0.086 & 0.096 & 0.000*** \\ 
+          4 with 2 & -0.003 & -0.008 & 0.002 & 0.682 \\ 
+          5 with 2 & 0.076 & 0.071 & 0.081 & 0.000*** \\ 
+          6 with 2 & -0.005 & -0.010 & 0.000 & 0.089 \\ 
+          4 with 3 & -0.094 & -0.099 & -0.089 & 0.000*** \\ 
+          5 with 3 & -0.015 & -0.020 & -0.010 & 0.000*** \\ 
+          6 with 3 & -0.096 & -0.101 & -0.091 & 0.000*** \\ 
+          5 with 4 & 0.079 & 0.074 & 0.084 & 0.000*** \\ 
+          6 with 4 & -0.002 & -0.007 & 0.003 & 0.855 \\ 
+          6 with 5 & -0.081 & -0.086 & -0.076 & 0.000*** \\ 
+          \bottomrule
+        \end{tabular}
+        \begin{tablenotes}[flushleft]
+            \footnotesize
+            \item \textit{Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1}
+            \item[1] \textit{Mean ASGR of simulation mentioned first in combination minus mean ASGR of simulation mentioned second in combination}
+        \end{tablenotes}
+    \end{threeparttable}
+\end{table}
+\vspace{0.5 cm}
+
+\section{Discussion}
+
+\subsection{Conclusion}
+
+ The results of the conducted analyses are unambiguous, both when it comes to effects of the league reform measures on competitive balance and financial stability of teams.
+ 
+ \noindent
+ The introduction of a salary cap positively affects competitive balance and at the same time, also increases championship uncertainty. This results in more unpredictable games and breaks long-term dominance of particular teams as it is currently observed in the NL. Given that the current state of research assumes that perfect competition is not to be desired just as much as the complete absence of competition is to be rejected, it is, however, difficult to interpret these salary cap effects on competitive balance as either beneficial or adverse. There is a real threat of pushing past a potential sweet spot of competitive balance. Eventually, it probably also comes down to other measures and structures already in place, as can be seen based on the example of significant different outcomes when salary cap is combined with more or less import players. As to the question, if a salary cap is suitable to combat the observed concentration of championship titles in the NL, the answer is a distinct yes. The salary cap is also suitable to foster financial stability of teams. As the analysis shows, the salary cap completely prevents team bankruptcies. This is an indication for a protective mechanism of the salary cap preventing teams from falling victim to irrational and time inconsistent behaviour, leading to poor financial decisions and eventually to a team's demise. A salary cap also limits salary growth. The results show that a salary cap introduction leads to a much smaller salary growth, if any, compared to a situation without a salary cap being introduced. Thus a salary cap is a suitable tool to combat the increasing player salaries observed in the NL. Given the extraordinary salaries today's NL players earn compared to what they would earn abroad based on their skill and given the introduced problems that might arise from unstoppable salary growth, efforts to stop salary growth via a salary cap seem to be in the best interest of Swiss ice hockey. 
+
+\noindent
+The results with regard to the effect of import player limits stand in stark contrast. The increase of a import player limit leads to lower competitive balance and lower championship uncertainty. Intuitively, this makes sense. When no additional salary cap is present, then teams with a lot of financial resources have more opportunities, compared to teams with less resources, to compensate the skill losses incurred in the domestic player "lottery" with skill from the foreign player market. The higher the limit, the more scope these teams have to still acquire the optimal team given their budget. In extreme cases, this might lead to complete, long-term dominance by a few teams. Even when the import player limit is increased in combination with the introduction of a salary cap, the effect on competitive balance is still negative. This might be due to the fact that the expenditure ceiling defined by the salary cap still exceeds the budget of some teams which is a problem as was pointed out in the literature analysis. Nevertheless, the difficulty to interpret these import player limit effects on competitive balance as beneficial or adverse applies here as well. At least it appears that increasing the import player limit is not a suitable tool to combat one-sided competition. Interestingly, the results suggest that higher import player limits may help to reduce bankruptcy rates up to some point. A reasonable explanation for this observation might be that teams can replace Swiss players by imports when Swiss players become too expensive. This effect vanishes as soon as the pressure to stay competitive and thus to sign the maximal number of allowed imports outweighs the pressure to find cheap alternatives. When it comes to player salaries, the increase of import players actually helps to reduce salaries although by no means at comparable rates as the introduction of a salary cap. Still, the mechanism of diluting the players' bargaining power by increasing supply as explained earlier seems to be at play here. In light of these results, however, increasing the import player limit is less effective in combating increasing salaries and comes at the previously discussed but not analysed long-term risk of domestic players loosing quality. 
+
+
+
+\subsection{Limitations}
+
+The most significant limitation of this paper and especially of the simulation originates from the limited access to data required to parameterize the model. While all parameter values were defined to the best of the available information, it would be more accurate to inquire certain parameter values directly from representative entities. For example, a more accurate model representation of the NL would contain the actual team budgets in a given season and not only approximations of said budgets based on publicly available information or actual average per game revenues as monetary factors $z_i$ instead of calculated approximation values. Also, a generic, optimal winning percentage based on findings from MLB and NBA was applied instead of calculating a custom value for the NL based on \citet{kesenne_optimal_2015}. In terms of simulation, the framework is solely based on team skill and completely neglects other potential success factors like team form, home advantage or travel hardship. The simulation is further limited to one formulation of a salary cap aligned with the system applied in the NHL. But as discussed in the literature analysis, a salary cap can take various forms which might lead to different results. Finally, the model and the simulation are based on a few strong assumptions, some of which are necessary to reduce model complexity but at the cost of accuracy and some of which seem reasonable although empirical proof is still to be provided.
+
+\subsection{Future research}
+
+The model introduced in this paper might serve as blueprint model for the simulation of other sports leagues faced with the same developments as the NL. The unique stochastic property of the model, compared to deterministic models introduced by previous research, allows the prediction of scenarios and a quantification of these scenarios by probabilities which makes its application worthwhile for exploratory analyses. In the context of applying the model to the NL, a reparametrization of the model is to be considered in favour of a more accurate NL simulation. Building upon the results of this paper, knowledge about the optimal level of competitive balance in the NL is needed to enable a better interpretation of the observed reform measures' effects. Finally, the allegedly convex relation between the number of allowed import players and bankruptcy rates is to be investigated further. 
+
+\newpage
+
+\renewcommand{\BRetrievedFrom}{}
+\bibliography{references}
+
+\newpage
+
+\titlespacing*{\section}{0pt}{0pt}{1cm}
+\appendix
+
+\section{Appendix}
+
+\input{appendix}
+
+\end{document}

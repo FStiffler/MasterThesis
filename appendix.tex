@@ -1,0 +1,619 @@
+
+
+\begin{figure}[!h]
+\centering
+\caption{Effect of $\lambda$ on supply effect}
+\label{fig:supplyFunctionLambda}
+\includegraphics[width=\textwidth]{ {dataAnalysis/images/supplyEffect/supplyFunctionLambda} }
+\end{figure}
+
+\vfill
+
+\begin{figure}[!h]
+\centering
+\caption{Effect of $\gamma$ on supply effect}
+\label{fig:supplyFunctionGamma}
+\includegraphics[width=\textwidth]{ {dataAnalysis/images/supplyEffect/supplyFunctionGamma} }
+\end{figure}
+
+\vfill
+
+\newpage
+
+\vspace{0.5cm}
+ \begin{figure}[h]
+\centering
+\caption{Effect of $\epsilon$ on supply effect}
+\label{fig:supplyFunctionEpsilon}
+\includegraphics[width=\textwidth]{ {dataAnalysis/images/supplyEffect/supplyFunctionEpsilon} }
+\end{figure}
+
+\vfill
+
+\renewcommand*{\arraystretch}{1.5}
+\begin{longtable}[h!]{lc>{\baselineskip=15pt}p{4cm}>{\baselineskip=15pt}p{6cm}}
+
+    \caption{General simulation parameters}
+    \label{table:params} \\
+
+    \toprule
+    Parameter& Value & Source & Note \\
+    \midrule
+    \endfirsthead
+
+    \multicolumn{4}{c}{{{\bfseries \tablename\ \thetable{}} -- \textit{continued from previous page}}}\\
+    \toprule
+    Parameter& Value & Source & Note \\
+    \midrule
+    \endhead
+
+    
+    $n$  & 14 &  & Number of NL teams starting with 2022/23 season \\
+    $h_{max}$ & 22 & \citet[][p. ~ 39]{iihf_iihf_2022-1} & Maximal team size in accordance with section 2, rule 5, paragraph 5.1 of the official IIHF rule book 2022/23 which states that 'no more than twenty (20) Skaters and two (2) Goalkeepers shall be permitted'. Albeit this definition, it is to say that the model does not make any distinction between player types, i.e. goalkeeper or skater. Implicitly it is assumed that a team picks 22 players, two of which are automatically goalkeepers, without explicitly labeling them as such. \\
+    $h_{min}$ & 12 & \citet[][p. ~ 39]{iihf_iihf_2022-1} & The minimal team size is partially derived from the rule book. According to section 2, rule 5, paragraph 5.1 of the official IIHF rule book 2022/23 a team "must be able to put on the ice at least five (5) Skaters and one (1) Goalkeeper at the beginning of the game". Given the high intensity of this sport on professional level, however, I assume it to be more realistic to have a team at least field 12 players (one backup goalkeeper) to pull through a game even in case of injuries or disciplinary penalties.  \\
+    $\alpha$  & 1.48 & Data provided by authors of NL Ice Data & Estimated by MLE applied to data on win-shares per game of NL players in season 2021/22 as proxy for skill based on assumption that skill positively correlates with win contribution. The win-shares are normalized before MLE. The function \emph{ebeta} of R package \emph{EnvStats} is used to conduct MLE. \\
+    $\beta$  & 3.56 & Data provided by authors of NL Ice Data & Estimated by MLE applied to data on win-shares per game of NL players in season 2021/22 as proxy for skill based on assumption that skill positively correlates with win contribution. The win-shares are normalized before MLE. The function \emph{ebeta} of R package \emph{EnvStats} is used to conduct MLE. \\
+    $k_{domestic,0}$  & 300 & \cite{elite_prospects_elite_2022} & Sum of Swiss players and of players with Swiss license having played at least 10 NL games in reference season 2021/22 \\
+    $\kappa$  & 0.021 & \cite{iihf_iihf_2022} & Average growth rate of Swiss player base based on data from source. It is assumed that a growth of the Swiss player base also directly translates into a growth of the domestic player pool of NL players \\
+    $\rho_0$  & 4 &  & Allowed number of import players in reference season 2021/22 \\
+    $k_0$  & 304 &  & Sum of $k_{domestic,0}$ and $\rho_0$ \\
+    $k_{min}$  & 168 &  & Product of $h_{min}$ and $n$. Assumes that every team has to be able to sign at least the minimal required number of players or otherwise the league is going to unravel.\\
+    $\epsilon$  & 2 &  & To be used when solving equation system \ref{eq:solvingSupplyEffect}. Assumes that player salaries half when the player pool size doubles \\
+    $\lambda$  & 304 &  & Obtained by solving equation system \ref{eq:solvingSupplyEffect} with defined $k_0$, $k_{min}$ and $\epsilon$ \\
+    $\gamma$  & 0 &  & Obtained by solving equation system \ref{eq:solvingSupplyEffect} with defined $k_0$, $k_{min}$ and $\epsilon$ \\
+    $\omega^*$  & 0.67 & \cite{kesenne_optimal_2015}, \cite{rascher_fans_2007} & The first source mentions optimal values in the range of 0.5 and 0.67. The second source mentions an optimal value of 0.7. The optimal value of 0.67 determined here thus accommodates both sources. \\
+    $B_0$  & CHF 1.45M & \cite{zaugg_wie_2017} & Annual earnings per team from broadcasting deal according to source. Assumed to be initial broadcasting value subject to a annual growth rate. \\
+    $\pi$  & 0.031 & \cite{zaugg_wie_2017} & In total, broadcasting value increases from CHF 30.4M to CHF 35.4M over 5 years according to source. The parameter, therefore, can be calculated by solving the following equation:
+    $\textrm{CHF 30.4M }(1+\pi)^5=\textrm{CHF 35.4M}$ \\
+    $\mu$  & 0.05 & \cite{allemann_sind_2020} & Highest player salary in the NL is CHF 0.9M according to source. Based on table \ref{table:teamParams}, EV Zug has the highest initial team budget of CHF 18.4M. Parameter, thus, is given by the rounded ratio of CHF 0.9M/CHF 18.4M \\
+    $\tau$  & 1.2075 & \cite{nhl_collective_2012} & According to article 50.5.b.i of the source, the per team revenue average (called midpoint in source) is to be adjusted upward 5\% every year (with exceptions not considered here) to adjust for growth in league revenue and to be scaled with a factor of 1.15 to obtain the expenditure ceiling (called upper limit in source). Based on these information, $\tau$ is obtained by the multiplication $1.05*1.15$\\
+    \bottomrule
+            
+\end{longtable}
+
+\vfill
+
+\newpage
+
+\small 
+\renewcommand*{\arraystretch}{1.3}
+\begin{longtable}[h!]{p{1.5cm}cc>{\baselineskip=13pt}p{3cm}>{\baselineskip=13pt}p{5.5cm}}
+
+    \caption{Team parameters}
+    \label{table:teamParams} \\
+    
+    \toprule
+    Team & Parameter & Value & Source & Note \\
+    \midrule
+    \endfirsthead
+
+    \multicolumn{5}{c}{{{\bfseries \tablename\ \thetable{}} -- \textit{continued from previous page}}}\\
+    \toprule
+    Team & Parameter & Value & Source & Note \\
+    \midrule
+    \endhead
+    
+    \multirow[t]{5}{=}{ZSC Lions} & ${R_{tot}}_{0}$ & CHF 16.7M & \cite{graf_17_2019} & Based on team expenditures in season 2018/19 \\
+                                    & $m$ & 8863 & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming market potential of team directly correlates with game attendance. \\
+                                    & $r_g$ & \{1, 1.15\} & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming constant effect of 1 for all teams during regular season. Revenue effect of playoffs based on additional game attendance during playoffs \\
+                                    & $b$ & 13228 &  & See equation \ref{eq:competitiveBalanceEffect} for calculation\\
+                                    & $\hat{z}$ & CHF 162 &  & See table \ref{table:calcMonetaryFactor} for calculation. Approximation of average per game revenue generated by team. \\
+    \midrule
+    
+    \multirow[t]{5}{=}{SCL Tigers} & ${R_{tot}}_{0}$ & CHF 6.5M & \cite{germann_mir_2018} & Based on actual team budget for 2018/19 season \\
+                                     & $m$ & 5549 & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming market potential of team directly correlates with game attendance. \\
+                                     & $r_g$ & \{1, 1.13\} & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming constant effect of 1 for all teams during regular season. Revenue effect of playoffs based on additional game attendance during playoffs \\
+                                     & $b$ & 8282 &  & See equation \ref{eq:competitiveBalanceEffect} for calculation \\
+                                     & $\hat{z}$ & CHF 106 &  &  See table \ref{table:calcMonetaryFactor} for calculation. Approximation of average per game revenue generated by team. \\
+    \midrule
+    
+    \multirow[t]{5}{=}{SC Rapperswil-Jona Lakers} & ${R_{tot}}_{0}$ & CHF 11M & \cite{umberg_cup_2019} & 
+    Total budget for 2019/20 season according to source. Assuming that budget is fully allocated to team. \\
+                                                 & $m$ & 4319 & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming market potential of team directly correlates with game attendance. \\
+                                                 & $r_g$ & \{1, 1.55\} & \cite{national_league_zuschauerzahlen_2022} &  See table \ref{table:attendanceDevelopment} for calculation. Assuming constant effect of 1 for all teams during regular season. Revenue effect of playoffs based on additional game attendance during playoffs \\
+                                                 & $b$ & 6446 &  & See equation \ref{eq:competitiveBalanceEffect} for calculation \\
+                                                 & $\hat{z}$ & CHF 362 &  & See table \ref{table:calcMonetaryFactor} for calculation. Approximation of average per game revenue generated by team. \\
+    \midrule    
+    
+    \multirow[t]{5}{=}{SC Bern} & ${R_{tot}}_{0}$ & CHF 15M & \cite{zaugg_seit_2017} & 
+    Budget of CHF 15-20M over multiple season according to source. Assuming budget of CHF 15M based on statement that SCB has third highest budget in the league at maximum \citep{luthi_es_2020}\\
+                                                 & $m$ & 16164 & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming market potential of team directly correlates with game attendance. \\
+                                                 & $r_g$ & \{1, 1.04\} & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming constant effect of 1 for all teams during regular season. Revenue effect of playoffs based on additional game attendance during playoffs \\
+                                                 & $b$ & 24125 &  & See equation \ref{eq:competitiveBalanceEffect} for calculation \\
+                                                 & $\hat{z}$ & CHF 74 &  & See table \ref{table:calcMonetaryFactor} for calculation. Approximation of average per game revenue generated by team. \\
+    \midrule
+    
+    \multirow[t]{5}{=}{Lausanne HC} & ${R_{tot}}_{0}$ & CHFM & \cite{reynard_au_2018} & 
+    Budget of CHF 15-20M for season 2018/19 according to source, Assuming budget of CHF 15M based on roster comparison with top two expensive rosters\\
+                                   & $m$ & 6548 & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming market potential of team directly correlates with game attendance. \\
+                                   & $r_g$ & \{1, 1.16\} & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming constant effect of 1 for all teams during regular season. Revenue effect of playoffs based on additional game attendance during playoffs \\
+                                   & $b$ & 9773 &  & See equation \ref{eq:competitiveBalanceEffect} for calculation \\
+                                   & $\hat{z}$ & CHF 260 &  & See table \ref{table:calcMonetaryFactor} for calculation. Approximation of average per game revenue generated by team. \\
+    \midrule
+    
+    \multirow[t]{5}{=}{HC Lugano} & ${R_{tot}}_{0}$ & CHF 15M & \cite{noauthor_deficit_2019} & 
+    Revenue of CHF 23M in season 2018/19 according to source. Assuming budget of CHF 15M based on an approximately two-thirds budget to revenue ratio observed in NL and based on team roster. \\
+                                 & $m$ & 5040 & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming market potential of team directly correlates with game attendance. \\
+                                 & $r_g$ & \{1, 1.2\} & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming constant effect of 1 for all teams during regular season. Revenue effect of playoffs based on additional game attendance during playoffs \\
+                                 & $b$ & 7522 &  & See equation \ref{eq:competitiveBalanceEffect} for calculation \\
+                                 & $\hat{z}$ & CHF 233 &  & See table \ref{table:calcMonetaryFactor} for calculation. Approximation of average per game revenue generated by team. \\
+    \midrule
+    
+    \multirow[t]{5}{=}{HC Davos} & ${R_{tot}}_{0}$ & CHF 8.3M &                                                                   \cite{hockey_club_davos_ag_geschaftsbericht_2019} & Based on team expenditures in 2018/19 season \\
+                                & $m$ & 4544 & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming market potential of team directly correlates with game attendance. \\
+                                & $r_g$ & \{1, 1.2\} & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming constant effect of 1 for all teams during regular season. Revenue effect of playoffs based on additional game attendance during playoffs \\
+                                & $b$ & 6782 &  & \\
+                                & $\hat{z}$ & CHF 178 &  & See table \ref{table:calcMonetaryFactor} for calculation. Approximation of average per game revenue generated by team. \\
+    \midrule
+    
+    \multirow[t]{5}{=}{HC Ambri-Piotta} & ${R_{tot}}_{0}$ & CHF 8M & \cite{giraldi_ambri_2019} &                            Revenue of ~CHF 12M in season 2018/19 according to source. Assuming budget of CHF 8M based on an approximately two-thirds budget to revenue ratio observed in NL\\
+                                        & $m$ & 4955 & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming market potential of team directly correlates with game attendance. \\
+                                        & $r_g$ & \{1, 1.1\} & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming constant effect of 1 for all teams during regular season. Revenue effect of playoffs based on additional game attendance during playoffs \\
+                                        & $b$ & 7396 &  & See equation \ref{eq:competitiveBalanceEffect} for calculation \\
+                                        & $\hat{z}$ & CHF 146 &  & See table \ref{table:calcMonetaryFactor} for calculation. Approximation of average per game revenue generated by team. \\
+    \midrule
+    
+    \multirow[t]{5}{=}{HC Ajoie} & ${R_{tot}}_{0}$ & CHF 7.1M & \cite{kouyoumdjian_president_2022}                            & Based on actual team budget for 2021/22 season\\ 
+                                & $m$ & 3626 & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming market potential of team directly correlates with game attendance. \\
+                                & $r_g$ & \{1, 1.31\} & \cite{national_league_zuschauerzahlen_2022} & Since Ajoie never appeared in playoffs so far, the ratio of stadium capacity to $m$ is used instead \\
+                                & $b$ & 5412 &  & See equation \ref{eq:competitiveBalanceEffect} for calculation \\
+                                & $\hat{z}$ & CHF 385 &  & See table \ref{table:calcMonetaryFactor} for calculation. Approximation of average per game revenue generated by team. \\
+    \midrule
+    
+    \multirow[t]{5}{=}{Genève-Servette HC} & ${R_{tot}}_{0}$ & CHF 14M & \cite{emery_retour_2018}                                                    & Sport budget for season 2018/19 according to source , Assuming that budget is fully allocated to team \\ 
+                                            & $m$ & 6554 & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming market potential of team directly correlates with game attendance. \\
+                                            & $r_g$ & \{1, 1.06\} & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming constant effect of 1 for all teams during regular season. Revenue effect of playoffs based on additional game attendance during playoffs \\
+                                            & $b$ & 9782 &  & See equation \ref{eq:competitiveBalanceEffect} for calculation \\
+                                            & $\hat{z}$ & CHF 237 &  & See table \ref{table:calcMonetaryFactor} for calculation. Approximation of average per game revenue generated by team. \\
+    \midrule
+    
+    \multirow[t]{5}{=}{HC Fribourg-Gottéron} & ${R_{tot}}_{0}$ & CHF 12.7M & \cite{hc_fribourg-gotteron_sa_rapport_2019} & Personnel expenses in season 2018/19, Equation with team expenditures \\
+                                            & $m$ & 6261 & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming market potential of team directly correlates with game attendance. \\
+                                            & $r_g$ & \{1, 1.02\} & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming constant effect of 1 for all teams during regular season. Revenue effect of playoffs based on additional game attendance during playoffs \\
+                                            & $b$ & 9345 &  & See equation \ref{eq:competitiveBalanceEffect} for calculation \\
+                                            & $\hat{z}$ & CHF 218 &  & See table \ref{table:calcMonetaryFactor} for calculation. Approximation of average per game revenue generated by team. \\
+    \midrule
+    
+    \multirow[t]{5}{=}{EV Zug} & ${R_{tot}}_{0}$ & CHF 18.4M & \cite{evz_holding_ag_jahresbericht_2019} & 
+    Personnel expenses in season 2018/19, Treated as team expenditures \\
+                                                & $m$ & 6366 & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming market potential of team directly correlates with game attendance. \\
+                                                & $r_g$ & \{1, 1.09\} & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming constant effect of 1 for all teams during regular season. Revenue effect of playoffs based on additional game attendance during playoffs \\
+                                                & $b$ & 9501 &  & See equation \ref{eq:competitiveBalanceEffect} for calculation \\
+                                                & $\hat{z}$ & CHF 285 &  & See table \ref{table:calcMonetaryFactor} for calculation. Approximation of average per game revenue generated by team. \\
+    \midrule
+    
+    \multirow[t]{5}{=}{EHC Kloten} & ${R_{tot}}_{0}$ & CHF 8.6M &                                                                                            \cite{ehc_kloten_sport_ag_geschaftsbericht_2018} &                                          Personnel expenses before their relegation in season 2017/18, Treated as team expenditures \\
+                                                    & $m$ & 5361 & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming market potential of team directly correlates with game attendance. \\
+                                                    & $r_g$ & \{1, 1.3\} & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming constant effect of 1 for all teams during regular season. Revenue effect of playoffs based on additional game attendance during playoffs \\
+                                                    & $b$ & 8001 &  & See equation \ref{eq:competitiveBalanceEffect} for calculation \\
+                                                    & $\hat{z}$ & CHF 175 &  & See table \ref{table:calcMonetaryFactor} for calculation. Approximation of average per game revenue generated by team. \\
+    
+    \midrule
+    
+    \multirow[t]{5}{=}{EHC Biel-Bienne} & ${R_{tot}}_{0}$ & CHF 10.4M & \cite{kleisl_derniere_2016} &                         Team expenditures of CHF 9.65-10.4M in season 2016/17 according to source, Assuming expenditures of  10.4 \\
+                                       & $m$ & 5015 & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming market potential of team directly correlates with game attendance. \\ 
+                                       & $r_g$ & \{1, 1.21\} & \cite{national_league_zuschauerzahlen_2022} & See table \ref{table:attendanceDevelopment} for calculation. Assuming constant effect of 1 for all teams during regular season. Revenue effect of playoffs based on additional game attendance during playoffs \\
+                                       & $b$ & 7485 &  & See equation \ref{eq:competitiveBalanceEffect} for calculation \\
+                                       & $\hat{z}$ & CHF 211 &  & See table \ref{table:calcMonetaryFactor} for calculation. Approximation of average per game revenue generated by team. \\
+    \bottomrule
+\end{longtable}
+
+\vfill
+
+\begin{figure}[h!]
+\centering
+\caption{Distribution of NL player win-shares per game observed in season 2021/22}
+\includegraphics[width=\textwidth]{ {dataAnalysis/images/skillDistribution/skillDistribution} }
+\label{fig:skillDistribution}
+\end{figure}
+
+\vfill
+
+\newpage
+
+\begin{figure}[h!]
+\centering
+\caption{Comparison of fitted distribution by MLE and observed distribution}
+\includegraphics[width=\textwidth]{ {dataAnalysis/images/skillDistribution/fittedSkillDistribution} }
+\label{fig:fittedSkillDistribution}
+\end{figure}
+
+\vfill
+\normalsize
+
+\begin{table}[h!]
+ \centering
+    \begin{threeparttable}
+        \caption{Number of players with at least ten games during NL season 2021/22 per team and by license type}
+        \label{table:playerCount}
+        \begin{tabular}{lccc}
+            \toprule
+            Team & Swiss (or Swiss license) & Imports & Total \\
+            \midrule
+            ZSC Lions & 21 & 7 & 28 \\
+            SCL Tigers & 23 & 4 & 27 \\
+            SC Rapperswil-Jona Lakers & 20 & 4 & 24 \\
+            SC Bern & 22 & 7 & 29 \\
+            Lausanne HC & 21 & 7 & 28 \\
+            HC Lugano & 22 & 5 & 27 \\
+            HC Davos & 21 & 4 & 25 \\
+            HC Ambri-Piotta & 21 & 5 & 26 \\
+            HC Ajoie & 19 & 6 & 25 \\
+            Genève-Servette HC & 22 & 4 & 26 \\
+            Fribourg-Gottéron & 20 & 4 & 24 \\
+            EV Zug & 21 & 5 & 26 \\
+            EHC Kloten & 25 & 2 & 27 \\
+            EHC Biel-Bienne & 22 & 5 & 27 \\
+            \midrule
+            League Total & 300 & 69 & 369 \\
+            \bottomrule
+        \end{tabular}
+        \small 
+        \begin{tablenotes}[flushleft]
+            \item \footnotesize \textit{Data Source: \cite{elite_prospects_elite_2022}}
+        \end{tablenotes}
+    \end{threeparttable}
+\end{table}
+
+\vfill
+
+\newpage
+
+\begin{figure}[h]
+\centering
+\caption{Illustration of final supply effect based on real world parameters}
+\includegraphics[width=\textwidth]{ {dataAnalysis/images/supplyEffect/supplyFunctionReal} }
+\label{fig:supplyFunctionReal}
+\end{figure}
+
+\vfill
+
+\begin{figure}[!h]
+    \centering
+    \caption{Relative market size of teams over time}
+    \includegraphics[width=\textwidth]{ {dataAnalysis/images/teamMarketSize/attendanceDevelopment} }
+ 
+    \begin{flushleft}
+        {\footnotesize \textit{Note: A team's relative market size in a season is the ratio of the team's average regular season game attendance and the sum of average regular season game attendance over all teams in that season. Data Source: \cite{national_league_zuschauerzahlen_2022}}}
+    \end{flushleft}
+    \label{fig:attendanceDevelopment}
+\end{figure}
+
+\vfill
+
+\newpage
+
+\renewcommand*{\arraystretch}{1}
+\begin{TableNotes}[flushleft]
+   \item \footnotesize  \textit{Data source: \cite{national_league_zuschauerzahlen_2022}}
+\end{TableNotes}
+\begin{longtable}[c]{p{5cm}cccc}
+
+    \caption{Average game attendance in the NL and calculated playoff factors by team and season}
+    \label{table:attendanceDevelopment} \\
+    
+    \toprule
+    \multicolumn{2}{c}{} & \multicolumn{2}{c}{Average Game Attendance} &  \\
+    \cmidrule{3-4}
+    Team & Season & Regular Season & Playoffs & Growth Factor\\
+    \midrule
+    \endfirsthead
+
+    \multicolumn{5}{c}{{{\bfseries \tablename\ \thetable{}} -- \textit{continued from previous page}}}\\
+    \toprule
+    \multicolumn{2}{c}{} & \multicolumn{2}{c}{Average Game Attendance} &  \\
+    \cmidrule{3-4}
+    Team & Season & Regular Season & Playoffs & Growth Factor\\
+    \midrule
+    \endhead
+
+    \endfoot
+    \insertTableNotes
+    \endlastfoot
+    
+    
+    \multirow[t]{14}{=}{ZSC Lions}    & 08/09 & 7720 & 8698 & 1.13 \\ 
+                                     & 09/10 & 7749 & 8948 & 1.15 \\ 
+                                     & 10/11 & 7640 & 10050 & 1.32 \\ 
+                                     & 11/12 & 7625 & 10843 & 1.42 \\ 
+                                     & 12/13 & 8745 & 10541 & 1.21 \\ 
+                                     & 13/14 & 9048 & 10082 & 1.11 \\ 
+                                     & 14/15 & 9331 & 10447 & 1.12 \\ 
+                                     & 15/16 & 9818 & 10633 & 1.08 \\ 
+                                     & 16/17 & 9214 & 10348 & 1.12 \\ 
+                                     & 17/18 & 8863 & 11014 & 1.24 \\ 
+                                     & 18/19 & 9694 & ~ & ~ \\ 
+                                     & 19/20 & 8975 & ~ & ~ \\ 
+                                     & 21/22 & 8020 & 10239 & 1.28 \\ 
+                                     \cmidrule{2-5}
+                                     & Median & 8863 & 10348 & 1.15 \\ 
+                                     \cmidrule{1-5}
+    \multirow[t]{14}{=}{SCL Tigers}   & 08/09 & 5788 & ~ & ~ \\ 
+                                     & 09/10 & 5235 & ~ & ~ \\ 
+                                     & 10/11 & 5374 & 6550 & 1.22 \\ 
+                                     & 11/12 & 5290 & ~ & ~ \\ 
+                                     & 12/13 & 5355 & ~ & ~ \\ 
+                                     & 13/14 & ~ & ~ & ~ \\ 
+                                     & 14/15 & ~ & ~ & ~ \\ 
+                                     & 15/16 & 5868 & ~ & ~ \\ 
+                                     & 16/17 & 5779 & ~ & ~ \\ 
+                                     & 17/18 & 5777 & ~ & ~ \\ 
+                                     & 18/19 & 5747 & 6000 & 1.04 \\ 
+                                     & 19/20 & 5549 & ~ & ~ \\ 
+                                     & 21/22 & 4742 & ~ & ~ \\ 
+                                     \cmidrule{2-5}
+                                     & Median & 5549 & 6275 & 1.13 \\ 
+                                     \cmidrule{1-5}
+    \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\ 
+    \multirow[t]{14}{=}{SC Rapperswil-Jona Lakers}    & 08/09 & 4816 & ~ & ~ \\ 
+                                                     & 09/10 & 4754 & ~ & ~ \\ 
+                                                     & 10/11 & 4363 & ~ & ~ \\ 
+                                                     & 11/12 & 4135 & ~ & ~ \\ 
+                                                     & 12/13 & 4566 & ~ & ~ \\ 
+                                                     & 13/14 & 4361 & ~ & ~ \\ 
+                                                     & 14/15 & 4276 & ~ & ~ \\ 
+                                                     & 15/16 & ~ & ~ & ~ \\ 
+                                                     & 16/17 & ~ & ~ & ~ \\ 
+                                                     & 17/18 & ~ & ~ & ~ \\ 
+                                                     & 18/19 & 3985 & ~ & ~ \\ 
+                                                     & 19/20 & 4050 & ~ & ~ \\ 
+                                                     & 21/22 & 3927 & 6100 & 1.55 \\ 
+                                                     \cmidrule{2-5}
+                                                     & Median & 4319 & 6100 & 1.55 \\ 
+                                                     \cmidrule{1-5}
+    \multirow[t]{14}{=}{SC Bern}  & 08/09 & 16172 & 16464 & 1.02 \\ 
+                                 & 09/10 & 15709 & 16931 & 1.08 \\ 
+                                 & 10/11 & 15856 & 16856 & 1.06 \\ 
+                                 & 11/12 & 15779 & 16979 & 1.08 \\ 
+                                 & 12/13 & 16330 & 16780 & 1.03 \\ 
+                                 & 13/14 & 16347 & ~ & ~ \\ 
+                                 & 14/15 & 16164 & 16693 & 1.03 \\ 
+                                 & 15/16 & 16145 & 17031 & 1.05 \\ 
+                                 & 16/17 & 16399 & 17031 & 1.04 \\ 
+                                 & 17/18 & 16371 & 16658 & 1.02 \\ 
+                                 & 18/19 & 16290 & 16687 & 1.02 \\ 
+                                 & 19/20 & 15588 & ~ & ~ \\ 
+                                 & 21/22 & 13348 & ~ & ~ \\ 
+                                 \cmidrule{2-5}
+                                 & Median & 16164 & 16818 & 1.04 \\
+    \cmidrule{1-5}
+    \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\ 
+    \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\ 
+    \multirow[t]{14}{=}{Lausanne HC} & 08/09 & ~ & ~ & ~ \\ 
+                                    & 09/10 & ~ & ~ & ~ \\ 
+                                    & 10/11 & ~ & ~ & ~ \\ 
+                                    & 11/12 & ~ & ~ & ~ \\ 
+                                    & 12/13 & ~ & ~ & ~ \\ 
+                                    & 13/14 & 6528 & 8000 & 1.23 \\ 
+                                    & 14/15 & 6711 & 7557 & 1.13 \\ 
+                                    & 15/16 & 6692 & ~ & ~ \\ 
+                                    & 16/17 & 6567 & 7600 & 1.16 \\ 
+                                    & 17/18 & 6282 & ~ & ~ \\ 
+                                    & 18/19 & 6498 & 6700 & 1.03 \\ 
+                                    & 19/20 & 8206 & ~ & ~ \\ 
+                                    & 21/22 & 6052 & 9600 & 1.59 \\ 
+                                    \cmidrule{2-5}
+                                    & Median & 6548 & 7579 & 1.16 \\ 
+                                    \cmidrule{1-5}
+    \multirow[t]{14}{=}{HC Lugano}    & 08/09 & 3992 & 5374 & 1.35 \\ 
+                                     & 09/10 & 4136 & 4348 & 1.05 \\ 
+                                     & 10/11 & 4060 & ~ & ~ \\ 
+                                     & 11/12 & 4125 & 5583 & 1.35 \\ 
+                                     & 12/13 & 4725 & 5647 & 1.2 \\ 
+                                     & 13/14 & 5040 & 5302 & 1.05 \\ 
+                                     & 14/15 & 5559 & 6139 & 1.1 \\ 
+                                     & 15/16 & 5783 & 7433 & 1.29 \\ 
+                                     & 16/17 & 5911 & 7139 & 1.21 \\ 
+                                     & 17/18 & 5762 & 6910 & 1.2 \\ 
+                                     & 18/19 & 6301 & 7037 & 1.12 \\ 
+                                     & 19/20 & 5679 & ~ & ~ \\ 
+                                     & 21/22 & 4960 & 5984 & 1.21 \\ 
+                                     \cmidrule{2-5}
+                                     & Median & 5040 & 6062 & 1.2 \\ 
+    \cmidrule{1-5}
+     \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\ 
+    \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\
+    \multirow[t]{14}{=}{HC Davos} & 08/09 & 4195 & 6001 & 1.43 \\ 
+                                 & 09/10 & 4514 & 5120 & 1.13 \\ 
+                                 & 10/11 & 4524 & 5982 & 1.32 \\ 
+                                 & 11/12 & 4544 & 5355 & 1.18 \\ 
+                                 & 12/13 & 4784 & 5576 & 1.17 \\ 
+                                 & 13/14 & 4782 & 5359 & 1.12 \\ 
+                                 & 14/15 & 4763 & 5950 & 1.25 \\ 
+                                 & 15/16 & 4822 & 5796 & 1.2 \\ 
+                                 & 16/17 & 4792 & 6050 & 1.26 \\ 
+                                 & 17/18 & 4681 & 5383 & 1.15 \\ 
+                                 & 18/19 & 4307 & ~ & ~ \\ 
+                                 & 19/20 & 4444 & ~ & ~ \\ 
+                                 & 21/22 & 3988 & 5613 & 1.41 \\
+                                 \cmidrule{2-5}
+                                 & Median & 4544 & 5595 & 1.2 \\ 
+                                 \cmidrule{1-5}
+    \multirow[t]{14}{=}{HC Ambri-Piotta}  & 08/09 & 3608 & ~ & ~ \\ 
+                                         & 09/10 & 3490 & ~ & ~ \\ 
+                                         & 10/11 & 3657 & ~ & ~ \\ 
+                                         & 11/12 & 3707 & ~ & ~ \\ 
+                                         & 12/13 & 4859 & ~ & ~ \\ 
+                                         & 13/14 & 5631 & 5902 & 1.05 \\ 
+                                         & 14/15 & 5154 & ~ & ~ \\ 
+                                         & 15/16 & 5298 & ~ & ~ \\ 
+                                         & 16/17 & 4955 & ~ & ~ \\ 
+                                         & 17/18 & 4730 & ~ & ~ \\ 
+                                         & 18/19 & 5489 & 6295 & 1.15 \\ 
+                                         & 19/20 & 4996 & ~ & ~ \\ 
+                                         & 21/22 & 6017 & ~ & ~ \\ 
+                                         \cmidrule{2-5}
+                                         & Median & 4955 & 6099 & 1.1 \\ 
+    \cmidrule{1-5}
+     \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\ 
+    \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\
+    \multirow[t]{14}{=}{HC Ajoie} & 08/09 & ~ & ~ & ~ \\ 
+                                 & 09/10 & ~ & ~ & ~ \\ 
+                                 & 10/11 & ~ & ~ & ~ \\ 
+                                 & 11/12 & ~ & ~ & ~ \\ 
+                                 & 12/13 & ~ & ~ & ~ \\ 
+                                 & 13/14 & ~ & ~ & ~ \\ 
+                                 & 14/15 & ~ & ~ & ~ \\ 
+                                 & 15/16 & ~ & ~ & ~ \\ 
+                                 & 16/17 & ~ & ~ & ~ \\ 
+                                 & 17/18 & ~ & ~ & ~ \\ 
+                                 & 18/19 & ~ & ~ & ~ \\ 
+                                 & 19/20 & ~ & ~ & ~ \\ 
+                                 & 21/22 & 3626 & ~ & ~ \\ 
+                                 \cmidrule{2-5}
+                                 & Median & 3626 & 0 & 0 \\
+                                 \cmidrule{1-5}
+    \multirow[t]{14}{=}{Genève-Servette HC}   & 08/09 & 6099 & 6350 & 1.04 \\ 
+                                             & 09/10 & 6554 & 7037 & 1.07 \\ 
+                                             & 10/11 & 6922 & 7382 & 1.07 \\ 
+                                             & 11/12 & 6769 & ~ & ~ \\ 
+                                             & 12/13 & 6967 & 7135 & 1.02 \\ 
+                                             & 13/14 & 7722 & 7120 & 0.92 \\ 
+                                             & 14/15 & 6619 & 7007 & 1.06 \\ 
+                                             & 15/16 & 6556 & 6928 & 1.06 \\ 
+                                             & 16/17 & 6135 & 6727 & 1.1 \\ 
+                                             & 17/18 & 5928 & 6272 & 1.06 \\ 
+                                             & 18/19 & 6019 & 7026 & 1.17 \\ 
+                                             & 19/20 & 5801 & ~ & ~ \\ 
+                                             & 21/22 & 4833 & ~ & ~ \\ 
+                                             \cmidrule{2-5}
+                                             & Median & 6554 & 7017 & 1.06 \\
+    \cmidrule{1-5} 
+     \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\ 
+    \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\
+     \multirow[t]{14}{=}{HC Fribourg-Gottéron}    & 08/09 & 6169 & 7125 & 1.15 \\ 
+                                                 & 09/10 & 6969 & 7000 & 1 \\ 
+                                                 & 10/11 & 6764 & 6700 & 0.99 \\ 
+                                                 & 11/12 & 6636 & 6800 & 1.02 \\ 
+                                                 & 12/13 & 6537 & 6700 & 1.02 \\ 
+                                                 & 13/14 & 6570 & 6700 & 1.02 \\ 
+                                                 & 14/15 & 6261 & ~ & ~ \\ 
+                                                 & 15/16 & 6156 & 6302 & 1.02 \\ 
+                                                 & 16/17 & 5758 & ~ & ~ \\ 
+                                                 & 17/18 & 5889 & 6418 & 1.09 \\ 
+                                                 & 18/19 & 6077 & ~ & ~ \\ 
+                                                 & 19/20 & 5935 & ~ & ~ \\ 
+                                                 & 21/22 & 8324 & 8934 & 1.07 \\ 
+                                                 \cmidrule{2-5}
+                                                 & Median & 6261 & 6700 & 1.02 \\
+                                                 \cmidrule{1-5}
+    \multirow[t]{14}{=}{EV Zug}   & 08/09 & 4533 & 6380 & 1.41 \\ 
+                                 & 09/10 & 4316 & 5884 & 1.36 \\ 
+                                 & 10/11 & 6295 & 6514 & 1.03 \\ 
+                                 & 11/12 & 6265 & 6904 & 1.1 \\ 
+                                 & 12/13 & 6302 & 7015 & 1.11 \\ 
+                                 & 13/14 & 6159 & ~ & ~ \\ 
+                                 & 14/15 & 6366 & 7015 & 1.1 \\ 
+                                 & 15/16 & 6486 & 7015 & 1.08 \\ 
+                                 & 16/17 & 6436 & 6999 & 1.09 \\ 
+                                 & 17/18 & 6983 & 7200 & 1.03 \\ 
+                                 & 18/19 & 6952 & 7193 & 1.03 \\ 
+                                 & 19/20 & 6574 & ~ & ~ \\ 
+                                 & 21/22 & 6708 & 7200 & 1.07 \\ 
+                                 \cmidrule{2-5}
+                                 & Median & 6366 & 7007 & 1.09 \\
+    \cmidrule{1-5}
+     \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\ 
+    \multicolumn{5}{c}{} \\
+    \multicolumn{5}{c}{} \\                            
+    \multirow[t]{14}{=}{EHC Kloten}   & 08/09 & 4772 & 7035 & 1.47 \\ 
+                                     & 09/10 & 5849 & 7424 & 1.27 \\ 
+                                     & 10/11 & 5695 & 7423 & 1.3 \\ 
+                                     & 11/12 & 6041 & 7077 & 1.17 \\ 
+                                     & 12/13 & 5366 & ~ & ~ \\ 
+                                     & 13/14 & 5627 & 7256 & 1.29 \\ 
+                                     & 14/15 & 5262 & ~ & ~ \\ 
+                                     & 15/16 & 4790 & 6523 & 1.36 \\ 
+                                     & 16/17 & 5229 & ~ & ~ \\ 
+                                     & 17/18 & 5356 & ~ & ~ \\ 
+                                     & 18/19 & ~ & ~ & ~ \\ 
+                                     & 19/20 & ~ & ~ & ~ \\ 
+                                     & 21/22 & ~ & ~ & ~ \\ 
+                                     \cmidrule{2-5}
+                                     & Median & 5361 & 7077 & 1.3 \\ 
+                                     \cmidrule{1-5}
+    \multirow[t]{14}{=}{EHC Biel-Bienne}   & 08/09 & 5015 & ~ & ~ \\ 
+                                             & 09/10 & 4901 & ~ & ~ \\ 
+                                             & 10/11 & 4526 & ~ & ~ \\ 
+                                             & 11/12 & 4749 & 5550 & 1.17 \\ 
+                                             & 12/13 & 4909 & 6090 & 1.24 \\ 
+                                             & 13/14 & 4651 & ~ & ~ \\ 
+                                             & 14/15 & 4676 & 6035 & 1.29 \\ 
+                                             & 15/16 & 5896 & ~ & ~ \\ 
+                                             & 16/17 & 5415 & 6521 & 1.2 \\ 
+                                             & 17/18 & 5369 & 6521 & 1.21 \\ 
+                                             & 18/19 & 6028 & 6521 & 1.08 \\ 
+                                             & 19/20 & 5696 & ~ & ~ \\ 
+                                             & 21/22 & 5263 & 6401 & 1.22 \\ 
+                                             \cmidrule{2-5}
+                                             & Median & 5015 & 6401 & 1.21 \\
+                                             \bottomrule
+\end{longtable}                                                    
+
+\newpage
+
+\begin{landscape}
+\begin{table}[!ht]
+\vspace{1.5cm}
+\centering
+    \begin{threeparttable}
+        \renewcommand{\arraystretch}{1.1}
+        \caption{Calculation of monetary factor per team}
+        \label{table:calcMonetaryFactor}
+        \begin{tabular}{lllcccccccc}
+            \toprule
+            \multicolumn{2}{c}{}&\multicolumn{4}{c}{Calculation of ${\hat{\bar{R}}_{i,g,0}}$}&\multicolumn{3}{c}{Calculation of ${\bar{\omega}_{i,0}}$} & \multicolumn{2}{c}{Approximation of $\hat{z_i}$} \\
+            \cmidrule(lr){3-6} \cmidrule(lr){7-9} \cmidrule(lr){10-11}
+            Team & $t=0$ & ${R_{tot}}_{i,0}$ & $B_0$ & $G_{i,0}$ & (\ref{eq:averageGameRevenue})\tnote{1} & victories\textsubscript{i,0} & games\textsubscript{i,0} & (\ref{eq:averageWinPercentag})\tnote{1} & $m_i$ & (\ref{eq:monetaryFactor})\tnote{1} \\ 
+            \midrule
+            ZSC & 17/18 & CHF 16.7M & \multirow[c]{14}{*}{CHF 1.45M} & 33 & CHF 462121 & 37 & 68 & 0.54 & 8863 & CHF 162 \\
+            SCL & 17/18 & CHF 6.5M &  & 28 & CHF 180357 & 27 &  56 & 0.48 & 5549 & CHF 106 \\
+            SCRJ & 18/19 & CHF 11M &  & 30 & CHF 318333 & 15 & 61 & 0.25 & 4319 & CHF 362 \\
+            SCB & 16/17\tnote{2} & CHF 15M &  & 34 & CHF 398529 & 49 & 66 & 0.74 & 16164 & CHF 74 \\ 
+            LHC & 17/18 & CHF 15M &  & 28 & CHF 483929 & 23 & 56 & 0.41 & 6548 & CHF 260 \\ 
+            HCL & 17/18 & CHF 15M &  & 35 & CHF 387143 & 40 & 68 & 0.59 & 5040 & CHF 233 \\ 
+            HCD & 17/18 & CHF 8.3M &  & 28 & CHF 244643 & 26 & 56 & 0.46 & 4544 & CHF 178 \\
+            HCAP & 17/18 & CHF 8M &  & 31 & CHF 211290 & 26 & 61 & 0.43 & 4955 & CHF 146 \\ 
+            HCA & 21/22\tnote{3} & CHF 7.1M &  & 26 & CHF 217308 & 9 & 51 & 0.18 & 3626 & CHF 385 \\ 
+            GSHC & 17/18 & CHF 14M &  & 27 & CHF 464815 & 25 & 55 & 0.45 & 6554 & CHF 237 \\ 
+            HCFG & 17/18 & CHF 12.7M &  & 27 & CHF 416667 & 26 & 55 & 0.47 & 6261 & CHF 218 \\
+            EVZ & 17/18 & CHF 18.4M &  & 28 & CHF 605357 & 34 & 55 & 0.62 & 6366 & CHF 285 \\ 
+            EHCK & 16/17 & CHF 8.6M &  & 28 & CHF 255357 & 21 & 56 & 0.38 & 5361 & CHF 175 \\ 
+            EHCB & 15/16 & CHF 10.4M &  & 31 & CHF 288710 & 23 & 61 & 0.38 & 5015 & CHF 211 \\ 
+            \bottomrule
+        \end{tabular}
+        \begin{tablenotes}[flushleft]
+            \footnotesize
+            \item \textit{Data source for game numbers: \cite{national_league_zuschauerzahlen_2022}}
+            \item [1] \textit{References the corresponding formulas}
+            \item [2] \textit{The budget for the SC Bern is inferred based on article published in season 2017/18. Thus reference season is thus assumed to be the season before}
+            \item [3] \textit{HC Ajoie was promoted to the NL in season 2020/21 which is why the budget and the measured performance both are derived from season 2021/22}
+        \end{tablenotes}
+    \end{threeparttable}
+\end{table}
+
+\end{landscape}
+
+
