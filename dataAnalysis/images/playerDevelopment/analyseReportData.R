@@ -27,7 +27,7 @@ swissDev<-reportData%>%
   geom_text(aes(label=Count), vjust=-1.2, show.legend =F, size=(textSize-10)/.pt, family="CM")+
   theme_minimal()+
   scale_color_manual(values=c("black",Set3[4],Set3[5],Set3[6]),
-                     labels=c("Registered (total)", "U20", "Senior", "Female"),
+                     labels=c("Registered (total)", "U20 (male)", "Adult (male)", "Female"),
                      limits=c("Registered","U20","Senior","Female"))+
   scale_x_continuous(breaks = c(min(reportData$Year):max(reportData$Year)),
                      limits = c(2011,2021))+
